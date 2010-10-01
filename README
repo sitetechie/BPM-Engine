@@ -1,0 +1,9 @@
+BPM::Engine is a workflow/bpm engine based on BPMN/XPDL.
+It has a simple core which allows for different
+implementations and building additional functionality on top.
+
+The project's source code will be available at Github on
+
+         *** Monday October 4, 2010 ***
+
+Please stay tuned.
