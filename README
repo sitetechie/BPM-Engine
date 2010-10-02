@@ -1,9 +1,160 @@
-BPM::Engine is a workflow/bpm engine based on BPMN/XPDL.
-It has a simple core which allows for different
-implementations and building additional functionality on top.
+NAME
+    BPM::Engine - Business process execution engine
 
-The project's source code will be available at Github on
+VERSION
+    0.001
 
-         *** Monday October 4, 2010 ***
+SYNOPSIS
+      use BPM::Engine;
+  
+      my $callback = sub {
+            my($entity, $event, $node, $instance) = @_;
+            ...
+            };
+  
+      my $engine = BPM::Engine->new(
+          log_dispatch_conf => 'log.conf',
+          connect_info      => [$dsn, $user, $password],
+          callback          => $callback
+          );
+  
+      my $package = $engine->create_package('/path/to/model.xpdl');
 
-Please stay tuned.
+      my @workflows = $engine->list_process_definitions->all;
+  
+      my $instance = $engine->create_process_instance(
+          $process, 'Client xyz', { param1 => 'value1' }
+          );
+  
+      $engine->start_process_instance($instance);
+
+DESCRIPTION
+    BPM::Engine is an embeddable workflow process engine with persistence.
+    It handles saving and loading XPDL packages in a database, and running
+    workflow processes.
+
+WARNING
+    Currently this is alpha code and should be considered HIGHLY
+    EXPERIMENTAL. This module is still in heavy flux, and will change. I
+    welcome any opinions, ideas for extensions, etc. However, tests are
+    incomplete, documentation is nonexistent, and interfaces are subject to
+    change. Don't use this in production.
+
+    Please review the test files and source code to see how it works.
+
+INTERFACE
+  CONSTRUCTOR METHODS
+  new
+  new_with_config
+  ATTRIBUTES
+  connect_info
+  schema
+  storage
+  logger
+  log_dispatch_conf
+  callback
+  PROCESS DEFINITION METHODS
+  list_packages
+  create_package
+  delete_package
+  list_process_definitions
+  get_process_definition
+  PROCESS INSTANCE METHODS
+  list_process_instances
+  create_process_instance
+  get_process_instance
+  start_process_instance
+  terminate_process_instance
+  abort_process_instance
+  delete_process_instance
+  process_instance_attribute
+  change_process_instance_state
+  ACTIVITY INSTANCE METHODS
+  list_activity_instances
+  get_activity_instance
+  change_activity_instance_state
+  activity_instance_attribute
+  LOGGING
+    log, debug, info, notice, warning, error, critical, alert, emergency
+
+CONFIGURATION AND ENVIRONMENT
+    BPM::Engine may optionally be configured with a configuration file when
+    constructed using the "new_with_config" method. See etc/engine.yaml for
+    an example.
+
+MAJOR DEPENDENCIES
+    *   Moose
+
+    *   Class::Workflow
+
+    *   BPM::XPDL
+
+    *   DBIx::Class
+
+    *   Template Toolkit
+
+    *   XML::LibXML
+
+    See the included Makefile.PL for a list of all dependencies.
+
+INCOMPATIBILITIES
+    None reported.
+
+AUTHOR
+    Peter de Vos, "<sitetech@cpan.org>"
+
+SOURCE
+    You can contribute or fork this project via GitHub:
+
+      git clone git://github.com/sitetechie/BPM-Engine.git BPM-Engine
+
+BUGS
+    Please report any bugs or feature requests to
+    "bug-bpm-engine@rt.cpan.org", or through the web interface at
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=BPM-Engine>. I will be
+    notified, and then you'll automatically be notified of progress on your
+    bug as I make changes.
+
+SUPPORT
+    You can find documentation for this module with the perldoc command.
+
+        perldoc BPM::Engine
+
+    You can also look for information at:
+
+    *   Homepage
+
+        <http://bpmengine.org/>
+
+    *   Github Repository
+
+        <http://github.com/sitetechie/BPM-Engine>
+
+COPYRIGHT AND LICENSE
+    Copyright (c) 2010, Peter de Vos "<sitetech@cpan.org>".
+
+    This module is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself. See perlartistic.
+
+DISCLAIMER OF WARRANTY
+    BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+    FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+    OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+    PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+    EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+    ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
+    YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+    NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+    IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+    WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+    REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE LIABLE
+    TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL, OR
+    CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE
+    SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+    RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+    FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+    SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+    DAMAGES.
+

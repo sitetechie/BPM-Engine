@@ -1,0 +1,299 @@
+
+package BPM::Engine::Store::Result::Activity;
+BEGIN {
+    $BPM::Engine::Store::Result::Activity::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::Activity::AUTHORITY = 'cpan:SITETECH';
+    }
+
+use Moose;
+
+#BEGIN {
+  extends qw/DBIx::Class Moose::Object/;
+  with    qw/BPM::Engine::Store::ResultBase::Activity
+             BPM::Engine::Store::ResultRole::WithAssignments/;
+#  }
+
+__PACKAGE__->load_components(qw/ InflateColumn::Serializer Core /);
+__PACKAGE__->table('wfd_activity');
+__PACKAGE__->add_columns(
+    activity_id => {
+        data_type         => 'INT',
+        is_auto_increment => 1,
+        is_nullable       => 0,
+        extras            => { unsigned => 1 }
+        },
+    process_id => {
+        data_type         => 'CHAR',
+        size              => 36,        
+        is_nullable       => 0,
+        is_foreign_key    => 1,
+        },
+    performer_participant_id => {
+        data_type         => 'INT',
+        is_nullable       => 1,
+        is_foreign_key    => 1,
+        },
+    activity_uid => {
+        data_type         => 'VARCHAR',
+        size              => 64,
+        is_nullable       => 1,
+        },    
+    activity_name => {
+        data_type         => 'VARCHAR',
+        size              => 255,
+        is_nullable       => 1,
+        },
+    activity_type => {
+        data_type         => 'ENUM',
+        is_nullable       => 0,
+        default           => 'Implementation',
+        default_value     => 'Implementation',        
+        extra             => { list => [qw/Implementation Route BlockActivity Event/] },
+        },    
+    implementation_type => {
+        data_type         => 'ENUM',
+        is_nullable       => 0,
+        default           => 'No',
+        default_value     => 'No',        
+        extra             => { list => [qw/No Tool Task SubFlow Reference/] },
+        },    
+    description => {
+        data_type         => 'VARCHAR',
+        size              => 255,
+        is_nullable       => 1,
+        },
+    start_mode => {
+        data_type         => 'ENUM',
+        is_nullable       => 0,
+        default           => 'Automatic',
+        default_value     => 'Automatic',        
+        extra             => { list => [qw/Automatic Manual/] },
+        },
+    finish_mode => {
+        data_type         => 'ENUM',
+        is_nullable       => 0,
+        default           => 'Automatic',
+        default_value     => 'Automatic',        
+        extra             => { list => [qw/Automatic Manual/] },
+        },
+    priority => {
+        data_type         => 'BIGINT',
+        default_value     => 0,
+        is_nullable       => 0,
+        size => 21
+        },    
+    documentation_url => {
+        data_type         => 'VARCHAR',
+        size              => 255,
+        is_nullable       => 1,
+        },
+    icon_url => {
+        data_type         => 'VARCHAR',
+        size              => 255,
+        is_nullable       => 1,
+        },    
+    join_type => {
+        data_type         => 'ENUM',
+        is_nullable       => 1,
+        default           => 'NONE',
+        default_value     => 'NONE',
+        extra             => { list => [qw/NONE AND XOR OR Exclusive Inclusive Parallel Complex/] },
+        },
+    join_type_exclusive => {
+        data_type         => 'ENUM',
+        is_nullable       => 1,
+        default           => 'Data',
+        default_value     => 'Data',
+        extra             => { list => [qw/Data Event/] },
+        },
+    split_type => {
+        data_type         => 'ENUM',
+        is_nullable       => 1,
+        default           => 'NONE',
+        default_value     => 'NONE',        
+        extra             => { list => [qw/NONE AND XOR OR Exclusive Inclusive Parallel Complex/] },
+        },    
+    split_type_exclusive => {
+        data_type         => 'ENUM',
+        is_nullable       => 1,
+        default           => 'Data',
+        default_value     => 'Data',
+        extra             => { list => [qw/Data Event/] },
+        },    
+    data_fields => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },
+    assignments => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },    
+    extended_attr => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },    
+    );
+
+__PACKAGE__->set_primary_key('activity_id');
+
+__PACKAGE__->belongs_to(
+    process => 'BPM::Engine::Store::Result::Process', 'process_id'
+    );
+
+# transitions
+__PACKAGE__->has_many(
+    transitions_in => 'BPM::Engine::Store::Result::Transition', 
+    { 'foreign.to_activity_id' => 'self.activity_id' }
+    );
+__PACKAGE__->many_to_many(
+    prev_activities => 'transitions_in', 'from_activity'
+    );
+__PACKAGE__->has_many(
+    transitions => 'BPM::Engine::Store::Result::Transition', 
+    { 'foreign.from_activity_id' => 'self.activity_id' }
+    );
+__PACKAGE__->many_to_many(
+    next_activities => 'transitions', 'to_activity'
+    );
+__PACKAGE__->has_many(
+    transition_refs => 'BPM::Engine::Store::Result::TransitionRef',
+    'activity_id'
+    );
+
+# deadlines
+__PACKAGE__->has_many(
+    deadlines => 'BPM::Engine::Store::Result::ActivityDeadline',
+    'activity_id'
+    );
+
+# performers and participants
+__PACKAGE__->has_many(
+    performers => 'BPM::Engine::Store::Result::ActivityPerformer', 'activity_id'
+    );
+__PACKAGE__->many_to_many(
+    participants => 'performers', 'participant'
+    );
+
+__PACKAGE__->has_many(
+    tasks => 'BPM::Engine::Store::Result::ActivityTask', 'activity_id'
+    );
+
+__PACKAGE__->has_many(
+    instances => 'BPM::Engine::Store::Result::ActivityInstance', 'activity_id'
+    );
+
+sub store_column {
+    my ($self, $name, $value) = @_;
+    
+    if ($name eq 'activity_uid') {
+        $value = join( '_', split( /\s+/, $value ) ); #lc?
+        }
+    
+    $self->next::method( $name, $value );
+    }
+
+
+sub transitions { } # for the role to be happy
+
+sub has_transition {
+    my ($self, $transition) = @_;
+    $self->find_related(transitions => $transition->id);
+    }
+
+sub has_transitions {
+    my ($self, @transitions) = @_;
+    $self->search_related(
+        transitions => [ map { $_->id } @transitions ]
+        )->count == @transitions;
+    }
+
+sub transitions_in_by_ref {
+    my ($self) = @_;
+    return $self->result_source->schema->resultset('Transition')->search(
+        { 'me.from_activity_id' => $self->id,
+          'transition_refs.split_or_join' => 'JOIN',
+        },
+        { prefetch     => 'transition_refs',
+          order_by  => ['transition_refs.position'],
+        });
+    }
+
+sub transitions_by_ref {
+    my ($self) = @_;
+    
+    return $self->result_source->schema->resultset('Transition')->search(
+        { 'me.from_activity_id' => $self->id,
+          'transition_refs.split_or_join' => 'SPLIT',
+        },
+        { prefetch     => 'transition_refs',
+          order_by  => ['transition_refs.position'],
+        });
+    }
+
+
+#-- transition count
+
+sub is_start_activity {
+    my $self = shift;
+    #return 0 if $self->transitions->count == 0;
+    return $self->transitions_in->count == 0;
+    }
+
+sub is_end_activity {
+    my $self = shift;    
+    #return 0 if $self->transitions_in->count == 0;  
+    return $self->transitions->count == 0;
+    }
+
+#-- start/finish mode shortcuts
+
+sub is_auto_start {
+    shift->start_mode =~ /^automatic$/i;
+    }
+
+sub is_auto_finish {
+    shift->finish_mode =~ /^automatic$/i;
+    }
+
+#-- activity_type shortcuts
+
+sub is_implementation_type {
+    shift->activity_type =~ /^implementation$/i;
+    }
+
+sub is_route_type {
+    shift->activity_type =~ /^route$/i;
+    }
+
+sub is_block_type {
+    shift->activity_type =~ /^blockactivity$/i;
+    }
+
+sub is_event_type {
+    shift->activity_type =~ /^event$/i;
+    }
+
+#-- implementation_type shortcuts (No Tool Task SubFlow Reference)
+
+sub is_impl_no { 
+    shift->implementation_type =~ /^no$/i;
+    }
+
+sub is_impl_task {
+    shift->implementation_type =~ /^task|tool$/i;
+    }
+
+sub is_impl_subflow {
+    shift->implementation_type =~ /^subflow$/i;
+    }
+
+sub is_impl_reference {
+    shift->implementation_type =~ /^reference$/i;
+    }
+
+
+1;
+__END__

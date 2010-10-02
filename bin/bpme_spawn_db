@@ -1,0 +1,96 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use Pod::Usage;
+use Getopt::Long;
+
+use BPM::Engine::Store;
+use Config::General;
+
+my ($help, $deploy, $ddl, $drop_tables) = (0, 0, 0, 0);
+
+GetOptions(
+    'help|?'   => \$help,
+    'deploy|d' => \$deploy,
+    'ddl'      => \$ddl,
+    'drop'     => \$drop_tables,
+);
+
+pod2usage(1) if $help;
+
+my @connect_info = ('dbi:SQLite:dbname=var/bpmengine.sqlite');
+my $schema = BPM::Engine::Store->connect(@connect_info) or die "Failed to connect";
+
+if ($ddl) {
+    $schema->create_ddl_dir(
+        [ 'SQLite', 'MySQL' ],
+        $BPM::Engine::Store::VERSION,
+        "$FindBin::Bin/../var"
+        );
+    print "DDL files created in ./var \n";
+    }
+elsif ($deploy) {
+    $schema->deploy({ add_drop_table => $drop_tables });
+    #$schema->seed();
+    print "Schema deployed and seeded\n";
+    }
+else {
+    pod2usage(1);
+    }
+        
+$schema->storage->disconnect if $connect_info[0] =~ /mysql/;
+
+#-- copy as test db
+use File::Copy ();
+use File::Spec;
+unlink './t/lib/BPME/bpmengine.test.db' if -f './t/lib/BPME/bpmengine.test.db';
+die("Test db locked") if -f './t/lib/BPME/bpmengine.test.db';
+File::Copy::copy('./var/bpmengine.sqlite', './t/lib/BPME/bpmengine.test.db');
+
+1;
+__END__
+
+=pod
+
+=head1 NAME
+
+bpme_spawn_db - Spawn a database with BPM-Engine tables and seed data
+
+=head1 SYNOPSIS
+
+spawn_db [options]
+
+ Options:
+   -? -help           display this help and exits
+   -ddl               create DDL files
+   -deploy            deploy tables into existing database
+     -drop            drop existing database/tables when deploying
+
+ See also:
+   perldoc BPM::Engine::Store
+
+Examples:
+
+  perl bin/bpme_spawn_db -ddl
+  perl bin/bpme_spawn_db -drop -deploy
+
+=head1 DESCRIPTION
+
+Spawn a database with BPM::Engine tables and seed data
+
+=head1 AUTHOR
+
+Peter de Vos, C<< <sitetech at cpan.org> >>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2010 Peter de Vos, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
