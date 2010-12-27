@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::Result::ActivityDeadline;
 BEGIN {
     $BPM::Engine::Store::Result::ActivityDeadline::VERSION   = '0.001';

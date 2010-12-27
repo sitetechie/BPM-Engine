@@ -14,7 +14,7 @@ SYNOPSIS
   
       my $engine = BPM::Engine->new(
           log_dispatch_conf => 'log.conf',
-          connect_info      => [$dsn, $user, $password],
+          connect_info      => { dsn => $dsn, user => $user, password => $password },
           callback          => $callback
           );
   
@@ -43,7 +43,7 @@ WARNING
     Please review the test files and source code to see how it works.
 
 INTERFACE
-  CONSTRUCTOR METHODS
+  CONSTRUCTORS
   new
   new_with_config
   ATTRIBUTES
@@ -106,7 +106,7 @@ AUTHOR
 SOURCE
     You can contribute or fork this project via GitHub:
 
-      git clone git://github.com/sitetechie/BPM-Engine.git BPM-Engine
+      git clone git://github.com/sitetechie/BPM-Engine.git
 
 BUGS
     Please report any bugs or feature requests to

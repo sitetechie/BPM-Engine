@@ -1,20 +1,20 @@
-
 package BPM::Engine::Store::ResultBase::ProcessInstance;
 BEGIN {
     $BPM::Engine::Store::ResultBase::ProcessInstance::VERSION   = '0.001';
     $BPM::Engine::Store::ResultBase::ProcessInstance::AUTHORITY = 'cpan:SITETECH';
     }
 
+use namespace::autoclean;
 use Moose::Role;
-use BPM::Engine::Util::YAMLWorkflowLoader;
+use BPM::Engine::Util::YAMLWorkflowLoader qw/load_workflow_from_yaml/;
 with 'BPM::Engine::Store::ResultRole::WithWorkflow';
-use namespace::autoclean -also => [qr/^_/];
 
 my $W = undef;
 
-sub _get_workflow {
+sub get_workflow {
     unless($W) {
-        $W = load_workflow_from_yaml(join('', <DATA>));
+        my $yaml = do { local $/ = undef; <DATA> };
+        $W = load_workflow_from_yaml($yaml); #join('', <DATA>));
         $W->instance_class('BPM::Engine::Store::Result::ProcessInstanceState');
         }
     return $W;

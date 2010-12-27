@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::Result::Participant;
 BEGIN {
     $BPM::Engine::Store::Result::Participant::VERSION   = '0.001';
@@ -39,7 +38,8 @@ __PACKAGE__->add_columns(
         default           => 'SYSTEM',
         default_value     => 'SYSTEM',
         extra             => { list => [qw/
-            RESOURCE_SET RESOURCE ROLE ORGANIZATIONAL_UNIT HUMAN SYSTEM /] },
+            RESOURCE_SET RESOURCE ROLE ORGANIZATIONAL_UNIT HUMAN SYSTEM 
+            /] },
         },
     participant_list_id => {
         data_type         => 'INT',

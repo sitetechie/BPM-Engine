@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::Result::ParticipantList;
 BEGIN {
     $BPM::Engine::Store::Result::ParticipantList::VERSION   = '0.001';
@@ -28,7 +27,10 @@ __PACKAGE__->might_have(
 __PACKAGE__->might_have(
     'process' => 'BPM::Engine::Store::Result::Process', 'participant_list_id');
 
-__PACKAGE__->has_many(participants => 'BPM::Engine::Store::Result::Participant','participant_list_id');
+__PACKAGE__->has_many(
+    participants => 'BPM::Engine::Store::Result::Participant',
+    'participant_list_id'
+    );
 
 1;
 __END__

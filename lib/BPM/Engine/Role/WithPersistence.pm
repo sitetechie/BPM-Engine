@@ -1,14 +1,13 @@
-
 package BPM::Engine::Role::WithPersistence;
 BEGIN {
     $BPM::Engine::Role::WithPersistence::VERSION   = '0.001';
     $BPM::Engine::Role::WithPersistence::AUTHORITY = 'cpan:SITETECH';
     }
 
+use namespace::autoclean;
 use Moose::Role;
-#use BPM::Engine::Types qw/ConnectInfo/;
+use BPM::Engine::Types qw/ConnectInfo/;
 use BPM::Engine::Store;
-use namespace::autoclean -also => [qr/^_/];
 
 has schema => (
     isa  => 'BPM::Engine::Store',
@@ -17,7 +16,10 @@ has schema => (
     predicate => 'has_schema',
     );
 
-sub storage { shift->schema(@_); }
+sub storage {
+    my ($self, @args) = @_;
+    return $self->schema(@args);
+    }
 
 sub _build_schema {
     my $self = shift;
@@ -26,9 +28,9 @@ sub _build_schema {
     }
 
 has 'connect_info' => (
-    is     => 'rw',
-    #isa    => ConnectInfo,
-    #coerce => 1,
+    is       => 'rw',
+    isa      => ConnectInfo,
+    coerce   => 1,
     required => 0,
     );
 

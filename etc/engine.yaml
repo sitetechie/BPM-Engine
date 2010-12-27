@@ -1,3 +1,0 @@
-log_dispatch_conf: logger.conf
-connect_info:
-    dsn: dbi:SQLite:dbname=var/bpmengine.sqlite

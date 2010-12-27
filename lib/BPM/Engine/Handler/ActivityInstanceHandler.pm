@@ -1,64 +1,63 @@
-
 package BPM::Engine::Handler::ActivityInstanceHandler;
 BEGIN {
     $BPM::Engine::Handler::ActivityInstanceHandler::VERSION   = '0.001';
     $BPM::Engine::Handler::ActivityInstanceHandler::AUTHORITY = 'cpan:SITETECH';
     }
+## no critic (RequireEndWithOne)
+use MooseX::Declare;
 
-use Moose::Role;
-use namespace::autoclean;
-
-sub list_activity_instances {
-    my ($self, @args) = @_;
-    return $self->storage->resultset('ActivityInstance')->search_rs(@args);
-    }
-
-sub get_activity_instance {
-    my ($self, $id) = @_;
-    return $self->storage->resultset('ActivityInstance')->find($id);
-    }
-
-sub change_activity_instance_state {
-    my ($self, $id, $state) = @_;
-    my $instance = $self->get_activity_instance($id);
-
-    eval {
-        my $process_instance = $instance->process_instance;
-        my $activity = $instance->activity;
-
-        if ($state eq 'assign' #&& $ai->created() == null ||
-                || $state eq 'finish') {    
-            my $runner = $self->_runner($process_instance);            
-            if($state eq 'assign') { # open.running
-                # Execute the activity if it is now open.running.
-                $runner->start_activity($activity, $instance, 1);
-                }
-            elsif($state eq 'finish') { # closed.completed
-                # Fire the activity's efferent transitions if it is
-                # now closed.complete.
-                $runner->complete_activity($activity, $instance, 1);
-                }
-            } 
-        else {
-            $instance->apply_transition($state);
-            }
+role BPM::Engine::Handler::ActivityInstanceHandler {
+  
+  requires 'runner';
+  
+  use Scalar::Util qw/blessed/;
+  use BPM::Engine::Exceptions qw/throw_store/;
+  
+  method list_activity_instances (@args) {
     
-    };    
-    if($@) {
-        die $@;
-        }
-    return;
-    }
+      return $self->storage->resultset('ActivityInstance')->search_rs(@args);
+      }
 
-sub activity_instance_attribute {
-    my $self = shift;
-    my $id = shift;
+  method get_activity_instance (Int|HashRef $id, HashRef $args = {}) {
     
-    my $instance = $self->get_activity_instance($id);
-    return $instance->attribute(@_);
-    }
+      return $self->storage->resultset('ActivityInstance')->find($id, $args) 
+          || throw_store(error => "ActivityInstance '$id' not found");
+      }
 
-no Moose::Role;
+  method change_activity_instance_state (Int|Object $ai, Str $state) {
+    
+      $ai = $self->get_activity_instance(
+          $ai, { prefetch => ['process_instance', 'activity'] }
+          ) unless(blessed $ai);
+    
+      if ($state eq 'assign' || $state eq 'finish') {    
+          my $activity         = $ai->activity;        
+          my $process_instance = $ai->process_instance;
+          my $runner           = $self->runner($process_instance);            
+          if($state eq 'assign') { # open.running
+              # Execute the activity if it is now open.running.
+              $runner->start_activity($activity, $ai, 1);
+              }
+          elsif($state eq 'finish') { # closed.completed
+              # Fire the activity's efferent transitions if it is
+              # now closed.complete.
+              $runner->complete_activity($activity, $ai, 1);
+              }
+          }
+      else {
+          $ai->apply_transition($state);
+          }
+    
+      return;
+      }
+
+  method activity_instance_attribute (Int $id, @args) {
+    
+      my $instance = $self->get_activity_instance($id);
+      return $instance->attribute(@args);
+      }
+
+}
 
 1;
 __END__

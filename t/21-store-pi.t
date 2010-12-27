@@ -3,14 +3,13 @@ use strict;
 use warnings;
 use lib './t/lib';
 use Test::More;
-
-use BPME::TestUtils qw/setup_db rollback_db schema $dsn/;
+use BPM::Engine::TestUtils qw/setup_db teardown_db schema $dsn/;
 
 BEGIN { setup_db }
-END   { rollback_db }
+END   { teardown_db }
 
 my $schema = schema();
-$schema->resultset('Package')->create_from_xpdl('./t/var/or.xpdl');
+$schema->resultset('Package')->create_from_xpdl('./t/var/02-branching.xpdl');
 
 #-- get the first process definition
 my $process = $schema->resultset('Process')->search->first;
@@ -46,17 +45,18 @@ my $ai_meta = $from_instance->meta;
 my $transition = $from_act->transitions->first;
 my $t_meta = $transition->meta;
 ok($t_meta->does_role('BPM::Engine::Store::ResultBase::ProcessTransition'), '... Transition->meta does_role Store::ResultBase::ProcessTransition');
-ok($t_meta->does_role('Class::Workflow::Transition'), '... Transition->meta does_role Class::Workflow::Transition');
-ok($t_meta->does_role('Class::Workflow::Transition::Validate::Simple'), '... Transition->meta does_role Class::Workflow::Transition::Validate::Simple');
+ok($t_meta->does_role('BPM::Engine::Store::ResultRole::TransitionCondition'), '... Transition->meta does_role Store::ResultRole::TransitionCondition');
+ok(!$t_meta->does_role('Class::Workflow::Transition'), '... Transition->meta does_role Class::Workflow::Transition');
+ok(!$t_meta->does_role('Class::Workflow::Transition::Validate::Simple'), '... Transition->meta does_role Class::Workflow::Transition::Validate::Simple');
 ok(!$t_meta->does_role('Class::Workflow::Transition::Deterministic'), '... Transition->meta does not do role Class::Workflow::Transition::Deterministic');
 ok(!$t_meta->does_role('Class::Workflow::Transition::Strict'), '... Transition->meta does not do role Class::Workflow::Transition::Strict');
 
-$transition->ignore_validator_rv(1);
-$transition->no_die(1);
+#$transition->ignore_validator_rv(1);
+#$transition->no_die(1);
 $transition->clear_validators;
-#$transition->add_validators( sub { die('invalid') } );
-#$transition->add_validators( sub { 1 == 0 } );
-$transition->add_validators( sub { 1 == 1 } );
+#$transition->add_validator( sub { die('invalid') } );
+#$transition->add_validator( sub { 1 == 0 } );
+$transition->add_validator( sub { 1 == 1 } );
 
 #- apply the transition
 my $instance = $transition->apply($from_instance);

@@ -12,5 +12,4 @@ eval { BPM::Engine::Exception->throw(error => 'I feel funny.') };
 my $e = $@;
 ok(is_Exception($e));
 
-
-done_testing();
+done_testing;

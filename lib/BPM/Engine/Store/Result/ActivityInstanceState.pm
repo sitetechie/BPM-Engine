@@ -1,13 +1,14 @@
-
 package BPM::Engine::Store::Result::ActivityInstanceState; 
 BEGIN {
     $BPM::Engine::Store::Result::ActivityInstanceState::VERSION   = '0.001';
     $BPM::Engine::Store::Result::ActivityInstanceState::AUTHORITY = 'cpan:SITETECH';
     }
 
+use namespace::autoclean;
 use Moose;
 extends qw/DBIx::Class Moose::Object/;
 with qw/Class::Workflow::Instance/;
+#use overload '""' => sub { shift->state }, fallback => 1;
 
 __PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfe_activity_instance_journal');
@@ -45,7 +46,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key('event_id');
 
 __PACKAGE__->belongs_to(
-    activity_instance => 'BPM::Engine::Store::Result::ActivityInstance', 'token_id'
+    activity_instance => 'BPM::Engine::Store::Result::ActivityInstance', 
+    'token_id', { cascade_delete => 1 }
     );
 
 __PACKAGE__->belongs_to( prev => __PACKAGE__ ); # history
@@ -64,6 +66,8 @@ __PACKAGE__->inflate_column('state', {
         shift->stringify 
         },
     });
+
+__PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 
 1;
 __END__

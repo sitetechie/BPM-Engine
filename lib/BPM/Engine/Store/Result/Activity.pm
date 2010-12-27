@@ -1,12 +1,11 @@
-
 package BPM::Engine::Store::Result::Activity;
 BEGIN {
     $BPM::Engine::Store::Result::Activity::VERSION   = '0.001';
     $BPM::Engine::Store::Result::Activity::AUTHORITY = 'cpan:SITETECH';
     }
 
+use namespace::autoclean;
 use Moose;
-
 #BEGIN {
   extends qw/DBIx::Class Moose::Object/;
   with    qw/BPM::Engine::Store::ResultBase::Activity
@@ -23,10 +22,10 @@ __PACKAGE__->add_columns(
         extras            => { unsigned => 1 }
         },
     process_id => {
-        data_type         => 'CHAR',
-        size              => 36,        
+        data_type         => 'INT',
         is_nullable       => 0,
         is_foreign_key    => 1,
+        extras            => { unsigned => 1 },
         },
     performer_participant_id => {
         data_type         => 'INT',
@@ -48,15 +47,28 @@ __PACKAGE__->add_columns(
         is_nullable       => 0,
         default           => 'Implementation',
         default_value     => 'Implementation',        
-        extra             => { list => [qw/Implementation Route BlockActivity Event/] },
+        extra             => { 
+            list          => [qw/Implementation Route BlockActivity Event/] 
+            },
         },    
     implementation_type => {
         data_type         => 'ENUM',
         is_nullable       => 0,
         default           => 'No',
         default_value     => 'No',        
-        extra             => { list => [qw/No Tool Task SubFlow Reference/] },
+        extra             => { 
+            list          => [qw/No Tool Task SubFlow Reference/] 
+            },
         },    
+    event_type => {
+        data_type         => 'ENUM',
+        is_nullable       => 0,
+        default           => 'No',
+        default_value     => 'No',
+        extra             => {
+            list          => [qw/No Start Intermediate End/]
+            },
+        },
     description => {
         data_type         => 'VARCHAR',
         size              => 255,
@@ -67,20 +79,36 @@ __PACKAGE__->add_columns(
         is_nullable       => 0,
         default           => 'Automatic',
         default_value     => 'Automatic',        
-        extra             => { list => [qw/Automatic Manual/] },
+        extra             => { 
+            list          => [qw/Automatic Manual/] 
+            },
         },
     finish_mode => {
         data_type         => 'ENUM',
         is_nullable       => 0,
         default           => 'Automatic',
         default_value     => 'Automatic',        
-        extra             => { list => [qw/Automatic Manual/] },
+        extra             => { 
+            list          => [qw/Automatic Manual/] 
+            },
         },
     priority => {
         data_type         => 'BIGINT',
         default_value     => 0,
         is_nullable       => 0,
-        size => 21
+        size              => 21
+        },    
+    start_quantity => {
+        data_type         => 'INT',
+        default_value     => 1,
+        size              => 3,
+        is_nullable       => 1,
+        },    
+    completion_quantity => {
+        data_type         => 'INT',
+        default_value     => 1,
+        size              => 3,
+        is_nullable       => 1,
         },    
     documentation_url => {
         data_type         => 'VARCHAR',
@@ -97,29 +125,42 @@ __PACKAGE__->add_columns(
         is_nullable       => 1,
         default           => 'NONE',
         default_value     => 'NONE',
-        extra             => { list => [qw/NONE AND XOR OR Exclusive Inclusive Parallel Complex/] },
+        extra             => { 
+            list => [qw/NONE AND XOR OR Exclusive Inclusive Parallel Complex/] 
+            },
         },
     join_type_exclusive => {
         data_type         => 'ENUM',
         is_nullable       => 1,
         default           => 'Data',
         default_value     => 'Data',
-        extra             => { list => [qw/Data Event/] },
+        extra             => { 
+            list          => [qw/Data Event/] 
+            },
         },
     split_type => {
         data_type         => 'ENUM',
         is_nullable       => 1,
         default           => 'NONE',
         default_value     => 'NONE',        
-        extra             => { list => [qw/NONE AND XOR OR Exclusive Inclusive Parallel Complex/] },
+        extra             => { 
+            list => [qw/NONE AND XOR OR Exclusive Inclusive Parallel Complex/] 
+            },
         },    
     split_type_exclusive => {
         data_type         => 'ENUM',
         is_nullable       => 1,
         default           => 'Data',
         default_value     => 'Data',
-        extra             => { list => [qw/Data Event/] },
+        extra             => { 
+            list          => [qw/Data Event/] 
+            },
         },    
+    event_attr => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },
     data_fields => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -177,13 +218,23 @@ __PACKAGE__->many_to_many(
     participants => 'performers', 'participant'
     );
 
+# tasks
 __PACKAGE__->has_many(
     tasks => 'BPM::Engine::Store::Result::ActivityTask', 'activity_id'
     );
 
+# instances
 __PACKAGE__->has_many(
     instances => 'BPM::Engine::Store::Result::ActivityInstance', 'activity_id'
     );
+
+sub new {
+    my ($class, $attrs) = @_;
+
+    $attrs->{activity_name} ||= $attrs->{activity_uid};
+
+    return $class->next::method($attrs);
+    }
 
 sub store_column {
     my ($self, $name, $value) = @_;
@@ -233,18 +284,15 @@ sub transitions_by_ref {
         });
     }
 
-
-#-- transition count
-
 sub is_start_activity {
     my $self = shift;
-    #return 0 if $self->transitions->count == 0;
+    #$g->is_source_vertex($v)    
     return $self->transitions_in->count == 0;
     }
 
 sub is_end_activity {
     my $self = shift;    
-    #return 0 if $self->transitions_in->count == 0;  
+    #$g->is_sink_vertex($v)
     return $self->transitions->count == 0;
     }
 
@@ -276,6 +324,58 @@ sub is_event_type {
     shift->activity_type =~ /^event$/i;
     }
 
+#-- splits and joins
+
+sub is_split {
+    my $self = shift;
+    return $self->split_type eq 'NONE' ? 0 : 1;
+    }
+
+sub is_or_split {
+    my $self = shift;
+    return $self->split_type =~ /^(OR|Inclusive)$/;
+    }
+
+sub is_xor_split {
+    my $self = shift;
+    return $self->split_type =~ /^(XOR|Exclusive)$/;
+    }
+
+sub is_and_split {
+    my $self = shift;
+    return $self->split_type =~ /^(AND|Parallel)$/;
+    }
+
+sub is_complex_split {
+    my $self = shift;
+    return $self->split_type eq 'Complex' ? 1 : 0;
+    }
+
+sub is_join {
+    my $self = shift;
+    return $self->join_type eq 'NONE' ? 0 : 1;
+    }
+
+sub is_or_join {
+    my $self = shift;
+    return $self->join_type =~ /^(OR|Inclusive)$/;
+    }
+
+sub is_xor_join {
+    my $self = shift;
+    return $self->join_type =~ /^(XOR|Exclusive)$/;
+    }
+
+sub is_and_join {
+    my $self = shift;
+    return $self->join_type =~ /^(AND|Parallel)$/;
+    }
+
+sub is_complex_join {
+    my $self = shift;
+    return $self->join_type eq 'Complex' ? 1 : 0;
+    }
+
 #-- implementation_type shortcuts (No Tool Task SubFlow Reference)
 
 sub is_impl_no { 
@@ -294,6 +394,7 @@ sub is_impl_reference {
     shift->implementation_type =~ /^reference$/i;
     }
 
+__PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 
 1;
 __END__

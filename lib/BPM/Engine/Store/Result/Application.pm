@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::Result::Application;
 BEGIN {
     $BPM::Engine::Store::Result::Application::VERSION   = '0.001';

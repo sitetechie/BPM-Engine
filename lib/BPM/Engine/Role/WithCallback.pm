@@ -1,4 +1,3 @@
-
 package BPM::Engine::Role::WithCallback;
 BEGIN {
     $BPM::Engine::Role::WithCallback::VERSION   = '0.001';

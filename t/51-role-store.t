@@ -3,100 +3,43 @@ use warnings;
 use lib './t/lib';
 use Test::More;
 use Test::Exception;
-
-use BPME::TestUtils qw/setup_db rollback_db $dsn/;
+use BPM::Engine::TestUtils qw/setup_db teardown_db $dsn/;
 
 BEGIN { setup_db }
-END   { rollback_db }
+END   { teardown_db }
 
-
-my $con0 = {
-  connect_info => {
-    user => 'postgres',
-    password => ''
-  }
-};
-
-
-my $con1 = {
-  connect_info => {
-    dsn => 'dbi:Pg:dbname=mypgdb',
-    user => 'postgres',
-    password => ''
-  }
-};
-
-my $con2 = {
-  connect_info => {
-    dsn => 'dbi:SQLite:dbname=foo.db',
-    on_connect_do => [
-      'PRAGMA synchronous = OFF',
-    ]
-  }
-};
-
-my $con3 = {
-  connect_info => {
-    dsn => 'dbi:Pg:dbname=mypgdb',
-    user => 'postgres',
-    password => '',
-    pg_enable_utf8 => 1,
-    on_connect_do => [
-      'some SQL statement',
-      'another SQL statement',
-    ],
-  }
-};
-
-my $con4 = {
-  connect_info => 'dbi:SQLite:dbname=var/bpmengine.sqlite'
-};
-
-my $con5 = {
-  connect_info => {
-    dsn => 'dbi:SQLite:dbname=var/bpmengine.sqlite',
-    user => 'root',
-    password => '',
-    pg_enable_utf8 => 1,
-    on_connect_do => [
-      'some SQL statement',
-      'another SQL statement',
-    ],
-  }
-};
-my $con6 = {
-  connect_info => ['dbi:SQLite:dbname=var/bpmengine.sqlite','root','',{}]
-};
-
-my($db1,$db2,$db3,$db4);
+my ($user, $password) = ('testuser', 'TestPass');
 
 use_ok('BPM::Engine');
-use BPM::Engine::Store;
 
-lives_ok { $db1 = BPM::Engine::Store->connect($con1->{connect_info}); }  'expecting to live';
-lives_ok { $db2 = BPM::Engine::Store->connect($con2->{connect_info}); }  'expecting to live';
-lives_ok { $db3 = BPM::Engine::Store->connect($con3->{connect_info}); }  'expecting to live';
-lives_ok { $db4 = BPM::Engine::Store->connect($con4->{connect_info}); }  'expecting to live';
+throws_ok( sub { BPM::Engine->new() }, 'BPM::Engine::Exception::Engine', 'exception thrown' );
+throws_ok( sub { BPM::Engine->new(connect_info => [$dsn, $user, $password, {AutoCommit => 1}] ) }, qr/does not pass the type constraint/, 'wrong type' );
 
-#-- engine construction
+t( BPM::Engine->new(connect_info => { dsn => $dsn, user => $user, password => $password, AutoCommit => 1 }), 0);
+t( BPM::Engine->new(connect_info => $dsn), 1);
+t( BPM::Engine->new(connect_info => sub { DBI->connect ($dsn, $user, $password, {AutoCommit => 1}) } ), 1);
+t( BPM::Engine->new(connect_info => { dbh_maker => sub { DBI->connect($dsn, $user, $password) }, AutoCommit => 1 }), 1);
 
-my($e0,$e1,$e2,$e3,$e4,$e5);
+$dsn = 'dbi:SQLite:dbname=t/var/bpmengine.db';
+t( BPM::Engine->new_with_config(configfile => 't/etc/engine.yaml'), 0);
+t( BPM::Engine->new_with_config(configfile => 't/etc/engine.ini'), 0);
+t( BPM::Engine->new_with_config(configfile => 't/etc/engine.conf'), 0);
 
-lives_ok { $e0 = BPM::Engine->new($con1); } 'expecting to live';
-lives_ok { $e1 = BPM::Engine->new($con1); } 'expecting to live';
-lives_ok { $e2 = BPM::Engine->new($con2); } 'expecting to live';
-lives_ok { $e3 = BPM::Engine->new($con3); } 'expecting to live';
-lives_ok { $e4 = BPM::Engine->new($con4); } 'expecting to live';
-lives_ok { $e5 = BPM::Engine->new($con5); } 'expecting to live';
+done_testing;
 
-lives_and { isa_ok(BPM::Engine->new($con4)->schema, 'BPM::Engine::Store') } 'method is 42';
-
-isa_ok($e1->schema, 'BPM::Engine::Store');
-isa_ok($e2->storage, 'BPM::Engine::Store');
-
-#$e3->schema->storage->debug(1);
-
-lives_ok { $e4->list_process_definitions } 'existing db';
-lives_ok { $e5->list_process_definitions } 'existing db';
-
-done_testing();
+sub t {
+    my ($engine, $skip) = @_;
+    $engine->schema->storage->ensure_connected;
+    ok($engine->schema->storage->connected);
+    isa_ok($engine->schema->resultset('Process')->search_rs, 'DBIx::Class::ResultSet');
+    #is($engine->schema->resultset('Process')->count, 0);
+    unless($skip) {
+        my $ci = $engine->schema->storage->_normalize_connect_info($engine->schema->storage->connect_info);
+        my $args = $ci->{arguments};
+        my $attr = $ci->{attributes};
+        is($args->[0], $dsn, 'dsn matches');
+        is($args->[1], $user,'user matches');
+        is($args->[2], $password,'password matches');
+        ok($attr->{AutoCommit}, 'AutoCommit set');
+        }
+    }

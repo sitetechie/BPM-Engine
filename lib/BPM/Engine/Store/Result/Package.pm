@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::Result::Package;
 BEGIN {
     $BPM::Engine::Store::Result::Package::VERSION   = '0.001';
@@ -156,12 +155,13 @@ __PACKAGE__->has_many(
 #__PACKAGE__->many_to_many( package_transitions => 'processes', 'transitions' );
 
 sub insert {
-    my $self = shift;
+    my ($self, @args) = @_;
 
-    my $plist = $self->result_source->schema->resultset('ParticipantList')->create({});
+    my $plist = $self->result_source->schema
+        ->resultset('ParticipantList')->create({});
     $self->participant_list_id($plist->id);
 
-    $self->next::method(@_);
+    $self->next::method(@args);
     }
 
 1;

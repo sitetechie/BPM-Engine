@@ -1,14 +1,13 @@
-
 package BPM::Engine::Store::ResultRole::WithWorkflow;
 BEGIN {
     $BPM::Engine::Store::ResultRole::WithWorkflow::VERSION   = '0.001';
     $BPM::Engine::Store::ResultRole::WithWorkflow::AUTHORITY = 'cpan:SITETECH';
     }
 
+use namespace::autoclean;
 use Moose::Role;
-use namespace::autoclean -also => [qr/^_/];
 
-requires '_get_workflow';
+requires 'get_workflow';
 
 has workflow => (
     does    => 'Class::Workflow',
@@ -16,7 +15,7 @@ has workflow => (
     lazy    => 1,
     default => sub {
         my $self = shift;
-        return $self->_get_workflow();
+        return $self->get_workflow();
         },
     );
 
@@ -35,10 +34,10 @@ sub apply_transition {
         my $state = $self->workflow_instance->state;
         $state->_reindex_hash;
         $transition = $state->get_transition($transition)
-            or die "There's no '$transitionid' transition in the current state $state";
+            or die "There's no '$transitionid' transition from " . $state->name;
         }
 
-    $self->_workflow_txn(sub{
+    $self->_workflow_txn(sub {
         my ($self, $instance) = @_;
         $transition->apply($instance, @args);
         });
@@ -70,9 +69,9 @@ sub clone {
     $self->copy({%fields});
     }
 
-sub state {
+sub state { ## no critic (ProhibitBuiltinHomonyms)
     my $self = shift;
-    return $self->workflow_instance->state;
+    return $self->workflow_instance->state->name;
     }
 
 no Moose::Role;

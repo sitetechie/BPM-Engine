@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::ResultRole::WithAssignments;
 BEGIN {
     $BPM::Engine::Store::ResultRole::WithAssignments::VERSION   = '0.001';
@@ -11,7 +10,8 @@ use namespace::autoclean;
 sub start_assignments {
     my $self = shift;
     my $assignments = $self->assignments || [];
-    return grep { !$_->{AssignTime} || $_->{AssignTime} eq 'Start' } @$assignments;
+    return grep { !$_->{AssignTime} || $_->{AssignTime} eq 'Start' } 
+        @$assignments;
     }
 
 sub end_assignments {

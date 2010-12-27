@@ -1,4 +1,3 @@
-
 package BPM::Engine;
 BEGIN {
     $BPM::Engine::VERSION   = '0.001';
@@ -10,11 +9,12 @@ use Moose;
 use MooseX::StrictConstructor;
 use BPM::Engine::Exceptions qw/throw_engine/;
 use BPM::Engine::Store;
-use BPM::Engine::Service::ProcessRunner;
+use BPM::Engine::ProcessRunner;
 use namespace::autoclean;
 
 with qw/
     MooseX::SimpleConfig
+    MooseX::Traits    
     BPM::Engine::Role::WithCallback
     BPM::Engine::Role::WithPersistence
     BPM::Engine::Role::WithLogger    
@@ -22,27 +22,31 @@ with qw/
     BPM::Engine::Handler::ProcessInstanceHandler
     BPM::Engine::Handler::ActivityInstanceHandler
     /;
-with 'BPM::Engine::API';
+with 'BPM::Engine::Role::EngineAPI';
+
+has '+configfile' => ( default => '/etc/bpmengine.yaml' );
 
 around BUILDARGS => sub {
     my $orig = shift;
     my $args = $orig->(@_);
 
-    throw_engine("Invalid connection arguments") unless $args->{connect_info} || $args->{schema};
+    throw_engine("Invalid connection arguments") 
+        unless $args->{connect_info} || $args->{schema};
 
     return $args;
     };
 
-sub _runner {
+sub runner {
     my ($self, $pi) = @_;
     
     my $args = {
-        process          => $pi->process,
         process_instance => $pi,
+        engine           => $self,
+        logger           => $self->logger,
         };
     $args->{callback} = $self->callback if $self->has_callback;
     
-    return BPM::Engine::Service::ProcessRunner->new($args);
+    return BPM::Engine::ProcessRunner->new($args);
     }
 
 __PACKAGE__->meta->make_immutable;
@@ -51,6 +55,8 @@ __PACKAGE__->meta->make_immutable;
 __END__
 
 =pod
+
+=encoding utf-8
 
 =head1 NAME
 
@@ -71,7 +77,7 @@ BPM::Engine - Business process execution engine
   
   my $engine = BPM::Engine->new(
       log_dispatch_conf => 'log.conf',
-      connect_info      => [$dsn, $user, $password],
+      connect_info      => { dsn => $dsn, user => $user, password => $password },
       callback          => $callback
       );
   
@@ -103,7 +109,7 @@ Please review the test files and source code to see how it works.
 
 =head1 INTERFACE
 
-=head2 CONSTRUCTOR METHODS
+=head2 CONSTRUCTORS
 
 =head2 new
 
@@ -207,7 +213,7 @@ Peter de Vos, C<< <sitetech@cpan.org> >>
 
 You can contribute or fork this project via GitHub:
 
-  git clone git://github.com/sitetechie/BPM-Engine.git BPM-Engine
+  git clone git://github.com/sitetechie/BPM-Engine.git
 
 =head1 BUGS
 

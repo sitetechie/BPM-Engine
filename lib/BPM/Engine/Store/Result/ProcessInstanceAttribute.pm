@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::Result::ProcessInstanceAttribute;
 BEGIN {
     $BPM::Engine::Store::Result::ProcessInstanceAttribute::VERSION   = '0.001';
@@ -7,7 +6,6 @@ BEGIN {
 
 use strict;
 use warnings;
-use overload '""' => sub { shift->value }, fallback => 1;
 use base qw/DBIx::Class/;
 
 __PACKAGE__->load_components(qw/ Core /);
@@ -25,6 +23,11 @@ __PACKAGE__->add_columns(
         size              => 64,
         is_nullable       => 0,
         },
+    scope => {
+        data_type         => 'VARCHAR',
+        size              => 64,
+        is_nullable       => 1,
+        },    
     type => {
         data_type         => 'VARCHAR',
         size              => 20,
@@ -44,7 +47,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key(qw/ process_instance_id name /);
 
 __PACKAGE__->belongs_to(
-    process_instance => 'BPM::Engine::Store::Result::ProcessInstance', 'process_instance_id'
+    process_instance => 'BPM::Engine::Store::Result::ProcessInstance', 
+    'process_instance_id'
     );
 
 1;

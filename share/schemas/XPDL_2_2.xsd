@@ -4,7 +4,7 @@
 <!-- edited with XML Spy v4.0 U (http://www.xmlspy.com) by Robert M Shapiro (Cape Visions) -->
 <!-- edited with XMLSpy v2007 sp1 (http://www.altova.com) by Bruce Silver (private) -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:deprecated="http://www.wfmc.org/2002/XPDL1.0" xmlns:xpdl="http://www.wfmc.org/2009/XPDL2.2" targetNamespace="http://www.wfmc.org/2009/XPDL2.2" elementFormDefault="qualified" attributeFormDefault="unqualified" version="40">
-	<xsd:import namespace="http://www.wfmc.org/2002/XPDL1.0" schemaLocation="http://www.wfmc.org/standards/docs/TC-1025_schema_10_xpdl.xsd"/>
+	<xsd:import namespace="http://www.wfmc.org/2002/XPDL1.0" schemaLocation="XPDL_1_0.xsd"/>
 	<xsd:element name="Activities">
 		<xsd:complexType>
 			<xsd:sequence>

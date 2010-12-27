@@ -10,11 +10,11 @@ use MooseX::StrictConstructor;
 use namespace::autoclean;
 
 has 'params' => (
-    traits    => [ 'Hash' ],
-    isa => 'HashRef',
-    is => 'rw',
-    default => sub { {} },
-    handles => {
+    traits   => [ 'Hash' ],
+    isa      => 'HashRef',
+    is       => 'rw',
+    default  => sub { {} },
+    handles  => {
         get_param => 'get',        
         set_param => 'set',
         variables => 'keys',

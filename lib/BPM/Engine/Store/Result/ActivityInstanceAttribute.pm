@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::Result::ActivityInstanceAttribute;
 BEGIN {
     $BPM::Engine::Store::Result::ActivityInstanceAttribute::VERSION   = '0.001';
@@ -7,7 +6,6 @@ BEGIN {
 
 use strict;
 use warnings;
-use overload '""' => sub { shift->value }, fallback => 1;
 use base qw/DBIx::Class/;
 
 __PACKAGE__->load_components(qw/ Core /);

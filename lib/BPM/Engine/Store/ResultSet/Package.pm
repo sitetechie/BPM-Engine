@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::ResultSet::Package;
 BEGIN {
     $BPM::Engine::Store::ResultSet::Package::VERSION   = '0.001';
@@ -6,28 +5,13 @@ BEGIN {
     }
 
 use Moose;
-use Scalar::Util qw(blessed);
-use File::Spec;
-use File::ShareDir ();
-use XML::LibXML;
+use Scalar::Util qw/blessed/;
 use XML::LibXML::Simple ();
-use BPM::XPDL;
-use BPM::Engine::Exceptions qw/throw_model throw_install/;
+use BPM::Engine::Util::XPDL qw/xpdl_hash/;
+use BPM::Engine::Exceptions qw/throw_model throw_store/;
 extends 'DBIx::Class::ResultSet';
 
 my %APPMAP = ();
-
-sub active {
-    my $self = shift;
-    $self->search({ deleted => \'IS NULL'},
-                  { order_by => \'priority ASC' });
-}
-
-sub deleted {
-    my $self = shift;
-    $self->search({ deleted => \'IS NOT NULL' },
-                  { order_by => \'deleted DESC' });
-}
 
 sub create_from_xml {
     my ($self, $string) = @_;
@@ -48,65 +32,10 @@ sub create_from_xml {
 sub create_from_xpdl {
     my ($self, $args) = @_;
 
-    unless(ref($args) eq 'HASH') {
-        my $doc = $self->_xml_doc($args);
-        $args = (BPM::XPDL->from($doc))[1];
-        }
+    $args = xpdl_hash($args) unless(ref($args) eq 'HASH');
     
     return $self->_create_from_hash($args);
     }
-
-sub _xml_doc {
-    my ($self, $args) = @_;    
-    
-    my $parser = XML::LibXML->new;
-    my $doc = undef;
-
-    if(ref($args) eq 'SCALAR') {
-        $doc = eval { $parser->parse_string($$args); };
-        die "invalid XML: $@" if $@;                
-        }
-    elsif(!ref($args) && -f $args) {
-        $doc = eval { $parser->parse_file($args); };
-        die "invalid XML: $@" if $@;
-        }
-    else {
-        die "file $args not found";
-        }
-
-    # get XPDL version from xml
-    my @nodes = $doc->documentElement->getElementsByTagName('XPDLVersion');
-    die "XPDLVersion not defined" unless $nodes[0];
-    my $v = $nodes[0]->textContent or die "XPDL version not set";
-    die "unsupported XPDL version $v" unless(grep { $v == $_ } qw/1.0 2.0 2.1 2.2/);
-    $v =~ s/\./_/;
-    
-    # validate against schema since BPM::XPDL's validation is not very informative
-    my $schema_file = _xpdl_spec($v);
-    die "schema file not found" unless -f $schema_file;
-    
-    my $schema = XML::LibXML::Schema->new(location => $schema_file);
-    eval { $schema->validate($doc); };
-    die "non-conformant XML: \n$@" if $@;
-    
-    return $doc;
-    }
-
-sub _xpdl_spec {
-    my $version = shift;
-    
-    my $fname = "XPDL_$version.xsd";
-    my $file  = File::Spec->catfile('share', 'schemas', $fname);
-    eval {
-        $file = File::Spec->catfile(
-            File::ShareDir::dist_file('BPM-Engine', 'schemas', $fname) );
-        } unless(-e $file);
-    
-    throw_install(error => "Schema file '$fname' not found in shared dirs") unless(-e $file);
-    
-    return $file;
-    }
-
 
 sub _create_from_hash {
     my ($self, $args) = @_;
@@ -123,41 +52,47 @@ sub _create_from_hash {
         $entry->package_name($args->{Name}) if($args->{Name});
 
         #-- element: PackageHeader (required)
-        _import_packhead($entry, $args->{PackageHeader}) if $args->{PackageHeader};
+        _import_packhead($entry, $args->{PackageHeader}) 
+            if $args->{PackageHeader};
 
         #-- element: RedefinableHeader
-        _import_redefhead($entry, $args->{RedefinableHeader}) if $args->{RedefinableHeader};
+        _import_redefhead($entry, $args->{RedefinableHeader})
+            if $args->{RedefinableHeader};
 
         #-- element: ConformanceClass
-        $entry->graph_conformance($args->{ConformanceClass}->{GraphConformance}) if ($args->{ConformanceClass});
+        $entry->graph_conformance($args->{ConformanceClass}->{GraphConformance}) 
+            if ($args->{ConformanceClass});
 
         #-- element: Script
         #-- element: ExternalPackages
         #-- element: TypeDeclarations
 
         #-- element: Participants
-        _import_participants($entry, $args->{Participants}->{Participant}) if $args->{Participants};
+        _import_participants($entry, $args->{Participants}->{Participant}) 
+            if $args->{Participants};
 
         #-- element: Applications
-        _import_applications($entry, $args->{Applications}->{Application}) if $args->{Applications};
+        _import_applications($entry, $args->{Applications}->{Application}) 
+            if $args->{Applications};
 
-        #-- elements: Attributes (DataFields, ExtendedAttributes, FormalParameters, ActualParameters )
+        #-- elements: DataFields, ExtendedAttributes, Formal/ActualParameters
         _set_elements($entry, $args);
 
         #-- element: WorkflowProcesses
-        _import_processes($entry, $args->{WorkflowProcesses}->{WorkflowProcess}) if $args->{WorkflowProcesses};
+        _import_processes($entry, $args->{WorkflowProcesses}->{WorkflowProcess}) 
+            if $args->{WorkflowProcesses};
 
-        #$entry->update();
+        $entry->update();
         return $entry;
         };
-    
+
     my $row;
     eval { $row = $schema->txn_do($create_txn); };
-    if ($@) {
-        die "Rollback failed!" if ($@ =~ /Rollback failed/);
-        die("XML validation/integrity/completeness error: $@");
+    if(my $err = $@) {
+        throw_store error => "$err" if(ref($err));
+        throw_model error => $err;
         }
-    
+
     return $row;
     }
 
@@ -210,7 +145,9 @@ sub _import_participants {
     
     my $idx = 0;
     foreach my $part_proto(@{$args}) {
-        my $participant = _import_participant($entry->participant_list, $part_proto, $idx);
+        my $participant = _import_participant(
+            $entry->participant_list, $part_proto, $idx
+            );
         $participant->update();
         $idx++;
         }
@@ -306,10 +243,12 @@ sub _import_process {
     _set_elements($process, $args);
 
     #-- element: Participants
-    _import_participants($process, $args->{Participants}->{Participant}) if $args->{Participants};
+    _import_participants($process, $args->{Participants}->{Participant}) 
+        if $args->{Participants};
 
     #-- element: Applications
-    _import_applications($process, $args->{Applications}->{Application}) if $args->{Applications};
+    _import_applications($process, $args->{Applications}->{Application}) 
+        if $args->{Applications};
 
     #-- element: ActivitySets
 
@@ -320,10 +259,10 @@ sub _import_process {
     my $deadline_map = {};
     if($args->{Activities} && $args->{Activities}->{Activity}) {
         foreach my $act_proto(@{ $args->{Activities}->{Activity} }) {
-            my $activity = _import_activity($process, $act_proto, $transition_map, $deadline_map);
+            my $activity = _import_activity(
+                $process, $act_proto, $transition_map, $deadline_map
+                );
             $activity->update();
-            ### XXX - needs2be Activity record without From/To entry in Transition table
-            # $process->default_start_activity_id($activity->activity_id) unless $i;
             $i++;
             }
         }
@@ -332,14 +271,24 @@ sub _import_process {
     debug('Importing transitions');    
     if($args->{Transitions} && $args->{Transitions}->{Transition}) {
         foreach my $trans_proto(@{ $args->{Transitions}->{Transition} }) {
-            my $transition = _import_transition($process, $trans_proto, $transition_map, $deadline_map);
+            my $transition = _import_transition(
+                $process, $trans_proto, $transition_map, $deadline_map
+                );
             $transition->update();
             }
         }
 
-    die("Not all transitionrefs have matching transitions") if(scalar keys %{$transition_map});
-    die("Not all deadlines have matching transition conditions") if(scalar keys %{$deadline_map});
-
+    die("Not all transitionrefs have matching transitions") 
+        if(scalar keys %{$transition_map});
+    die("Not all deadlines have matching transition conditions") 
+        if(scalar keys %{$deadline_map});
+    
+    #my $start_activities = $process->start_activities;
+    #warn("Too many start activities")
+    #    if(scalar @{$start_activities} > 1);
+    
+    $process->mark_back_edges();    
+    
     $process->update();
 
     return;
@@ -355,18 +304,21 @@ sub _import_activity {
         activity_uid     => $args->{Id},
         activity_name    => $args->{Name} || $args->{Id},
         activity_type    => $args->{Route} ? 'Route' : (
-            $args->{BlockActivity} ? 'BlockActivity' : 'Implementation'
+            $args->{BlockActivity} ? 'BlockActivity' : (
+            $args->{Event} ? 'Event' : 'Implementation')
             ),
         });
 
     #-- elements: Description, Priority, Icon, Documentation
     my %columns = (
-        description       => 'Description',
-        priority          => 'Priority',
-        documentation_url => 'Documentation',
-        icon_url          => 'Icon',
-        start_mode        => 'StartMode',
-        finish_mode       => 'FinishMode',
+        description         => 'Description',
+        priority            => 'Priority',
+        documentation_url   => 'Documentation',
+        icon_url            => 'Icon',
+        start_mode          => 'StartMode',
+        finish_mode         => 'FinishMode',
+        start_quantity      => 'StartQuantity',
+        completion_quantity => 'CompletionQuantity',
         );
     _set_values($activity, $args, \%columns);
 
@@ -374,10 +326,12 @@ sub _import_activity {
 
     #-- element: StartMode + FinishMode
     $activity->start_mode('Manual') if($args->{StartMode} && 
-        ( ref($args->{StartMode}) ? $args->{StartMode}->{Manual} : ($args->{StartMode} eq 'Manual'))
+        ( ref($args->{StartMode}) ? 
+            $args->{StartMode}->{Manual} : ($args->{StartMode} eq 'Manual'))
         );
     $activity->finish_mode('Manual') if($args->{FinishMode} &&
-        ( ref($args->{FinishMode}) ? $args->{FinishMode}->{Manual} : ($args->{FinishMode} eq 'Manual'))
+        ( ref($args->{FinishMode}) ? 
+            $args->{FinishMode}->{Manual} : ($args->{FinishMode} eq 'Manual'))
         );
     
     #-- element: Deadline
@@ -398,15 +352,22 @@ sub _import_activity {
     # join_type  => 'JoinType',
     if($args->{TransitionRestrictions}) {
         my @restrict = @{$args->{TransitionRestrictions}->{TransitionRestriction}};
+        my $seen_split = 0;
+        my $seen_join  = 0;        
         foreach my $r(@restrict) {
             my @rkeys = keys %{$r};
-            die("Invalid TransitionRestriction") unless(scalar(@rkeys) == 1 || scalar(@rkeys) == 2);
+            die("Invalid TransitionRestriction") 
+                unless(scalar(@rkeys) == 1 || scalar(@rkeys) == 2);
             foreach my $rtype(@rkeys) {
                 if($rtype eq 'Split') {
                     $activity->split_type($r->{$rtype}->{Type});
+                    die("Invalid TransitionRestriction: multiple splits") 
+                        if $seen_split++;
                     }
                 elsif($rtype eq 'Join') {
                     $activity->join_type($r->{$rtype}->{Type});
+                    die("Invalid TransitionRestriction: multiple joins") 
+                        if $seen_join++;
                     }
                 else {
                     die("Invalid TransitionRestriction");
@@ -416,7 +377,8 @@ sub _import_activity {
                 my $pos = 1;
                 foreach my $trans(@{ $r->{$rtype}->{TransitionRefs}->{TransitionRef} }) {
                     $trans_map->{$trans->{Id}}->{$rtype} ||= [];
-                    push(@{ $trans_map->{$trans->{Id}}->{$rtype} }, [$activity->id, $pos++]);
+                    push(@{ $trans_map->{$trans->{Id}}->{$rtype} }, 
+                        [$activity->id, $pos++]);
                     }
                 }
             }
@@ -435,21 +397,22 @@ sub _import_activity {
         #-- implementation_type: No Tool Task SubFlow Reference
         my $impl = $args->{Implementation} || { 'No' => undef };
         my @itypes = keys %{$impl};
-        die("Invalid Activity implementation") unless(scalar(@itypes) == 1);
-        $activity->implementation_type($itypes[0]);
+        die("Invalid Implementation specification") if(scalar(@itypes) > 1);
+        my $impl_type = $itypes[0] || 'No';
+        $activity->implementation_type($impl_type);
         if($activity->is_impl_task) {
             my ($type, @tasks) = ();
-            if($itypes[0] eq 'Tool') {
+            if($impl_type eq 'Tool') {
                 @tasks = @{$impl->{Tool}};
                 $type = 'Tool';
                 foreach my $task(@tasks) {
                     _add_task($activity, $task, $type);
                     }
                 }
-            elsif($itypes[0] eq 'Task') {
+            elsif($impl_type eq 'Task') {
                 my @tkeys = keys %{$impl->{Task}};
-                unless (scalar @tkeys < 2) {
-                    die("Too many tasks (Task element takes no attributes");
+                if(scalar @tkeys > 1) {
+                    die("Too many tasks (Task element takes no attributes)");
                     }
                 
                 $type = $tkeys[0];
@@ -462,8 +425,8 @@ sub _import_activity {
                 }
             }
         elsif(!$activity->is_impl_no && !$activity->is_impl_subflow 
-           && !$activity->is_impl_reference) {
-            die("Invalid Activity implementation");
+            && !$activity->is_impl_reference) {
+            #die("Invalid Activity implementation");
             }
         }
     elsif(!$activity->is_route_type && !$activity->is_block_type 
@@ -543,7 +506,8 @@ sub _add_task {
         task_type   => $type,
         }) or die("Invalid Task");
     if($type eq 'Tool' || $type eq 'Application') {
-        my $app = $APPMAP{ $task->{Id} } or die("No application for task $task->{Id}");
+        my $app = $APPMAP{ $task->{Id} } 
+            or die("No application for task $task->{Id}");
         $task_tool->application_id($app->id);
         }
 
@@ -551,6 +515,7 @@ sub _add_task {
     delete $task->{Id};
     
     debug('Setting taskdata');
+
     delete $task->{'WebServiceFaultCatch'};
     $task_tool->task_data($task) if(keys %{$task});
     $task_tool->update();
@@ -586,8 +551,10 @@ sub _import_transition {
 
     my $act_out = join( '_', split( /\s+/, $args->{From} ) );
     my $act_in  = join( '_', split( /\s+/, $args->{To} ) );
-    my $from    = $process->activities->search({ activity_uid => $act_out })->next or die("Unknown activity $args->{From}");
-    my $to      = $process->activities->search({ activity_uid => $act_in   })->next or die("Unknown activity $args->{To}");
+    my $from    = $process->activities->search({activity_uid => $act_out})->next
+                  or die("Unknown activity $args->{From}");
+    my $to      = $process->activities->search({activity_uid => $act_in })->next 
+                  or die("Unknown activity $args->{To}");
 
     my $transition = $process->add_to_transitions({
         transition_uid   => $args->{Id},
@@ -599,7 +566,9 @@ sub _import_transition {
     if($args->{Description}) {
         $transition->description($args->{Description});
         }
-
+    if($args->{Quantity}) {
+        $transition->quantity($args->{Quantity});
+        }
     if($args->{Condition}) {
         my $condition = $args->{Condition};
         if(ref($condition) eq 'XML::LibXML::Element') {
@@ -607,7 +576,6 @@ sub _import_transition {
                 $transition->condition_type($ctype->nodeValue);
                 }
             else {
-                # this shouldn't be needed, as it is the default value in schema def?
                 $transition->condition_type('NONE');
                 }
             
@@ -624,7 +592,7 @@ sub _import_transition {
         
         my $ctype = $transition->condition_type || die("No condition type");
         if($ctype eq 'EXCEPTION') {
-            if(my $dead = delete $deadline_map->{ $transition->condition_expr } ) {
+            if(my $dead = delete $deadline_map->{$transition->condition_expr}) {
                 $transition->create_related(deadline => $dead)
                     or die("Could not create deadline");
                 }
@@ -673,7 +641,10 @@ sub _trim {
     return $content;
     }
 
-#-- elements: DataFields, ExtendedAttributes, FormalParameters, ActualParameters
+#-- elements:
+# DataFields, ExtendedAttributes, FormalParameters, ActualParameters,
+# DataMappings, Assignments
+use Data::Dumper;
 sub _set_elements {
     my ($entry, $args) = @_;
 
@@ -685,57 +656,64 @@ sub _set_elements {
     my $s = { assignments   => [ 'Assignments', 'Assignment' ] };
     my $m = { data_maps     => [ 'DataMappings', 'DataMapping' ] };
     my $e = { extended_attr => [ 'ExtendedAttributes', 'ExtendedAttribute' ] };
+    my $v = { event_attr    => [ 'Event' ] };    
     my %types = (
         Package      => [$e,$d],
         Application  => [$f,$e],
         Process      => [$f,$e,$d,$s],
-        Activity     => [$e,$d,$s],
+        Activity     => [$e,$d,$s,$v],
         ActivityTask => [$a,$m,$e],
         Transition   => [$s],
         #Message(In|Out)      => [],
         );
-    my @pack = grep { ref($entry) =~ /^BPM::Engine::Store::Result::($_)$/ } keys %types;
+    my @pack = grep { ref($entry) =~ /^BPM::Engine::Store::Result::($_)$/ } 
+               keys %types;
     die("Invalid regexp $entry ") unless scalar @pack == 1;
+    my $container = $pack[0];
     
-    foreach my $type(@{ $types{$pack[0]} }) {
+    foreach my $type(@{ $types{$container} }) {
         my $field = (keys %{$type})[0];
         my ($multi, $single) = @{ $type->{$field} };
-        if($args->{$multi} && $args->{$multi}->{$single}) {
-            my $json = delete $args->{$multi}->{$single};
+        my $json = '';
+        #warn "Storing field $field multi $multi single $single type $type container $container entry $entry" if $container eq 'Package';
+        if(!$single && $multi eq 'Event') {
+            $json = delete $args->{$multi};
+            my @event_types = keys %{$json};
+            next unless scalar @event_types;
+            $json = scalar @event_types ? $json->{$event_types[0]} : {};
+            
+            my $ev = $event_types[0] || 'EndEvent';
+            $ev =~ s/Event$//;
+            $entry->event_type($ev);
+            }
+        elsif($args->{$multi} && $args->{$multi}->{$single}) {
+            $json = delete $args->{$multi}->{$single};
             delete $args->{$multi};
             next unless $json->[0];
-            # HACKS XML::LibXML::Element
+            # get rid of XML::LibXML::Element objects from mixed-scheme elements
             if($multi eq 'ExtendedAttributes' && ref($json->[0]) eq 'XML::LibXML::Element') {
-                $json = [map { { Name => $_->getAttribute('Name') , Value => $_->getAttribute('Value') } } @$json];
+                $json = [map { 
+                          { Name => $_->getAttribute('Name') , 
+                            Value => $_->getAttribute('Value') } 
+                        } @$json];
                 }
-            elsif($multi eq 'DataFields') {
-                # DataFields might still contain some XML::LibXML::Element in XPDL 2.1 definitions
-                foreach my $att(@$json) {
-                    next unless(ref($att) eq 'HASH');
-                    if($att->{InitialValue} && ref($att->{InitialValue}) eq 'XML::LibXML::Element') {
-                        $att->{InitialValue} = _checkxml($att->{InitialValue});
-                        }
-                    }
-                }
-            elsif($pack[0] eq 'ActivityTask' && $multi eq 'ActualParameters') {
+            elsif($container eq 'ActivityTask' && $multi eq 'ActualParameters') {
                 $json = _mapxml($json);
                 }
-            elsif($pack[0] eq 'ActivityTask' && $multi eq 'DataMappings') {
+            elsif($multi =~ /^(DataFields|DataMappings|Assignments|FormalParameters)$/) {
                 foreach(@{$json}) {
                     _hashxml($_);
                     }
                 }
-            elsif($multi eq 'Assignments') {
-                foreach(@{$json}) {
-                    _hashxml($_);
-                    }
-                }
-            eval {
-                $entry->$field($json);
-                };
-            if($@) {
-                warn "Error setting $field as JSON: $@";
-                }
+            }
+        else {
+            next;
+            }
+        eval {
+            $entry->$field($json);
+            };
+        if($@) {
+            warn "Error setting $field ($multi) as JSON: $@";
             }
         }
 
@@ -743,9 +721,10 @@ sub _set_elements {
 
 sub _hashxml {
     my $hash = shift;
+    return unless(ref($hash) eq 'HASH');
     foreach my $key(keys %{$hash}) {
         $hash->{$key} = _checkxml($hash->{$key});
-        delete $hash->{$key} unless $hash->{$key};
+        delete $hash->{$key} unless(defined $hash->{$key});
         }
     }
 
@@ -757,7 +736,6 @@ sub _mapxml {
 sub _checkxml {
     my $val = shift;
     return unless $val;
-    #return blessed $val ? $val->textContent : $val;
     return $val->textContent if blessed($val);
     return $val->{content}   if ref($val);
     return $val;

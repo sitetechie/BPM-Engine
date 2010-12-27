@@ -3,7 +3,7 @@
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by Marin, Mike (FileNet Corporation) -->
 <!-- edited with XML Spy v4.0 U (http://www.xmlspy.com) by Robert M Shapiro (Cape Visions) -->
 <xsd:schema xmlns:xpdl="http://www.wfmc.org/2004/XPDL2.0alpha" xmlns:deprecated="http://www.wfmc.org/2002/XPDL1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.wfmc.org/2004/XPDL2.0alpha" elementFormDefault="qualified" attributeFormDefault="unqualified">
-	<xsd:import namespace="http://www.wfmc.org/2002/XPDL1.0" schemaLocation="http://www.wfmc.org/standards/docs/TC-1025_schema_10_xpdl.xsd"/>
+	<xsd:import namespace="http://www.wfmc.org/2002/XPDL1.0" schemaLocation="XPDL_1_0.xsd"/>
 	<xsd:element name="Activities">
 		<xsd:complexType>
 			<xsd:sequence>

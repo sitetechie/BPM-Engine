@@ -1,14 +1,14 @@
-
 package BPM::Engine::Store::Result::ProcessInstanceState;
 BEGIN {
     $BPM::Engine::Store::Result::ProcessInstanceState::VERSION   = '0.001';
     $BPM::Engine::Store::Result::ProcessInstanceState::AUTHORITY = 'cpan:SITETECH';
     }
 
+use namespace::autoclean;
 use Moose;
-
 extends qw/DBIx::Class Moose::Object/;
 with qw/Class::Workflow::Instance/;
+#use overload '""' => sub { shift->state }, fallback => 1;
 
 __PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfe_process_instance_journal');
@@ -55,12 +55,12 @@ __PACKAGE__->belongs_to(
     );
 
 __PACKAGE__->inflate_column('state', {
-    inflate => sub { 
-        my ($value, $self) = @_; 
-        return $self->process_instance->workflow->get_state($value); 
+    inflate => sub {
+        my ($value, $self) = @_;
+        return $self->process_instance->workflow->get_state($value);
         },
-    deflate => sub { 
-        shift->stringify 
+    deflate => sub {
+        shift->stringify
         },
     });
 
@@ -68,6 +68,8 @@ sub clone {
     my ( $self, @fields ) = @_;
     $self->copy({@fields});
     }
+
+__PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 
 1;
 __END__

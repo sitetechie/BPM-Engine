@@ -1,10 +1,11 @@
 
 use strict;
 use warnings;
-use lib './t/lib';
-use Test::More qw/no_plan/;
+use Test::More;
 use Test::Exception;
-
+use FindBin qw/$Bin/;
+use lib "$Bin/lib";
+use lib "$Bin/t/lib";
 use BPM::Engine::Types 'Exception';
 use BPM::Engine::Exceptions ':all'; # qw/throw_runner throw_model/;
 
@@ -51,7 +52,8 @@ eval { throw_expression error => "Expression evaluator error"; };
 $e = Exception::Class->caught();
 isa_ok($e, 'BPM::Engine::Exception::Expression');
 
-
 eval { $e->rethrow; };
 ok(is_Exception($@));
 isa_ok($@, 'BPM::Engine::Exception::Expression');
+
+done_testing;

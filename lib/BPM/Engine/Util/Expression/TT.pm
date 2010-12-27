@@ -1,4 +1,3 @@
-
 package BPM::Engine::Util::Expression::TT;
 BEGIN {
     $BPM::Engine::Util::Expression::TT::VERSION   = '0.001';
@@ -14,7 +13,7 @@ use BPM::Engine::Exceptions qw/throw_expression throw_abstract/;
 use namespace::autoclean -also => [qr/^_/];
 extends 'BPM::Engine::Util::Expression::Base';
 
-# list.contains(string) to assess membership of a scalar
+# list.contains(string) to assess membership for a scalar
 $Template::Stash::LIST_OPS->{contains} = sub {
     my $array = shift;
     my $item = shift;
@@ -33,7 +32,8 @@ my $TT = Template->new(
     POST_CHOMP  => 1,
     AUTO_RESET  => 1,
     EVAL_PERL   => 1,
-    ENCODING    => 'utf8') or die $Template::ERROR;
+    ENCODING    => 'utf8'
+    ) or die $Template::ERROR;
 
 sub parse {
     my ($self, $expr) = @_;
@@ -42,9 +42,10 @@ sub parse {
 
 sub evaluate {
     my ($self, $expr) = @_;
-
     return 0 unless $expr;
+
     my $boolean = $self->parse($expr) || 0; # tt returns undef
+    #warn "EVAL $expr - $boolean";       
     
     throw_expression("Condition evalutation did not result in a boolean") unless $boolean =~ /^\d$/;
     throw_expression("Condition evalutation did not result in a true boolean, but $boolean") unless ($boolean == 0 || $boolean == 1);

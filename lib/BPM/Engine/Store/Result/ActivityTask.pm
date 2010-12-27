@@ -1,13 +1,12 @@
-
 package BPM::Engine::Store::Result::ActivityTask;
 BEGIN {
     $BPM::Engine::Store::Result::ActivityTask::VERSION   = '0.001';
     $BPM::Engine::Store::Result::ActivityTask::AUTHORITY = 'cpan:SITETECH';
     }
 
+use namespace::autoclean;
 use Moose;
-extends qw(DBIx::Class Moose::Object);
-#with 'BPM::Engine::Store::ResultBase::ActivityTask';
+extends qw/DBIx::Class Moose::Object/;
 
 __PACKAGE__->load_components(qw/ InflateColumn::Serializer Core /);
 __PACKAGE__->table('wfd_activity_task');
@@ -76,7 +75,7 @@ __PACKAGE__->add_columns(
     );
 __PACKAGE__->set_primary_key(qw/ task_id /);
 
-__PACKAGE__->has_one(
+__PACKAGE__->belongs_to(
     activity => 'BPM::Engine::Store::Result::Activity', 'activity_id'
     );
 
@@ -84,5 +83,6 @@ __PACKAGE__->belongs_to( # might_have?
     application => 'BPM::Engine::Store::Result::Application', 'application_id'
     );
 
+__PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 1;
 __END__

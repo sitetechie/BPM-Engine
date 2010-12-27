@@ -1,4 +1,3 @@
-
 package BPM::Engine::Store::Result::ActivityPerformer;
 BEGIN {
     $BPM::Engine::Store::Result::ActivityPerformer::VERSION   = '0.001';
