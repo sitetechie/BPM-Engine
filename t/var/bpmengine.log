@@ -1,6 +1,0 @@
-[Mon Dec 27 05:15:20 2010] [notice] event triggered at  line 
-[Mon Dec 27 05:15:20 2010] [warning] event triggered at  line 
-[Mon Dec 27 05:15:20 2010] [warning] a warning at t/50-role-logger.t line 75
-[Mon Dec 27 05:15:20 2010] [error] an error at t/50-role-logger.t line 76
-[Mon Dec 27 05:15:20 2010] [warning] a warning at t/50-role-logger.t line 88
-[Mon Dec 27 05:15:20 2010] [error] an error at t/50-role-logger.t line 89
