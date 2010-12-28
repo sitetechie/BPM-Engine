@@ -1,20 +1,34 @@
 #!/usr/bin/env perl
 
+# Makes sure that all of the modules that are 'use'd are listed in the Makefile.PL as dependencies.
+
 use warnings;
 use strict;
+BEGIN {
+	$|  = 1;
+	$^W = 1;
+}
 
-=head1 DESCRIPTION
+my @MODULES = (
+	'Module::CoreList 2.42',
+);
 
-Makes sure that all of the modules that are 'use'd are listed in the
-Makefile.PL as dependencies.
-
-=cut
-
+# Don't run tests during end-user installs
 use Test::More;
 use File::Find;
-eval 'use Module::CoreList';
-if ($@) { plan skip_all => 'Module::CoreList not installed' }
-if (! -d 'inc/.author') { plan skip_all => 'These tests only run for module authors'}
+unless ( $ENV{AUTOMATED_TESTING} or $ENV{RELEASE_TESTING} ) {
+	plan( skip_all => "Author tests not required for installation" );
+}
+
+# Load the testing modules
+foreach my $MODULE ( @MODULES ) {
+	eval "use $MODULE";
+	if ( $@ ) {
+		$ENV{RELEASE_TESTING}
+		? die( "Failed to load required release-testing module $MODULE" )
+		: plan( skip_all => "$MODULE not available for testing" );
+	}
+}
 
 plan 'no_plan';
 
@@ -80,5 +94,3 @@ for ( sort keys %required ) {
 }
 
 1;
-
-
