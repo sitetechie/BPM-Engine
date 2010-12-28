@@ -71,7 +71,7 @@ BPM::Engine - Business process execution engine
   use BPM::Engine;
   
   my $callback = sub {
-        my($entity, $event, $node, $instance) = @_;
+        my($runner, $entity, $event, $node, $instance) = @_;
         ...
         };
   
