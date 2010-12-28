@@ -59,8 +59,8 @@ ok( my $logger = BPM::Engine::Logger->new({
     log_dispatch_conf => './t/etc/logger_file.conf'
     })  );
 
-ok(!$logger->notice("event triggered"));
-ok(!$logger->warning("event triggered"));
+##ok(!$logger->notice("event triggered"));
+##ok(!$logger->warning("event triggered"));
 
 ok($engine = BPM::Engine->new(
   logger       => $logger,
@@ -72,8 +72,8 @@ is($engine->log_dispatch_conf, '/etc/bpme_logger.conf');
 is($elogger->log_dispatch_conf, './t/etc/logger_file.conf');
 is($logger->log_dispatch_conf, './t/etc/logger_file.conf');
 
-ok(!$engine->warning('a warning'));
-ok(!$engine->error('an error'));
+##ok(!$engine->warning('a warning'));
+##ok(!$engine->error('an error'));
 
 # log_dispatch_conf in engine config
 
