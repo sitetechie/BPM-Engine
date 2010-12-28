@@ -9,7 +9,6 @@ use Pod::Usage;
 use Getopt::Long;
 
 use BPM::Engine::Store;
-#use Config::General;
 
 my ($help, $deploy, $ddl, $drop_tables) = (0, 0, 0, 0);
 
@@ -35,14 +34,13 @@ if ($ddl) {
     }
 elsif ($deploy) {
     $schema->deploy({ add_drop_table => $drop_tables });
-    #$schema->seed();
 
-    #-- copy as test db
+    # copy as test db
     unlink './t/lib/BPM/Engine/bpmengine.test.db' if -f './t/lib/BPM/Engine/bpmengine.test.db';
     die("Test db locked") if -f './t/lib/BPM/Engine/bpmengine.test.db';
     File::Copy::copy('./t/var/bpmengine.db', './t/lib/BPM/Engine/bpmengine.test.db');
 
-    print "Schema deployed and seeded\n";
+    print "Schema deployed as ./t/var/bpmengine.db\n";
     }
 else {
     pod2usage(1);
@@ -59,7 +57,7 @@ __END__
 
 =head1 NAME
 
-spawn_db - Spawn a database with BPM-Engine tables and seed data
+spawn_db - Spawn a sqlite database with BPM-Engine tables
 
 =head1 SYNOPSIS
 
@@ -67,8 +65,8 @@ spawn_db [options]
 
  Options:
    -? -help           display this help and exits
-   -ddl               create DDL files
-   -deploy            deploy tables into existing database
+   -ddl               create DDL files in ./var
+   -deploy            deploy tables into new or existing database at ./t/var/bpmengine.db
      -drop            drop existing database/tables when deploying
 
  See also:
@@ -81,7 +79,7 @@ Examples:
 
 =head1 DESCRIPTION
 
-Spawn a database with BPM::Engine tables and seed data
+Spawn a sqlite database with BPM::Engine tables
 
 =head1 AUTHOR
 

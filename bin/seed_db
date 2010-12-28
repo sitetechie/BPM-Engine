@@ -45,7 +45,7 @@ Example:
 
 =head1 DESCRIPTION
 
-Seed a database with workflow processes from XPDL files
+Seed a new or existing database (./t/var/bpmengine.db) with workflow processes from XPDL files
 
 =head1 AUTHOR
 
