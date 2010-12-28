@@ -1,11 +1,3 @@
-use FindBin;
-BEGIN {
-    my $env = "$FindBin::Bin/bin/env";
-    if (-r $env) {
-        do $env or die $@;
-    }
-}
-
 use strict;
 use warnings;
 
