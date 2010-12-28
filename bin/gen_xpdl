@@ -81,7 +81,6 @@ $tt->process(
 
 print "XPDL files generated in ./t/var\n";
 
-
 1;
 __END__
 
