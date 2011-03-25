@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Package xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:deprecated="http://www.wfmc.org/2004/XPDL2.0alpha http://www.wfmc.org/2002/XPDL1.0" xmlns:sitecorp="http://schemas.sitecorporation.com/bpm" xmlns:tns="http://schemas.xmlsoap.org/tns/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xdt="http://www.w3.org/2004/07/xpath-datatypes" xmlns:fn="http://www.w3.org/2004/07/xpath-functions" xmlns:xs="http://www.w3.org/2001/XMLSchema" Id="02-branching.xpdl" Name="Advanced Branching and Synchronization Patterns">
+<Package xmlns="http://www.wfmc.org/2008/XPDL2.1"
+  xmlns:deprecated="http://www.wfmc.org/2004/XPDL2.0alpha"
+  xmlns:sitecorp="http://schemas.sitecorporation.com/bpm"
+  xmlns:tns="http://schemas.xmlsoap.org/tns/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xdt="http://www.w3.org/2004/07/xpath-datatypes"
+  xmlns:fn="http://www.w3.org/2004/07/xpath-functions"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" Id="02-branching.xpdl" Name="Advanced Branching and Synchronization Patterns">
     <PackageHeader>
         <XPDLVersion>2.1</XPDLVersion>
         <Vendor>BPM::Engine</Vendor>
@@ -99,10 +108,10 @@
             <Transitions>
                 <Transition Id="wcp6.A-GW1" Name="Transition" From="wcp6.A"   To="wcp6.GW1"/>
                 <Transition Id="wcp6.GW1-B" Name="Transition" From="wcp6.GW1" To="wcp6.B">
-                    <Condition Type="CONDITION">attributes.do_B</Condition>
+                    <Condition Type="CONDITION">attribute('do_B')</Condition>
                 </Transition>
                 <Transition Id="wcp6.GW1-C" Name="Transition" From="wcp6.GW1" To="wcp6.C">
-                    <Condition Type="CONDITION">attributes.do_C</Condition>
+                    <Condition Type="CONDITION">attribute('do_C')</Condition>
                 </Transition>
                 <Transition Id="wcp6.GW1-D" Name="Transition" From="wcp6.GW1" To="wcp6.D">
                     <Condition Type="OTHERWISE"/>
@@ -128,13 +137,13 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>common data</InitialValue>
+                    <InitialValue>'common data'</InitialValue>
                 </DataField>
                 <DataField Id="sbflw1data" IsArray="0">
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>sbflw1 data</InitialValue>
+                    <InitialValue>'sbflw1 data'</InitialValue>
                 </DataField>
             </DataFields>
             <Activities>
@@ -198,13 +207,13 @@
             <Transitions>
                 <Transition Id="wcp8.Start-A" From="wcp8.Start" To="wcp8.A"/>
                 <Transition Id="wcp8.A-B" From="wcp8.A" To="wcp8.B">
-                    <Condition Type="CONDITION">attributes.WhereToGo.search('B')</Condition>
+                    <Condition Type="CONDITION">attribute('WhereToGo').search('B')</Condition>
                 </Transition>
                 <Transition Id="wcp8.A-C" From="wcp8.A" To="wcp8.C">
-                    <Condition Type="CONDITION">attributes.WhereToGo.search('C')</Condition>
+                    <Condition Type="CONDITION">attribute('WhereToGo').search('C')</Condition>
                 </Transition>
                 <Transition Id="wcp8.A-D" From="wcp8.A" To="wcp8.D">
-                    <Condition Type="CONDITION">attributes.WhereToGo.search('D')</Condition>
+                    <Condition Type="CONDITION">attribute('WhereToGo').search('D')</Condition>
                 </Transition>
                 <Transition Id="wcp8.B-E" From="wcp8.B" To="wcp8.E"/>
                 <Transition Id="wcp8.C-E" From="wcp8.C" To="wcp8.E"/>
@@ -305,16 +314,16 @@
                     <Condition Type="OTHERWISE"/>
                 </Transition>
                 <Transition Id="wcp37.MC-B" From="wcp37.MC" To="wcp37.B">
-                    <Condition Type="CONDITION">attributes.multi_choice.search('B')</Condition>                
+                    <Condition Type="CONDITION">attribute('multi_choice').search('B')</Condition>                
                 </Transition>
                 <Transition Id="wcp37.MC-C" From="wcp37.MC" To="wcp37.C">
-                    <Condition Type="CONDITION">attributes.multi_choice.search('C')</Condition>                
+                    <Condition Type="CONDITION">attribute('multi_choice').search('C')</Condition>                
                 </Transition>
                 <Transition Id="wcp37.A-SM" From="wcp37.A" To="wcp37.SM"/>
                 <Transition Id="wcp37.B-SM" From="wcp37.B" To="wcp37.SM"/>
                 <Transition Id="wcp37.C-DC" From="wcp37.C" To="wcp37.DC"/>
                 <Transition Id="wcp37.DC-D" From="wcp37.DC" To="wcp37.D">
-                    <Condition Type="CONDITION">attributes.deferred_choice.search('D')</Condition>                
+                    <Condition Type="CONDITION">attribute('deferred_choice').search('D')</Condition>                
                 </Transition>
                 <Transition Id="wcp37.DC-E" From="wcp37.DC" To="wcp37.E">
                     <Condition Type="OTHERWISE"/>                
@@ -428,20 +437,20 @@
                     <Condition Type="OTHERWISE"/>
                 </Transition>
                 <Transition Id="wcp38.MC-B" From="wcp38.MC" To="wcp38.B">
-                    <Condition Type="CONDITION">attributes.multi_choice.search('B')</Condition>                
+                    <Condition Type="CONDITION">attribute('multi_choice').search('B')</Condition>                
                 </Transition>
                 <Transition Id="wcp38.MC-XOR" From="wcp38.MC" To="wcp38.XOR">
-                    <Condition Type="CONDITION">attributes.multi_choice.search('XOR')</Condition>                
+                    <Condition Type="CONDITION">attribute('multi_choice').search('XOR')</Condition>                
                 </Transition>
                 <Transition Id="wcp38.XOR-C" From="wcp38.XOR" To="wcp38.C"/>
                 <Transition Id="wcp38.A-SM" From="wcp38.A" To="wcp38.SM"/>
                 <Transition Id="wcp38.B-SM" From="wcp38.B" To="wcp38.SM"/>
                 <Transition Id="wcp38.C-DC" From="wcp38.C" To="wcp38.DC"/>
                 <Transition Id="wcp38.DC-D" From="wcp38.DC" To="wcp38.D">
-                    <Condition Type="CONDITION">attributes.deferred_choice.search('D')</Condition>                
+                    <Condition Type="CONDITION">attribute('deferred_choice').search('D')</Condition>                
                 </Transition>
                 <Transition Id="wcp38.DC-E" From="wcp38.DC" To="wcp38.E">
-                    <Condition Type="CONDITION">attributes.deferred_choice.search('E')</Condition>                
+                    <Condition Type="CONDITION">attribute('deferred_choice').search('E')</Condition>                
                 </Transition>
                 <Transition Id="wcp38.DC-XOR" From="wcp38.DC" To="wcp38.XOR">
                     <Condition Type="OTHERWISE"/>

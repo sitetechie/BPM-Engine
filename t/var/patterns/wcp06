@@ -75,10 +75,10 @@
             <Transitions>
                 <Transition Id="A-GW1" Name="Transition" From="A"   To="GW1"/>
                 <Transition Id="GW1-B" Name="Transition" From="GW1" To="B">
-                    <Condition Type="CONDITION">attributes.do_B</Condition>
+                    <Condition Type="CONDITION">attribute('do_B')</Condition>
                 </Transition>
                 <Transition Id="GW1-C" Name="Transition" From="GW1" To="C">
-                    <Condition Type="CONDITION">attributes.do_C</Condition>
+                    <Condition Type="CONDITION">attribute('do_C')</Condition>
                 </Transition>
                 <Transition Id="GW1-D" Name="Transition" From="GW1" To="D">
                     <Condition Type="OTHERWISE"/>

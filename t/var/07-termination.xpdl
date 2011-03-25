@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Package xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:deprecated="http://www.wfmc.org/2004/XPDL2.0alpha http://www.wfmc.org/2002/XPDL1.0" xmlns:sitecorp="http://schemas.sitecorporation.com/bpm" xmlns:tns="http://schemas.xmlsoap.org/tns/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xdt="http://www.w3.org/2004/07/xpath-datatypes" xmlns:fn="http://www.w3.org/2004/07/xpath-functions" xmlns:xs="http://www.w3.org/2001/XMLSchema" Id="07-termination.xpdl" Name="Termination Patterns">
+<Package xmlns="http://www.wfmc.org/2008/XPDL2.1"
+  xmlns:deprecated="http://www.wfmc.org/2004/XPDL2.0alpha"
+  xmlns:sitecorp="http://schemas.sitecorporation.com/bpm"
+  xmlns:tns="http://schemas.xmlsoap.org/tns/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xdt="http://www.w3.org/2004/07/xpath-datatypes"
+  xmlns:fn="http://www.w3.org/2004/07/xpath-functions"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" Id="07-termination.xpdl" Name="Termination Patterns">
     <PackageHeader>
         <XPDLVersion>2.1</XPDLVersion>
         <Vendor>BPM::Engine</Vendor>

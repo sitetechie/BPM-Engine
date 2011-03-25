@@ -89,16 +89,16 @@
                     <Condition Type="OTHERWISE"/>
                 </Transition>
                 <Transition Id="MC-B" From="MC" To="B">
-                    <Condition Type="CONDITION">attributes.multi_choice.search('B')</Condition>                
+                    <Condition Type="CONDITION">attribute('multi_choice').search('B')</Condition>                
                 </Transition>
                 <Transition Id="MC-C" From="MC" To="C">
-                    <Condition Type="CONDITION">attributes.multi_choice.search('C')</Condition>                
+                    <Condition Type="CONDITION">attribute('multi_choice').search('C')</Condition>                
                 </Transition>
                 <Transition Id="A-SM" From="A" To="SM"/>
                 <Transition Id="B-SM" From="B" To="SM"/>
                 <Transition Id="C-DC" From="C" To="DC"/>
                 <Transition Id="DC-D" From="DC" To="D">
-                    <Condition Type="CONDITION">attributes.deferred_choice.search('D')</Condition>                
+                    <Condition Type="CONDITION">attribute('deferred_choice').search('D')</Condition>                
                 </Transition>
                 <Transition Id="DC-E" From="DC" To="E">
                     <Condition Type="OTHERWISE"/>                

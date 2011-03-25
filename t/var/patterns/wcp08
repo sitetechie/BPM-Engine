@@ -11,13 +11,13 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>common data</InitialValue>
+                    <InitialValue>'common data'</InitialValue>
                 </DataField>
                 <DataField Id="sbflw1data" IsArray="0">
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>sbflw1 data</InitialValue>
+                    <InitialValue>'sbflw1 data'</InitialValue>
                 </DataField>
             </DataFields>
             <Activities>
@@ -81,13 +81,13 @@
             <Transitions>
                 <Transition Id="Start-A" From="Start" To="A"/>
                 <Transition Id="A-B" From="A" To="B">
-                    <Condition Type="CONDITION">attributes.WhereToGo.search('B')</Condition>
+                    <Condition Type="CONDITION">attribute('WhereToGo').search('B')</Condition>
                 </Transition>
                 <Transition Id="A-C" From="A" To="C">
-                    <Condition Type="CONDITION">attributes.WhereToGo.search('C')</Condition>
+                    <Condition Type="CONDITION">attribute('WhereToGo').search('C')</Condition>
                 </Transition>
                 <Transition Id="A-D" From="A" To="D">
-                    <Condition Type="CONDITION">attributes.WhereToGo.search('D')</Condition>
+                    <Condition Type="CONDITION">attribute('WhereToGo').search('D')</Condition>
                 </Transition>
                 <Transition Id="B-E" From="B" To="E"/>
                 <Transition Id="C-E" From="C" To="E"/>

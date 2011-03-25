@@ -57,10 +57,10 @@
             </Activities>
             <Transitions>
                 <Transition Id="A-B" Name="Transition" From="A" To="B">
-                    <Condition Type="CONDITION">attributes.WhereToGo == "B"</Condition>
+                    <Condition Type="CONDITION">attribute('WhereToGo') == "B"</Condition>
                 </Transition>
                 <Transition Id="A-C" Name="Transition" From="A" To="C">
-                    <Condition Type="CONDITION">attributes.WhereToGo == "C"</Condition>
+                    <Condition Type="CONDITION">attribute('WhereToGo') == "C"</Condition>
                 </Transition>
                 <Transition Id="A-D" Name="Transition" From="A" To="D">
                     <Condition Type="OTHERWISE"/>

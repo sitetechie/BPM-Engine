@@ -50,7 +50,7 @@
                 <Transition Id="Start-A" From="Start" To="A"/>
                 <Transition Id="A-B" From="A" To="B"/>
                 <Transition Id="B-C" From="B" To="C">
-                    <Condition Type="CONDITION">attributes.cycle > 0</Condition>
+                    <Condition Type="CONDITION">attribute('cycle') > 0</Condition>
                 </Transition>
                 <Transition Id="B-End" From="B" To="End">
                     <Condition Type="OTHERWISE"/>

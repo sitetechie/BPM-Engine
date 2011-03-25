@@ -88,7 +88,7 @@
             </Activities>
             <Transitions>
                 <Transition Id="Start-A" From="Start" To="A" Name="">
-                    <Condition Type="CONDITION">attributes.data_ok</Condition>
+                    <Condition Type="CONDITION">attribute('data_ok')</Condition>
                 </Transition>
                 <Transition Id="Start-End" From="Start" To="End" Name="">
                     <Condition Type="OTHERWISE"/>

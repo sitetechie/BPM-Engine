@@ -29,7 +29,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>Mona Lisa</InitialValue>
+                    <InitialValue>'Mona Lisa'</InitialValue>
                 </DataField>
             </DataFields>            
             <Activities>

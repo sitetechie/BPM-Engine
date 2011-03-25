@@ -17,7 +17,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>C</InitialValue>
+                    <InitialValue>'C'</InitialValue>
                 </FormalParameter>
                 <FormalParameter Id="pathtaken" Mode="OUT">
                     <DataType>

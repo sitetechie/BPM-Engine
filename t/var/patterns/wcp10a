@@ -91,12 +91,12 @@
                 <Transition Id="Join2-C" Name="Transition" From="Join2" To="C"/>
                 <Transition Id="C-Split1" Name="Transition" From="C" To="Split1"/>
                 <Transition Id="Split1-Join1" Name="Transition" From="Split1" To="Join1">
-                    <Condition Type="CONDITION">attributes.repeatBC</Condition>
+                    <Condition Type="CONDITION">attribute('repeatBC')</Condition>
                 </Transition>
                 <Transition Id="Split1-D" Name="Transition" From="Split1" To="D"/>
                 <Transition Id="D-Split2" Name="Transition" From="D" To="Split2"/>
                 <Transition Id="Split2-Join2" Name="Transition" From="Split2" To="Join2">
-                    <Condition Type="CONDITION">attributes.repeatCD</Condition>
+                    <Condition Type="CONDITION">attribute('repeatCD')</Condition>
                 </Transition>
                 <Transition Id="Split2-E" Name="Transition" From="Split2" To="E"/>
             </Transitions>
@@ -166,11 +166,11 @@
                 <Transition Id="Start-Join" Name="Transition" From="Start" To="Join"/>
                 <Transition Id="Join-JoinSplit" Name="Transition" From="Join" To="JoinSplit"/>
                 <Transition Id="JoinSplit-Join" Name="Transition" From="JoinSplit" To="Join">
-                    <Condition Type="CONDITION">attributes.repeat1</Condition>
+                    <Condition Type="CONDITION">attribute('repeat1')</Condition>
                 </Transition>
                 <Transition Id="JoinSplit-Split" Name="Transition" From="JoinSplit" To="Split"/>
                 <Transition Id="Split-JoinSplit" Name="Transition" From="Split" To="JoinSplit">
-                    <Condition Type="CONDITION">attributes.repeat2</Condition>
+                    <Condition Type="CONDITION">attribute('repeat2')</Condition>
                 </Transition>
                 <Transition Id="Split-End" Name="Transition" From="Split" To="End"/>
             </Transitions>

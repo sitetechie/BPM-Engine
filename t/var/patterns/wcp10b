@@ -157,13 +157,13 @@
                 <Transition Id="A-XOR-Join-B-OR-Join" From="A-XOR-Join" To="B-OR-Join"/>
                 <Transition Id="B-OR-Join-C-OR-Split" From="B-OR-Join" To="C-OR-Split"/>
                 <Transition Id="C-OR-Split-B-OR-Join" From="C-OR-Split" To="B-OR-Join">
-                    <Condition Type="CONDITION">attributes.inner_loop > 0</Condition>                
+                    <Condition Type="CONDITION">attribute('inner_loop') > 0</Condition>                
                 </Transition>
                 <Transition Id="C-OR-Split-D-XOR-Split" From="C-OR-Split" To="D-XOR-Split">
                     <Condition Type="CONDITION">1</Condition>
                 </Transition>
                 <Transition Id="D-XOR-Split-A-XOR-Join" From="D-XOR-Split" To="A-XOR-Join">
-                    <Condition Type="CONDITION">attributes.outer_loop > 0</Condition>                
+                    <Condition Type="CONDITION">attribute('outer_loop') > 0</Condition>                
                 </Transition>
                 <Transition Id="D-XOR-Split-End" From="D-XOR-Split" To="End">
                     <Condition Type="OTHERWISE"/>

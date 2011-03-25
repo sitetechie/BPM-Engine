@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Package xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:deprecated="http://www.wfmc.org/2004/XPDL2.0alpha http://www.wfmc.org/2002/XPDL1.0" xmlns:sitecorp="http://schemas.sitecorporation.com/bpm" xmlns:tns="http://schemas.xmlsoap.org/tns/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xdt="http://www.w3.org/2004/07/xpath-datatypes" xmlns:fn="http://www.w3.org/2004/07/xpath-functions" xmlns:xs="http://www.w3.org/2001/XMLSchema" Id="06-iteration.xpdl" Name="Iteration Patterns">
+<Package xmlns="http://www.wfmc.org/2008/XPDL2.1"
+  xmlns:deprecated="http://www.wfmc.org/2004/XPDL2.0alpha"
+  xmlns:sitecorp="http://schemas.sitecorporation.com/bpm"
+  xmlns:tns="http://schemas.xmlsoap.org/tns/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xdt="http://www.w3.org/2004/07/xpath-datatypes"
+  xmlns:fn="http://www.w3.org/2004/07/xpath-functions"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" Id="06-iteration.xpdl" Name="Iteration Patterns">
     <PackageHeader>
         <XPDLVersion>2.1</XPDLVersion>
         <Vendor>BPM::Engine</Vendor>
@@ -74,7 +83,7 @@
                 <Transition Id="wcp21a.Start-A" From="wcp21a.Start" To="wcp21a.A"/>
                 <Transition Id="wcp21a.A-B" From="wcp21a.A" To="wcp21a.B"/>
                 <Transition Id="wcp21a.B-C" From="wcp21a.B" To="wcp21a.C">
-                    <Condition Type="CONDITION">attributes.cycle > 0</Condition>
+                    <Condition Type="CONDITION">attribute('cycle') > 0</Condition>
                 </Transition>
                 <Transition Id="wcp21a.B-End" From="wcp21a.B" To="wcp21a.End">
                     <Condition Type="OTHERWISE"/>
@@ -135,7 +144,7 @@
                 <Transition Id="wcp21b.A-B" From="wcp21b.A" To="wcp21b.B"/>
                 <Transition Id="wcp21b.B-C" From="wcp21b.B" To="wcp21b.C"/>
                 <Transition Id="wcp21b.C-A" From="wcp21b.C" To="wcp21b.A">
-                    <Condition Type="CONDITION">attributes.cycle > 0</Condition>
+                    <Condition Type="CONDITION">attribute('cycle') > 0</Condition>
                 </Transition>
                 <Transition Id="wcp21b.C-D" From="wcp21b.C" To="wcp21b.D">
                     <Condition Type="OTHERWISE"/>
@@ -237,12 +246,12 @@
                 <Transition Id="wcp10a.Join2-C" Name="Transition" From="wcp10a.Join2" To="wcp10a.C"/>
                 <Transition Id="wcp10a.C-Split1" Name="Transition" From="wcp10a.C" To="wcp10a.Split1"/>
                 <Transition Id="wcp10a.Split1-Join1" Name="Transition" From="wcp10a.Split1" To="wcp10a.Join1">
-                    <Condition Type="CONDITION">attributes.repeatBC</Condition>
+                    <Condition Type="CONDITION">attribute('repeatBC')</Condition>
                 </Transition>
                 <Transition Id="wcp10a.Split1-D" Name="Transition" From="wcp10a.Split1" To="wcp10a.D"/>
                 <Transition Id="wcp10a.D-Split2" Name="Transition" From="wcp10a.D" To="wcp10a.Split2"/>
                 <Transition Id="wcp10a.Split2-Join2" Name="Transition" From="wcp10a.Split2" To="wcp10a.Join2">
-                    <Condition Type="CONDITION">attributes.repeatCD</Condition>
+                    <Condition Type="CONDITION">attribute('repeatCD')</Condition>
                 </Transition>
                 <Transition Id="wcp10a.Split2-E" Name="Transition" From="wcp10a.Split2" To="wcp10a.E"/>
             </Transitions>
@@ -312,11 +321,11 @@
                 <Transition Id="wcp10a.Start-Join" Name="Transition" From="wcp10a.Start" To="wcp10a.Join"/>
                 <Transition Id="wcp10a.Join-JoinSplit" Name="Transition" From="wcp10a.Join" To="wcp10a.JoinSplit"/>
                 <Transition Id="wcp10a.JoinSplit-Join" Name="Transition" From="wcp10a.JoinSplit" To="wcp10a.Join">
-                    <Condition Type="CONDITION">attributes.repeat1</Condition>
+                    <Condition Type="CONDITION">attribute('repeat1')</Condition>
                 </Transition>
                 <Transition Id="wcp10a.JoinSplit-Split" Name="Transition" From="wcp10a.JoinSplit" To="wcp10a.Split"/>
                 <Transition Id="wcp10a.Split-JoinSplit" Name="Transition" From="wcp10a.Split" To="wcp10a.JoinSplit">
-                    <Condition Type="CONDITION">attributes.repeat2</Condition>
+                    <Condition Type="CONDITION">attribute('repeat2')</Condition>
                 </Transition>
                 <Transition Id="wcp10a.Split-End" Name="Transition" From="wcp10a.Split" To="wcp10a.End"/>
             </Transitions>
@@ -482,13 +491,13 @@
                 <Transition Id="wcp10b.A-XOR-Join-B-OR-Join" From="wcp10b.A-XOR-Join" To="wcp10b.B-OR-Join"/>
                 <Transition Id="wcp10b.B-OR-Join-C-OR-Split" From="wcp10b.B-OR-Join" To="wcp10b.C-OR-Split"/>
                 <Transition Id="wcp10b.C-OR-Split-B-OR-Join" From="wcp10b.C-OR-Split" To="wcp10b.B-OR-Join">
-                    <Condition Type="CONDITION">attributes.inner_loop > 0</Condition>                
+                    <Condition Type="CONDITION">attribute('inner_loop') > 0</Condition>                
                 </Transition>
                 <Transition Id="wcp10b.C-OR-Split-D-XOR-Split" From="wcp10b.C-OR-Split" To="wcp10b.D-XOR-Split">
                     <Condition Type="CONDITION">1</Condition>
                 </Transition>
                 <Transition Id="wcp10b.D-XOR-Split-A-XOR-Join" From="wcp10b.D-XOR-Split" To="wcp10b.A-XOR-Join">
-                    <Condition Type="CONDITION">attributes.outer_loop > 0</Condition>                
+                    <Condition Type="CONDITION">attribute('outer_loop') > 0</Condition>                
                 </Transition>
                 <Transition Id="wcp10b.D-XOR-Split-End" From="wcp10b.D-XOR-Split" To="wcp10b.End">
                     <Condition Type="OTHERWISE"/>

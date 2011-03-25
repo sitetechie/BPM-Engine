@@ -100,20 +100,20 @@
                     <Condition Type="OTHERWISE"/>
                 </Transition>
                 <Transition Id="MC-B" From="MC" To="B">
-                    <Condition Type="CONDITION">attributes.multi_choice.search('B')</Condition>                
+                    <Condition Type="CONDITION">attribute('multi_choice').search('B')</Condition>                
                 </Transition>
                 <Transition Id="MC-XOR" From="MC" To="XOR">
-                    <Condition Type="CONDITION">attributes.multi_choice.search('XOR')</Condition>                
+                    <Condition Type="CONDITION">attribute('multi_choice').search('XOR')</Condition>                
                 </Transition>
                 <Transition Id="XOR-C" From="XOR" To="C"/>
                 <Transition Id="A-SM" From="A" To="SM"/>
                 <Transition Id="B-SM" From="B" To="SM"/>
                 <Transition Id="C-DC" From="C" To="DC"/>
                 <Transition Id="DC-D" From="DC" To="D">
-                    <Condition Type="CONDITION">attributes.deferred_choice.search('D')</Condition>                
+                    <Condition Type="CONDITION">attribute('deferred_choice').search('D')</Condition>                
                 </Transition>
                 <Transition Id="DC-E" From="DC" To="E">
-                    <Condition Type="CONDITION">attributes.deferred_choice.search('E')</Condition>                
+                    <Condition Type="CONDITION">attribute('deferred_choice').search('E')</Condition>                
                 </Transition>
                 <Transition Id="DC-XOR" From="DC" To="XOR">
                     <Condition Type="OTHERWISE"/>

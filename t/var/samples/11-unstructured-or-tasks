@@ -17,7 +17,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>C</InitialValue>
+                    <InitialValue>'C'</InitialValue>
                 </FormalParameter>
                 <FormalParameter Id="pathtaken" Mode="OUT">
                     <DataType>
@@ -95,16 +95,16 @@
             </Activities>
             <Transitions>
                 <Transition Id="A-B1" From="A" To="B1">
-                    <Condition Type="CONDITION">!attributes.splitA || attributes.splitA == 'B1'</Condition>
+                    <Condition Type="CONDITION">!attribute('splitA') || attribute('splitA') == 'B1'</Condition>
                 </Transition>
                 <Transition Id="A-B" From="A" To="B">
-                    <Condition Type="CONDITION">!attributes.splitA || attributes.splitA == 'B'</Condition>
+                    <Condition Type="CONDITION">!attribute('splitA') || attribute('splitA') == 'B'</Condition>
                 </Transition>
                 <Transition Id="B-B1" From="B" To="B1">
-                    <Condition Type="CONDITION"><Expression>!attributes.splitB OR attributes.splitB.search('B1')</Expression></Condition>
+                    <Condition Type="CONDITION"><Expression>!attribute('splitB') OR attribute('splitB').search('B1')</Expression></Condition>
                 </Transition>
                 <Transition Id="B-C" From="B" To="C">
-                    <Condition Type="CONDITION"><Expression>!attributes.splitB OR attributes.splitB.search('C')</Expression></Condition>
+                    <Condition Type="CONDITION"><Expression>!attribute('splitB') OR attribute('splitB').search('C')</Expression></Condition>
                 </Transition>
                 <Transition Id="B1-B2" From="B1" To="B2"/>
                 <Transition Id="B2-C" From="B2" To="C">

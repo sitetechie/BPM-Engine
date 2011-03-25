@@ -17,7 +17,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>C</InitialValue>
+                    <InitialValue>'C'</InitialValue>
                 </FormalParameter>
                 <FormalParameter Id="pathtaken" Mode="OUT">
                     <DataType>
@@ -98,10 +98,10 @@
                 <Transition Id="Configure-Test1" From="Configure" To="Test1"/>
                 <Transition Id="Test1-Split1" From="Test1" To="Split1"/>
                 <Transition Id="Split1-Join1" From="Split1" To="Join1">
-                    <Condition Type="CONDITION">!attributes.test1_ok</Condition>
+                    <Condition Type="CONDITION">!attribute('test1_ok')</Condition>
                 </Transition>
                 <Transition Id="Split1-Test2" From="Split1" To="Test2">
-                    <Condition Type="CONDITION">attributes.run_test2</Condition>
+                    <Condition Type="CONDITION">attribute('run_test2')</Condition>
                 </Transition>
                 <Transition Id="Split1-Join2" From="Split1" To="Join2">
                     <Condition Type="OTHERWISE"/>
@@ -111,7 +111,7 @@
                     <Condition Type="OTHERWISE"/>
                 </Transition>
                 <Transition Id="Split2-Join2" From="Split2" To="Join2">
-                    <Condition Type="CONDITION">attributes.test2_ok</Condition>
+                    <Condition Type="CONDITION">attribute('test2_ok')</Condition>
                 </Transition>
                 <Transition Id="Join2-Package" From="Join2" To="Package"/>
                 <Transition Id="Package-End" From="Package" To="End"/>

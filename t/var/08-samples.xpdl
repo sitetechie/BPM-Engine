@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Package xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:deprecated="http://www.wfmc.org/2004/XPDL2.0alpha http://www.wfmc.org/2002/XPDL1.0" xmlns:sitecorp="http://schemas.sitecorporation.com/bpm" xmlns:tns="http://schemas.xmlsoap.org/tns/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xdt="http://www.w3.org/2004/07/xpath-datatypes" xmlns:fn="http://www.w3.org/2004/07/xpath-functions" xmlns:xs="http://www.w3.org/2001/XMLSchema" Id="samples" Name="Samples">
+<Package xmlns="http://www.wfmc.org/2008/XPDL2.1" Id="samples" Name="Samples">
     <PackageHeader>
         <XPDLVersion>2.1</XPDLVersion>
         <Vendor>BPM::Engine</Vendor>
@@ -39,7 +39,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>Mona Lisa</InitialValue>
+                    <InitialValue>'Mona Lisa'</InitialValue>
                 </DataField>
             </DataFields>            
             <Activities>
@@ -138,7 +138,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>Mona Lisa</InitialValue>
+                    <InitialValue>'Mona Lisa'</InitialValue>
                 </DataField>
             </DataFields>            
             <Activities>
@@ -313,7 +313,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>C</InitialValue>
+                    <InitialValue>'C'</InitialValue>
                 </FormalParameter>
                 <FormalParameter Id="pathtaken" Mode="OUT">
                     <DataType>
@@ -391,16 +391,16 @@
             </Activities>
             <Transitions>
                 <Transition Id="ex4.A-B1" From="ex4.A" To="ex4.B1">
-                    <Condition Type="CONDITION">!attributes.splitA || attributes.splitA == 'B1'</Condition>
+                    <Condition Type="CONDITION">!attribute('splitA') || attribute('splitA') == 'B1'</Condition>
                 </Transition>
                 <Transition Id="ex4.A-B" From="ex4.A" To="ex4.B">
-                    <Condition Type="CONDITION">!attributes.splitA || attributes.splitA == 'B'</Condition>
+                    <Condition Type="CONDITION">!attribute('splitA') || attribute('splitA') == 'B'</Condition>
                 </Transition>
                 <Transition Id="ex4.B-B1" From="ex4.B" To="ex4.B1">
-                    <Condition Type="CONDITION"><Expression>!attributes.splitB OR attributes.splitB.search('B1')</Expression></Condition>
+                    <Condition Type="CONDITION"><Expression>!attribute('splitB') OR attribute('splitB').search('B1')</Expression></Condition>
                 </Transition>
                 <Transition Id="ex4.B-C" From="ex4.B" To="ex4.C">
-                    <Condition Type="CONDITION"><Expression>!attributes.splitB OR attributes.splitB.search('C')</Expression></Condition>
+                    <Condition Type="CONDITION"><Expression>!attribute('splitB') OR attribute('splitB').search('C')</Expression></Condition>
                 </Transition>
                 <Transition Id="ex4.B1-B2" From="ex4.B1" To="ex4.B2"/>
                 <Transition Id="ex4.B2-C" From="ex4.B2" To="ex4.C">
@@ -427,7 +427,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>D</InitialValue>
+                    <InitialValue>'D'</InitialValue>
                 </FormalParameter>
                 <FormalParameter Id="pathtaken" Mode="OUT">
                     <DataType>
@@ -440,13 +440,13 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>B</InitialValue>
+                    <InitialValue>'B'</InitialValue>
                 </DataField>
                 <DataField Id="splitB">
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>D</InitialValue>
+                    <InitialValue>'D'</InitialValue>
                 </DataField>
             </DataFields>            
             <Activities>
@@ -517,25 +517,25 @@
             </Activities>
             <Transitions>
                 <Transition Id="ex5.A-B" From="ex5.A" To="ex5.B">
-                    <Condition Type="CONDITION">!attributes.splitA || attributes.splitA == 'B'</Condition>
+                    <Condition Type="CONDITION">!attribute('splitA') || attribute('splitA') == 'B'</Condition>
                 </Transition>
                 <Transition Id="ex5.A-C" From="ex5.A" To="ex5.C">
-                    <Condition Type="CONDITION">!attributes.splitA OR attributes.splitA == 'C'</Condition>
+                    <Condition Type="CONDITION">!attribute('splitA') OR attribute('splitA') == 'C'</Condition>
                 </Transition>
                 <Transition Id="ex5.B-D" From="ex5.B" To="ex5.D">
-                    <Condition Type="CONDITION"><Expression>!attributes.splitB OR attributes.splitB.search('D')</Expression></Condition>
+                    <Condition Type="CONDITION"><Expression>!attribute('splitB') OR attribute('splitB').search('D')</Expression></Condition>
                 </Transition>
                 <Transition Id="ex5.B-F" From="ex5.B" To="ex5.F">
-                    <Condition Type="CONDITION">!attributes.splitB OR attributes.splitB == 'C'</Condition>
+                    <Condition Type="CONDITION">!attribute('splitB') OR attribute('splitB') == 'C'</Condition>
                 </Transition>
                 <Transition Id="ex5.C-D" From="ex5.C" To="ex5.D">
-                    <Condition Type="CONDITION">!attributes.splitC OR attributes.splitC.search('D')</Condition>
+                    <Condition Type="CONDITION">!attribute('splitC') OR attribute('splitC').search('D')</Condition>
                 </Transition>
                 <Transition Id="ex5.C-E" From="ex5.C" To="ex5.E">
-                    <Condition Type="CONDITION">!attributes.splitC OR attributes.splitC.search('E')</Condition>
+                    <Condition Type="CONDITION">!attribute('splitC') OR attribute('splitC').search('E')</Condition>
                 </Transition>
                 <Transition Id="ex5.C-F" From="ex5.C" To="ex5.F">
-                    <Condition Type="CONDITION">!attributes.splitC OR attributes.splitC.search('F')</Condition>
+                    <Condition Type="CONDITION">!attribute('splitC') OR attribute('splitC').search('F')</Condition>
                 </Transition>
                 <Transition Id="ex5.D-E" From="ex5.D" To="ex5.E"/>
                 <Transition Id="ex5.E-F" From="ex5.E" To="ex5.F"/>
@@ -634,7 +634,7 @@
             </Activities>
             <Transitions>
                 <Transition Id="ex6.Start-A" From="ex6.Start" To="ex6.A" Name="">
-                    <Condition Type="CONDITION">attributes.data_ok</Condition>
+                    <Condition Type="CONDITION">attribute('data_ok')</Condition>
                 </Transition>
                 <Transition Id="ex6.Start-End" From="ex6.Start" To="ex6.End" Name="">
                     <Condition Type="OTHERWISE"/>
@@ -670,7 +670,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>C</InitialValue>
+                    <InitialValue>'C'</InitialValue>
                 </FormalParameter>
                 <FormalParameter Id="pathtaken" Mode="OUT">
                     <DataType>
@@ -776,7 +776,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>C</InitialValue>
+                    <InitialValue>'C'</InitialValue>
                 </FormalParameter>
                 <FormalParameter Id="pathtaken" Mode="OUT">
                     <DataType>
@@ -857,10 +857,10 @@
                 <Transition Id="ex8.Configure-Test1" From="ex8.Configure" To="ex8.Test1"/>
                 <Transition Id="ex8.Test1-Split1" From="ex8.Test1" To="ex8.Split1"/>
                 <Transition Id="ex8.Split1-Join1" From="ex8.Split1" To="ex8.Join1">
-                    <Condition Type="CONDITION">!attributes.test1_ok</Condition>
+                    <Condition Type="CONDITION">!attribute('test1_ok')</Condition>
                 </Transition>
                 <Transition Id="ex8.Split1-Test2" From="ex8.Split1" To="ex8.Test2">
-                    <Condition Type="CONDITION">attributes.run_test2</Condition>
+                    <Condition Type="CONDITION">attribute('run_test2')</Condition>
                 </Transition>
                 <Transition Id="ex8.Split1-Join2" From="ex8.Split1" To="ex8.Join2">
                     <Condition Type="OTHERWISE"/>
@@ -870,7 +870,7 @@
                     <Condition Type="OTHERWISE"/>
                 </Transition>
                 <Transition Id="ex8.Split2-Join2" From="ex8.Split2" To="ex8.Join2">
-                    <Condition Type="CONDITION">attributes.test2_ok</Condition>
+                    <Condition Type="CONDITION">attribute('test2_ok')</Condition>
                 </Transition>
                 <Transition Id="ex8.Join2-Package" From="ex8.Join2" To="ex8.Package"/>
                 <Transition Id="ex8.Package-End" From="ex8.Package" To="ex8.End"/>
@@ -897,7 +897,7 @@
                     <DataType>
                         <BasicType Type="STRING"/>
                     </DataType>
-                    <InitialValue>C</InitialValue>
+                    <InitialValue>'C'</InitialValue>
                 </FormalParameter>
                 <FormalParameter Id="pathtaken" Mode="OUT">
                     <DataType>
@@ -978,10 +978,10 @@
                 <Transition Id="ex9.Configure-Test1" From="ex9.Configure" To="ex9.Test1"/>
                 <Transition Id="ex9.Test1-Split1" From="ex9.Test1" To="ex9.Split1"/>
                 <Transition Id="ex9.Split1-Join1" From="ex9.Split1" To="ex9.Join1">
-                    <Condition Type="CONDITION">!attributes.test1_ok</Condition>
+                    <Condition Type="CONDITION">!attribute('test1_ok')</Condition>
                 </Transition>
                 <Transition Id="ex9.Split1-Test2" From="ex9.Split1" To="ex9.Test2">
-                    <Condition Type="CONDITION">attributes.run_test2</Condition>
+                    <Condition Type="CONDITION">attribute('run_test2')</Condition>
                 </Transition>
                 <Transition Id="ex9.Split1-Join2" From="ex9.Split1" To="ex9.Join2">
                     <Condition Type="OTHERWISE"/>
@@ -991,7 +991,7 @@
                     <Condition Type="OTHERWISE"/>
                 </Transition>
                 <Transition Id="ex9.Split2-Join2" From="ex9.Split2" To="ex9.Join2">
-                    <Condition Type="CONDITION">attributes.test2_ok</Condition>
+                    <Condition Type="CONDITION">attribute('test2_ok')</Condition>
                 </Transition>
                 <Transition Id="ex9.Join2-Package" From="ex9.Join2" To="ex9.Package"/>
                 <Transition Id="ex9.Package-End" From="ex9.Package" To="ex9.End"/>

@@ -8,6 +8,7 @@ inc/
 .last_cover_stats
 Makefile
 Makefile.old
+MANIFEST
 MANIFEST.bak
 META.yml
 MYMETA.yml
@@ -16,3 +17,7 @@ pm_to_blib
 var/
 t/var/bpmengine.db
 t/var/bpmengine.log
+tmon.out
+cover_db_view
+nytprof
+.DS_Store
