@@ -5,9 +5,9 @@ BEGIN {
     $BPM::Engine::Util::Expression::Base::AUTHORITY = 'cpan:SITETECH';
     }
 
+use namespace::autoclean;
 use Moose;
 use MooseX::StrictConstructor;
-use namespace::autoclean;
 
 has 'params' => (
     traits   => [ 'Hash' ],
@@ -18,15 +18,21 @@ has 'params' => (
         get_param => 'get',        
         set_param => 'set',
         variables => 'keys',
-        set_activity => [ set => 'activity' ],    
+        set_activity => [ set => 'activity' ],
         },
+    );
+
+has 'process_instance' => (
+    is       => 'ro',
+    isa      => 'BPM::Engine::Store::Result::ProcessInstance',
+    required => 1,
     );
 
 sub type {
     my ($self) = @_;
 
     my $type = ref $self;
-    $type =~ s/Expression:://xms;
+    $type =~ s/.*Expression:://xms;
     $type =~ tr/A-Z/a-z/;
 
     return $type;
