@@ -1,4 +1,3 @@
-
 package BPM::Engine::Exceptions;
 BEGIN {
     $BPM::Engine::Exceptions::VERSION   = '0.001';
@@ -20,9 +19,9 @@ BEGIN {
         },
         'BPM::Engine::Exception::Runner' => {
             isa         => 'BPM::Engine::Exception',
-            description => 'Dispatcher exception',
+            description => 'ProcessRunner exception',
             alias       => 'throw_runner'
-        },        
+        },
         'BPM::Engine::Exception::Database' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Datastore exception',
@@ -95,7 +94,8 @@ BPM::Engine::Exceptions - Exception classes used in BPM::Engine
 
 =head1 SYNOPSIS
 
-    # use exceptions
+Throw an exception when something is wrong
+
     use BPM::Engine::Exceptions qw/throw_plugin/;
 
     sub set_length {
@@ -105,28 +105,47 @@ BPM::Engine::Exceptions - Exception classes used in BPM::Engine
         throw_plugin("Whoops!") unless $length =~ /\d+/;
 
         # ...
-        }
+        }    
 
-    # now let's try something illegal and catch the exception
-    use BPM::Engine::Types qw/Exception/;
+Now let's try something illegal and catch the exception    
+    
+    # use the is_Exception() function exported from the types library
+    use BPM::Engine::Types qw/Exception/;    
+    
     eval {
-        $obj->set_length( 'non-numerical value' );
+        $obj->set_length( 'non-numerical value' ); # this throws the error
+        #...
     };
-
-    # handle some exceptions
+    
+    # handle any exception, cathing them in various ways
     if(my $err = $@) {
+        # encountered an error
         
         if( Exception::Class->caught('BPM::Engine::Exception::Engine') ) {
+            #... use the thrown error obj
+            warn $err->error;
             print $err->as_html;
             }
         elsif(my $err = BPM::Engine::Exception::Plugin->caught() ) {
             warn $err->trace->as_string;
             }
+        # the type tests blessed $@ && $@->isa('BPM::Engine::Exception')
         elsif( is_Exception($err) ) {
             $err->rethrow();
             }
-        
+        else {
+            # something bad happened!
+            die $@;
+            }
         }
+
+C<BPM::Engine::Exception> stringifies to something reasonable, so if you don't
+need detailed error information, you can simply treat $@ as a string:
+
+    eval { $engine->update($status) };
+    if ( $@ ) {
+        warn "update failed because: $@\n";
+    }
 
 =head1 DESCRIPTION
 
@@ -160,9 +179,49 @@ The exception classes created by BPM::Engine::Exceptions are as follows:
 
 This is the base class for all generated exceptions.
 
-=item * BPM::Engine::Exception::User
+=item * BPM::Engine::Exception::Engine
 
-User error. Extra field: C<username>. Aliased as C<throw_user>.
+Engine exception. Aliased as C<throw_engine>.
+
+=item * BPM::Engine::Exception::Runner
+
+ProcessRunner exception. Aliased as C<throw_runner>.
+
+=item * BPM::Engine::Exception::Database
+
+Datastore exception. Aliased as C<throw_store>.
+
+=item * BPM::Engine::Exception::IO
+
+IO exception. Aliased as C<throw_io>.
+
+=item * BPM::Engine::Exception::Parameter
+
+Invalid parameters was given to method/function. Aliased as C<throw_param>.
+
+=item * BPM::Engine::Exception::Condition
+
+Condition false error. Aliased as C<throw_condition>.
+
+=item * BPM::Engine::Exception::Expression
+
+Exception evaluator error. Aliased as C<throw_expression>.
+
+=item * BPM::Engine::Exception::Plugin
+
+Plugin exception. Extra field: C<plugin>. Aliased as C<throw_plugin>.
+
+=item * BPM::Engine::Exception::Model
+
+Model exception. Aliased as C<throw_model>.
+
+=item * BPM::Engine::Exception::Install
+
+Installation/configuration exception. Aliased as C<throw_install>.
+
+=item * BPM::Engine::Exception::NotImplemented
+
+Abstract method. Aliased as C<throw_abstract>.
 
 =back
 
@@ -188,7 +247,7 @@ Peter de Vos <sitetech@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2010, Peter de Vos C<< <sitetech@cpan.org> >>.
+Copyright (c) 2010, 2011 Peter de Vos C<< <sitetech@cpan.org> >>.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
