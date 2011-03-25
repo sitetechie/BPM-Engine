@@ -21,7 +21,7 @@ sub attribute {
     
     if(defined $value) {
         die("Attribute '$name' is read-only") if($attr->is_readonly);
-        $value = $attr->_validate($value);
+        #$value = $attr->validate($value);
         if($attr->type eq 'BasicType' && !$attr->is_array) {
             $value = [$value];
             }
@@ -55,6 +55,7 @@ sub create_attributes {
     
     my $build_value = sub {
         my $init = shift || {};
+        ## no critic (ProhibitExplicitReturnUndef)
         return undef unless defined $init->{content};
         my $ivalue = $init->{content};
         throw_param error => "InitialValue is not a string" if(ref($ivalue));

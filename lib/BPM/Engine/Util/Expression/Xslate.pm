@@ -65,11 +65,11 @@ sub render {
     my ($self, $expr) = @_;
     
     my $args = $self->params;
-    my $tmp = '';
-    $args->{output} = sub { $tmp = $_[0]; };
+    my $output_buffer = '';
+    $args->{output} = sub { $output_buffer = $_[0]; };
 
     my $output = $self->_render("output($expr)", $args);
-    $output = $tmp if $tmp;
+    $output = $output_buffer if $output_buffer;
 
     return $output;
     }

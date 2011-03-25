@@ -48,7 +48,7 @@ sub load {
         );
     }
 
-
+## no critic (ProhibitMultiplePackages)
 package BPM::Engine::ExprVar;
 
 use strict;
@@ -56,12 +56,13 @@ use warnings;
 our $AUTOLOAD;
 
 sub new {
-    my $this = shift;
+    my ($this, @args) = @_;
     my $class = ref($this) || $this;
-    my $self = bless { @_ }, $class;
+    my $self = bless { @args }, $class;
     return $self;
     }
 
+## no critic (ProhibitAutoloading)
 sub AUTOLOAD {
     my $self = shift;
     (my $method = $AUTOLOAD) =~ s/.*:://;

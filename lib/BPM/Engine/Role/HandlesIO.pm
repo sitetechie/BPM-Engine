@@ -51,11 +51,11 @@ after '_execute_implementation' => sub {
     };
 
 sub _validate_inputset {
-    my ($pi, $set, $attributes, $artifacts) = @_;
+    my ($pi, $ioset, $attributes, $artifacts) = @_;
 
     my @inputs = ();
 
-    foreach my $input(@{$set->{Input}}, @{$set->{ArtifactInput}}) {
+    foreach my $input(@{$ioset->{Input}}, @{$ioset->{ArtifactInput}}) {
         my ($art) = grep { $input->{ArtifactId} eq $_->{Id} } @{$artifacts};
         die("ArtifactId '" . $input->{ArtifactId} . " not specified") unless $art;
 
@@ -63,10 +63,8 @@ sub _validate_inputset {
             die "Useless use of empty Artifact" unless $art->{DataObject};
             die "Useless use of empty DataObject" unless $art->{DataObject}->{DataField};
 
-            my @fields = map {
-                my $attr = $_->{Id};
-                $attributes->find({ name => $attr })->value
-                } @{$art->{DataObject}->{DataField}};
+            my @fields = map { $attributes->find({ name => $_->{Id} })->value } 
+                @{$art->{DataObject}->{DataField}};
 
             if($art->{'RequiredForStart'}) {
                 my @vals = grep { $_ } @fields;
@@ -85,7 +83,7 @@ sub _validate_inputset {
             }
         }
 
-    foreach my $input(@{$set->{PropertyInput}}) {
+    foreach my $input(@{$ioset->{PropertyInput}}) {
         my $attr = $input->{PropertyId};
         push(@inputs, $attributes->find({ name => $attr })->value);
         }
@@ -94,9 +92,9 @@ sub _validate_inputset {
     }
 
 sub _set_output {
-    my ($pi, $set, $attributes, $artifacts, $result) = @_;
+    my ($pi, $ioset, $attributes, $artifacts, $result) = @_;
 
-    foreach my $output(@{$set->{Output}}) {
+    foreach my $output(@{$ioset->{Output}}) {
         my ($art) = grep { $output->{ArtifactId} eq $_->{Id} } @{$artifacts};
         die("ArtifactId '" . $output->{ArtifactId} . "' not specified") unless $art;
 
@@ -104,14 +102,12 @@ sub _set_output {
             die "Useless use of empty Artifact" unless $art->{DataObject};
             die "Useless use of empty DataObject" unless $art->{DataObject}->{DataField};
 
-            my @attr = map {
-                my $attr = $_->{Id};
-                $attributes->find({ name => $attr })
-                } @{$art->{DataObject}->{DataField}};
+            my @attr = map { $attributes->find({ name => $_->{Id} }) } 
+                @{$art->{DataObject}->{DataField}};
 
-            foreach my $var(@attr) {
+            foreach my $attr(@attr) {
                 my $val = shift @$result or last;
-                $var->update({ value => [$val]});
+                $attr->update({ value => [$val]});
                 }
             }
         else {

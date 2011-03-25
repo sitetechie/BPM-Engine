@@ -75,16 +75,16 @@ sub _message {
 
     my $res = { args => $params  };
 
-    foreach my $var(qw/Id Name FaultName/) {
-        $res->{lc($var)} = $msg->{$var} if $msg->{$var};
+    foreach my $prop(qw/Id Name FaultName/) {
+        $res->{lc($prop)} = $msg->{$prop} if $msg->{$prop};
         }
 
-    foreach my $var('To','From') {
-        if($msg->{$var}) {
+    foreach my $prop('To','From') {
+        if($msg->{$prop}) {
             my $rs = $process->participants_rs({
-                participant_uid => $msg->{$var}
+                participant_uid => $msg->{$prop}
                 });
-            $res->{lc($var)} = _performers($rs);
+            $res->{lc($prop)} = _performers($rs);
             }
         }
 

@@ -193,7 +193,7 @@ sub is_completed {
 sub TO_JSON {
     my ($self, $level) = @_;
     
-    my %data = map { $_ => $self->$_ } grep { $self->$_ }
+    my %struct = map { $_ => $self->$_ } grep { $self->$_ }
         (qw/
             token_id parent_token_id process_instance_id activity_id
             transition_id workflow_instance_id prev tokenset 
@@ -204,7 +204,7 @@ sub TO_JSON {
         #$data{$rel} = $self->$rel;
         }
     
-    return \%data;
+    return \%struct;
     }
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );

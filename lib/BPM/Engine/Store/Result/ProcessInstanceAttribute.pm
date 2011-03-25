@@ -6,6 +6,7 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
+use BPM::Engine::Exceptions qw/throw_abstract/;
 extends qw/BPM::Engine::Store::Result Moose::Object/;
 
 __PACKAGE__->load_components(qw/ Core /);
@@ -99,13 +100,10 @@ sub new {
     return $class->next::method($attrs);
     }
 
-sub _validate {
+sub validate {
     my ($self, $value) = @_;
-    return $value;
-    if($self->type eq 'SchemaType') {
-
-        }
-    return $value;
+    
+    throw_abstract error => 'BlockActivity not implemented yet';
     }
 
 sub value {
@@ -114,12 +112,14 @@ sub value {
     if($newvalue) {
         my $name = $self->name;
         die("Attribute '$name' is read-only") if($self->is_readonly);
-        die("Attribute value $newvalue should be a reference") unless(!ref($newvalue));
+        die("Attribute value $newvalue should be a reference") 
+            unless(ref($newvalue));
         return $self->_value($newvalue);
         }
 
     my $value = $self->_value;
-    return ($self->type eq 'BasicType' && !$self->is_array) ? $value->[0] : $value;
+    return ($self->type eq 'BasicType' && !$self->is_array) ? 
+        $value->[0] : $value;
     }
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );

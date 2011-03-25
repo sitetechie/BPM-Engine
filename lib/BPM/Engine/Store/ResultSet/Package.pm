@@ -21,7 +21,7 @@ sub debug {
 sub create_from_xml {
     my ($self, $string) = @_;
 
-    my $data = XML::LibXML::Simple::XMLin($string,
+    my $xmldata = XML::LibXML::Simple::XMLin($string,
       ForceArray => [qw/
         ExtendedAttribute FormalParameter DataField ActualParameter
         Participant Application Responsible
@@ -31,7 +31,7 @@ sub create_from_xml {
       ValueAttr => [ 'GraphConformance' ],
       );    
 
-    return $self->_create_from_hash($data);
+    return $self->_create_from_hash($xmldata);
     }
 
 sub create_from_xpdl {
