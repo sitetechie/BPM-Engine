@@ -1,4 +1,3 @@
-
 package BPM::Engine::Logger;
 BEGIN {
     $BPM::Engine::Logger::VERSION   = '0.001';
@@ -19,7 +18,7 @@ $Log::Dispatch::Config::CallerDepth = 1;
 has log_dispatch_conf => (
    is      => 'ro',
    lazy    => 1,
-   default => '/etc/bpme_logger.conf'
+   default => '/etc/bpmengine/logger.conf'
  );
 
 __PACKAGE__->meta->make_immutable;
