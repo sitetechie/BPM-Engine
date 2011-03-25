@@ -14,6 +14,7 @@ __PACKAGE__->provide_types_from(qw/
     BPM::Engine::Types::Internal
     MooseX::Types::Moose
     MooseX::Types::UUID
+    MooseX::Types::DBIx::Class
     /);
 
 1;
@@ -35,7 +36,7 @@ Peter de Vos, C<< <sitetech@cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2010, Peter de Vos C<< <sitetech@cpan.org> >>.
+Copyright (c) 2010, 2011 Peter de Vos C<< <sitetech@cpan.org> >>.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
