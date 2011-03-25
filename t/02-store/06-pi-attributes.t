@@ -41,6 +41,19 @@ like(  exception { $pi->add_to_attributes() }, qr/create needs a hashref/);
 isa_ok(exception { $pi->add_to_attributes({}) }, 'DBIx::Class::Exception');
 # mysql: execute failed: Field 'name' doesn't have a default value
 #like(  exception { $pi->add_to_attributes({}) }, qr/wfe_process_instance_attr.name may not be NULL/);
+
+ok($pi->add_to_attributes({ name => 'e1',  }));
+ok($pi->add_to_attributes({ name => 'e2', value => undef }));
+ok($pi->add_to_attributes({ name => 'e3', value => \'NULL' }));
+foreach(qw/e1 e2 e3/) {
+    ok(!defined $pi->attribute($_)->value);
+    }
+
+ok($pi->add_to_attributes({ name => 'e4', value => '' }));
+like(exception { $pi->attribute('e4')->value }, qr/malformed JSON string/, 'value, if any, should be a reference');
+ok($pi->add_to_attributes({ name => 'e5', value => 'NULL' })); # string
+like(exception { $pi->attribute('e5')->value }, qr/malformed JSON string/, 'value, if any, should be a reference');
+
 ok($pi->add_to_attributes({ name => '' }));
 isa_ok(exception { $pi->add_to_attributes({ name => ''}) }, 'DBIx::Class::Exception');
 # mysql: execute failed: Duplicate entry '3-'
