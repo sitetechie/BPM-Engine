@@ -18,12 +18,12 @@ has 'logger' => (
 has 'log_dispatch_conf' => (
     is         => 'ro',
     lazy       => 1,
-    default    => '/etc/bpme_logger.conf',
+    default    => '/etc/bpmengine/logger.conf',
     );
 
-sub _build_logger { 
+sub _build_logger {
     my $self = shift;
-    BPM::Engine::Logger->new({
+    return BPM::Engine::Logger->new({
         log_dispatch_conf => $self->log_dispatch_conf
         });
     }
@@ -32,3 +32,37 @@ no Moose::Role;
 
 1;
 __END__
+
+=pod
+
+=head1 NAME
+
+BPM::Engine::Role::WithLogger - Engine and ProcessRunner role providing a logger
+
+=head1 VERSION
+
+version 0.001
+
+=head1 DESCRIPTION
+
+This role provides a logger object to L<BPM::Engine> and 
+L<BPM::Engine::ProcessRunner|BPM::Engine::ProcessRunner>.
+
+=head1 ATTRIBUTES
+
+=head2 logger
+
+=head2 log_dispatch_conf
+
+=head1 AUTHOR
+
+Peter de Vos, C<< <sitetech@cpan.org> >>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2010, 2011 Peter de Vos C<< <sitetech@cpan.org> >>.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlartistic>.
+
+=cut

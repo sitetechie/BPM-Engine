@@ -10,7 +10,7 @@ use Moose::Role;
 requires qw(
   new
   new_with_config
-  
+
   logger
   log_dispatch_conf
 
@@ -25,18 +25,17 @@ requires qw(
   emergency
 
   schema
-  storage
   connect_info
 
   callback
 
-  list_packages
+  get_packages
   create_package
   delete_package
-  list_process_definitions
+  get_process_definitions
   get_process_definition
 
-  list_process_instances
+  get_process_instances
   create_process_instance
   get_process_instance
   start_process_instance
@@ -46,7 +45,7 @@ requires qw(
   process_instance_attribute
   change_process_instance_state
 
-  list_activity_instances
+  get_activity_instances
   get_activity_instance
   change_activity_instance_state
   activity_instance_attribute
