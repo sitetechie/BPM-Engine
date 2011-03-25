@@ -39,6 +39,8 @@ author_requires 'Perl::Critic'               => '1.11';
 build_requires  'Test::More'                 => '0.92';
 build_requires  'Test::Exception'            => '0.29';
 build_requires  'Test::Moose'                => '1.17';
+build_requires  'Test::Fatal'                => '0.003';
+build_requires  'Test::Requires'             => '0.06';
 
 requires        'namespace::clean'           => '0.18';
 requires        'namespace::autoclean'       => '0.11';
@@ -47,31 +49,34 @@ requires        'Moose'                      => '0.57';
 requires        'MooseX::StrictConstructor'  => '0.07';
 requires        'MooseX::Types'              => '0.23';
 requires        'MooseX::Types::UUID'        => '0.02';
+requires        'MooseX::Types::DBIx::Class' => '0.04';
+requires        'Data::GUID'                 => '0.046';
 requires        'MooseX::Declare'            => '0.34';
 requires        'MooseX::LogDispatch'        => '1.20';
 requires        'MooseX::Traits'             => '0.11';
+requires        'MooseX::SimpleConfig'       => '0.09';
 requires        'Exception::Class'           => '1.29';
 requires        'Sub::Exporter'              => '0.98';
 requires        'Class::Workflow'            => '0.11';
 requires        'DBIx::Class'                => '0.08';
 requires        'DBIx::Class::InflateColumn::Serializer' => '0.02';
-requires        'DBIx::Class::Helpers'       => '2.005';
+requires        'DBIx::Class::DynamicDefault'=> '0.03';
+requires        'DBIx::Class::UUIDColumns'   => '0.02';
+requires        'DBIx::Class::TimeStamp'     => '0.14';
 requires        'Template'                   => '2.20';
 requires        'Silly::Werder'              => '0.90';
 requires        'XML::LibXML'                => '1.70';
 requires        'XML::LibXML::Simple'        => '0.13';
-requires        'File::ShareDir'             => '1.02';
+requires        'File::ShareDir'             => '1.03';
 requires        'BPM::XPDL'                  => '0.04';
 requires        'File::ShareDir'             => '1.00';
 requires        'Path::Class'                => '0.21';
 requires        'DateTime'                   => '0.53';
 requires        'Graph'                      => '0.94';
+requires        'Text::Xslate'               => '1.0012';
+requires        'Text::Xslate::Bridge::TT2Like' => '0';
 
-feature          'Graphviz rendering'        => -default => 1,
-                 'GraphViz'                  => '2.04',
-                 'Graph::Writer::GraphViz'   => '0.10';
-
-tests           't/*.t';
+tests           't/*/*.t';
 author_tests    'xt';
 
 manifest_skip;
