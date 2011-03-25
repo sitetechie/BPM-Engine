@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 
-# Test that our META.yml file matches the specification
 use strict;
 BEGIN {
 	$|  = 1;

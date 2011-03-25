@@ -28,3 +28,6 @@ allow = _build_schema _build_logger _build_process _build_graph
 
 #[TestingAndDebugging::ProhibitNoStrict]
 #allow=refs
+
+[-Documentation::RequirePODUseEncodingUTF8]
+[-CodeLayout::RequireUseUTF8]
