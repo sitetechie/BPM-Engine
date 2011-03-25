@@ -60,15 +60,9 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key(qw/ application_id /);
 
 __PACKAGE__->might_have(
-    'package' => 'BPM::Engine::Store::Result::Package', 
+    'package' => 'BPM::Engine::Store::Result::Package',
     { 'foreign.package_id' => 'self.parent_node' },
     { application_scope => 'package' }
-    );
-
-__PACKAGE__->might_have(
-    'process' => 'BPM::Engine::Store::Result::Process',
-    { 'foreign.process_id' => 'self.parent_node' },
-    { application_scope => 'process' }
     );
 
 1;

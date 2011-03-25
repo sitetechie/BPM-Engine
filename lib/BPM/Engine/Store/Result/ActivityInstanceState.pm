@@ -8,7 +8,6 @@ use namespace::autoclean;
 use Moose;
 extends qw/DBIx::Class Moose::Object/;
 with qw/Class::Workflow::Instance/;
-#use overload '""' => sub { shift->state }, fallback => 1;
 
 __PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfe_activity_instance_journal');
@@ -47,14 +46,18 @@ __PACKAGE__->set_primary_key('event_id');
 
 __PACKAGE__->belongs_to(
     activity_instance => 'BPM::Engine::Store::Result::ActivityInstance', 
-    'token_id', { cascade_delete => 1 }
+    'token_id', { cascade_delete => 0 }
     );
 
 __PACKAGE__->belongs_to( prev => __PACKAGE__ ); # history
 
+__PACKAGE__->might_have(
+    next => __PACKAGE__,   { 'foreign.prev' => 'self.event_id' }
+    );
+
 sub clone {
-    my ( $self, @fields ) = @_;
-    $self->copy({@fields});
+    my ($self, @fields) = @_;
+    return $self->copy({@fields});
     }
 
 __PACKAGE__->inflate_column('state', {

@@ -14,6 +14,8 @@ __PACKAGE__->add_columns(
     package_id => {
         data_type         => 'CHAR',
         size              => 36,
+        #data_type         => 'VARBINARY',
+        #size              => 16,
         is_nullable       => 0,
         default_value     => 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
         },    
@@ -128,6 +130,11 @@ __PACKAGE__->add_columns(
         is_nullable       => 1,
         serializer_class  => 'JSON',
         },
+    artifacts => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },    
     extended_attr => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -163,6 +170,19 @@ sub insert {
 
     $self->next::method(@args);
     }
+
+sub TO_JSON {
+    my $self = shift;
+
+    my %parms = map { $_ => $self->$_ } grep { $self->$_ }
+        qw/package_name package_uid description version
+           author vendor graph_conformance created
+          /;
+    # processes participants
+
+    return \%parms;
+    }
+
 
 1;
 __END__

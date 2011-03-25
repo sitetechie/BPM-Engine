@@ -74,6 +74,16 @@ sub state { ## no critic (ProhibitBuiltinHomonyms)
     return $self->workflow_instance->state->name;
     }
 
+sub workflow_instance {
+    my ($self, $newinst) = @_;
+    if($newinst) {
+        my $newid = ref($newinst) ? $newinst->id : $newinst;
+        $self->workflow_instance_id($newid);
+        }
+    return $self->state_events->find({ event_id => $self->workflow_instance_id });
+    }
+
+
 no Moose::Role;
 
 # ABSTRACT: Workflow role for ResultBase::ProcessInstance and ResultBase::ActivityInstance

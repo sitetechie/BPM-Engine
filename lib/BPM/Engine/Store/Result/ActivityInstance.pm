@@ -9,13 +9,13 @@ use Moose;
 use DateTime;
 
 BEGIN {
-  extends qw/DBIx::Class Moose::Object/;
+  extends qw/BPM::Engine::Store::Result/;
   with    qw/BPM::Engine::Store::ResultBase::ActivityInstance
              BPM::Engine::Store::ResultRole::ActivityInstanceJoin
              BPM::Engine::Store::ResultRole::WithAttributes/;
   }
 
-__PACKAGE__->load_components(qw/TimeStamp InflateColumn::DateTime Core/);
+__PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfe_activity_instance'); #process_token
 __PACKAGE__->add_columns(
     token_id => {
@@ -53,7 +53,7 @@ __PACKAGE__->add_columns(
         is_foreign_key    => 1,
         is_nullable       => 1,
         },
-    workflow_instance_id => {         # (internal) state machine
+    workflow_instance_id => { # (internal) state machine
         data_type         => 'INT',
         extras            => { unsigned => 1 },
         is_foreign_key    => 1,
@@ -67,6 +67,21 @@ __PACKAGE__->add_columns(
         extras            => { unsigned => 1 },
         size              => 11,
         },    
+    inputset => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },
+    taskdata => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },    
+    taskresult => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },    
     created => {
         data_type         => 'DATETIME',
         is_nullable       => 1,
@@ -74,7 +89,7 @@ __PACKAGE__->add_columns(
         timezone          => 'UTC',
         },
     deferred => {
-        data_type         => 'TIMESTAMP',
+        data_type         => 'DATETIME',
         is_nullable       => 1,
         timezone          => 'UTC',
         },
@@ -111,17 +126,11 @@ __PACKAGE__->has_many(
     next => __PACKAGE__,   { 'foreign.prev' => 'self.token_id' }
     );
 
-# was might_have
 __PACKAGE__->belongs_to(
     parent => __PACKAGE__, { 'foreign.token_id' => 'self.parent_token_id' });
 
 __PACKAGE__->has_many(
     children => __PACKAGE__, { 'foreign.parent_token_id' => 'self.token_id' });
-
-__PACKAGE__->belongs_to(
-    workflow_instance => 'BPM::Engine::Store::Result::ActivityInstanceState', 
-                       { 'foreign.event_id' => 'self.workflow_instance_id' }  
-    );
 
 __PACKAGE__->has_many(
     state_events => 'BPM::Engine::Store::Result::ActivityInstanceState',
@@ -138,6 +147,16 @@ __PACKAGE__->has_many(
                 { 'foreign.activity_instance_id' => 'self.token_id' }
     );
 
+__PACKAGE__->has_many(
+    workitems => 'BPM::Engine::Store::Result::WorkItem',
+    { 'foreign.token_id' => 'self.token_id' }
+    );
+
+#__PACKAGE__->has_many(
+#    data_objects => 'BPM::Engine::Store::Result::DataObjectInstance',
+#                { 'foreign.token_id' => 'self.token_id' }
+#    );
+
 sub insert {
     my ($self, @args) = @_;
     
@@ -146,11 +165,9 @@ sub insert {
     $self->next::method(@args);
     $self->discard_changes;
     
-    my $state = $self->result_source->schema
-        ->resultset('ActivityInstanceState')->create({
-          token_id => $self->id,
-          state    => $self->workflow->initial_state,
-          });
+    my $state = $self->create_related('state_events', {
+        state => $self->workflow->initial_state,
+        });    
     $self->update({ workflow_instance_id => $state->id });    
     
     $guard->commit;
@@ -171,6 +188,23 @@ sub is_deferred {
 sub is_completed {
     my $self = shift;    
     return $self->completed ? 1 : 0;    
+    }
+
+sub TO_JSON {
+    my ($self, $level) = @_;
+    
+    my %data = map { $_ => $self->$_ } grep { $self->$_ }
+        (qw/
+            token_id parent_token_id process_instance_id activity_id
+            transition_id workflow_instance_id prev tokenset 
+             taskresult created deferred completed
+            /); # taskdata inputset # 
+    
+    foreach my $rel(qw/workitems attributes prev next/) { #  activity
+        #$data{$rel} = $self->$rel;
+        }
+    
+    return \%data;
     }
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );

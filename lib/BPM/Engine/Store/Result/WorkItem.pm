@@ -6,7 +6,7 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
-extends 'DBIx::Class';
+extends qw/BPM::Engine::Store::Result/;
 
 __PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfe_workitem');
@@ -105,39 +105,3 @@ __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 
 1;
 __END__
-
-=pod
-
-=head1 NAME
-
-BPM::Engine::Store::Result::WorkItem - DBIC schema class for WorkItem data
-
-=head1 SYNOPSIS
-
-    use BPM::Engine::Store;
-    my $schema = BPM::Engine::Store->connect;
-    my $items  = $schema->resultset('WorkItem')->search;
-
-=head1 DESCRIPTION
-
-This module is loaded by BPM::Engine::Store to read/write WorkItem data.
-
-=head1 COLUMNS
-
-  XXX TBD
-
-=head1 RELATIONS
-
-  XXX TBD
-
-=head1 AUTHOR
-
-Peter de Vos <sitetech@cpan.org>
-
-=head1 LICENSE
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
-
-=cut
-

@@ -29,7 +29,6 @@ __PACKAGE__->add_columns(
         data_type         => 'BOOLEAN', # synonym for TINYINT(1)
         default_value     => 0,
         is_nullable       => 0,
-        size              => 1,
         extras            => { unsigned => 1 }
         },
     # the number of times the join has fired since the workflow started
@@ -53,10 +52,10 @@ __PACKAGE__->belongs_to(
     activity_instance => 'BPM::Engine::Store::Result::ActivityInstance', 'token_id'
     );
 
-# set transition in a join (when following transition from a split)
 sub set_transition {
     my ($self, $transition_id, $state) = @_;
     
+    die("Invalid split state '$state'") unless $state =~ /^(taken|blocked|joined)$/;
     my $states = $self->states || {};
     if($states->{$transition_id} && $state ne 'joined') {
         die("Transition state '$state' already set in Join as '" . 
@@ -64,7 +63,7 @@ sub set_transition {
             );
         }
     elsif(!$states->{$transition_id} && $state eq 'joined') {
-        die("Transition state '$state' not previously taken for transition '$transition_id'");
+        die("State '$state' not previously taken for transition '$transition_id'");
         }
     
     $states->{$transition_id} = $state || 'taken';

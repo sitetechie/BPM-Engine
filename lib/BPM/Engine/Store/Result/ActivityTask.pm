@@ -50,13 +50,14 @@ __PACKAGE__->add_columns(
         default           => 'Tool',
         default_value     => 'Tool',
         extra             => { list => [qw/
-            Tool Application Send Receive Script Service User Manual Reference/] },
+            Tool Application Reference
+            Send Receive Service User Script Manual/] },
         },
     task_data => {
         data_type         => 'TEXT',
         is_nullable       => 1,
         serializer_class  => 'JSON',
-        },     
+        },
     actual_params => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -84,5 +85,6 @@ __PACKAGE__->belongs_to( # might_have?
     );
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
+
 1;
 __END__

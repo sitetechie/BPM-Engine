@@ -6,7 +6,7 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
-extends qw/DBIx::Class Moose::Object/;
+extends qw/BPM::Engine::Store::Result Moose::Object/;
 with qw/
            BPM::Engine::Store::ResultBase::ProcessTransition
            BPM::Engine::Store::ResultRole::WithAssignments
@@ -93,22 +93,27 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key('transition_id');
 
-__PACKAGE__->belongs_to( process => 'BPM::Engine::Store::Result::Process', 'process_id' );
+__PACKAGE__->add_unique_constraint(
+    [qw/process_id from_activity_id to_activity_id/]
+    );
 
-__PACKAGE__->belongs_to( from_activity => 'BPM::Engine::Store::Result::Activity',
-    { 'foreign.activity_id' => 'self.from_activity_id' } );
+__PACKAGE__->belongs_to( 
+    process => 'BPM::Engine::Store::Result::Process', 'process_id'
+    );
 
-__PACKAGE__->belongs_to( to_activity => 'BPM::Engine::Store::Result::Activity', 
-    { 'foreign.activity_id' => 'self.to_activity_id' } );
+__PACKAGE__->belongs_to( 
+    from_activity => 'BPM::Engine::Store::Result::Activity',
+    { 'foreign.activity_id' => 'self.from_activity_id' }
+    );
 
-__PACKAGE__->might_have( from_split => 'BPM::Engine::Store::Result::TransitionRef',
-    { 'foreign.activity_id' => 'self.from_activity_id', 'foreign.transition_id' => 'self.transition_id' } );
-
-__PACKAGE__->might_have( to_join => 'BPM::Engine::Store::Result::TransitionRef',
-    { 'foreign.activity_id' => 'self.to_activity_id', 'foreign.transition_id' => 'self.transition_id' } );
+__PACKAGE__->belongs_to(
+    to_activity => 'BPM::Engine::Store::Result::Activity', 
+    { 'foreign.activity_id' => 'self.to_activity_id' }
+    );
 
 __PACKAGE__->has_many(
-    transition_refs => 'BPM::Engine::Store::Result::TransitionRef', 'transition_id'
+    transition_refs => 'BPM::Engine::Store::Result::TransitionRef',
+    'transition_id'
     );
 
 __PACKAGE__->might_have(
@@ -117,6 +122,20 @@ __PACKAGE__->might_have(
     );
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
+
+sub from_split {
+    my $self = shift;
+    return $self->transition_refs({ 
+        activity_id => $self->from_activity_id 
+        })->first;
+    }
+
+sub to_join {
+    my $self = shift;
+    return $self->transition_refs({ 
+        activity_id => $self->to_activity_id 
+        })->first;
+    }
 
 1;
 __END__

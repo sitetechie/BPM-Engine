@@ -4,9 +4,9 @@ BEGIN {
     $BPM::Engine::Store::Result::ActivityInstanceAttribute::AUTHORITY = 'cpan:SITETECH';
     }
 
-use strict;
-use warnings;
-use base qw/DBIx::Class/;
+use namespace::autoclean;
+use Moose;
+extends qw/BPM::Engine::Store::Result/;
 
 __PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfe_activity_instance_attr');
@@ -45,6 +45,8 @@ __PACKAGE__->belongs_to(
     activity_instance => 'BPM::Engine::Store::Result::ActivityInstance', 
     'activity_instance_id'
     );
+
+__PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 
 1;
 __END__

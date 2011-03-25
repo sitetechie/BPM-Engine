@@ -7,12 +7,12 @@ BEGIN {
 use namespace::autoclean;
 use Moose;
 #BEGIN {
-  extends qw/DBIx::Class Moose::Object/;
+  extends qw/BPM::Engine::Store::Result Moose::Object/;
   with    qw/BPM::Engine::Store::ResultBase::Activity
              BPM::Engine::Store::ResultRole::WithAssignments/;
 #  }
 
-__PACKAGE__->load_components(qw/ InflateColumn::Serializer Core /);
+__PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfd_activity');
 __PACKAGE__->add_columns(
     activity_id => {
@@ -27,6 +27,7 @@ __PACKAGE__->add_columns(
         is_foreign_key    => 1,
         extras            => { unsigned => 1 },
         },
+    # not used, may become 'lane' or 'pool'
     performer_participant_id => {
         data_type         => 'INT',
         is_nullable       => 1,
@@ -140,7 +141,7 @@ __PACKAGE__->add_columns(
         },
     split_type => {
         data_type         => 'ENUM',
-        is_nullable       => 1,
+        is_nullable       => 0,
         default           => 'NONE',
         default_value     => 'NONE',        
         extra             => { 
@@ -166,6 +167,16 @@ __PACKAGE__->add_columns(
         is_nullable       => 1,
         serializer_class  => 'JSON',
         },
+    input_sets => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },
+    output_sets => {
+        data_type         => 'TEXT',
+        is_nullable       => 1,
+        serializer_class  => 'JSON',
+        },    
     assignments => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -179,6 +190,8 @@ __PACKAGE__->add_columns(
     );
 
 __PACKAGE__->set_primary_key('activity_id');
+
+#__PACKAGE__->add_unique_constraint( [qw/process_id activity_uid/] );
 
 __PACKAGE__->belongs_to(
     process => 'BPM::Engine::Store::Result::Process', 'process_id'
@@ -287,41 +300,41 @@ sub transitions_by_ref {
 sub is_start_activity {
     my $self = shift;
     #$g->is_source_vertex($v)    
-    return $self->transitions_in->count == 0;
+    return $self->transitions_in->count == 0 ? 1 : 0;
     }
 
 sub is_end_activity {
     my $self = shift;    
     #$g->is_sink_vertex($v)
-    return $self->transitions->count == 0;
+    return $self->transitions->count == 0 ? 1 : 0;
     }
 
 #-- start/finish mode shortcuts
 
 sub is_auto_start {
-    shift->start_mode =~ /^automatic$/i;
+    shift->start_mode =~ /^automatic$/i ? 1 : 0;
     }
 
 sub is_auto_finish {
-    shift->finish_mode =~ /^automatic$/i;
+    shift->finish_mode =~ /^automatic$/i ? 1 : 0;
     }
 
 #-- activity_type shortcuts
 
 sub is_implementation_type {
-    shift->activity_type =~ /^implementation$/i;
+    shift->activity_type =~ /^implementation$/i ? 1 : 0;
     }
 
 sub is_route_type {
-    shift->activity_type =~ /^route$/i;
+    shift->activity_type =~ /^route$/i ? 1 : 0;
     }
 
 sub is_block_type {
-    shift->activity_type =~ /^blockactivity$/i;
+    shift->activity_type =~ /^blockactivity$/i ? 1 : 0;
     }
 
 sub is_event_type {
-    shift->activity_type =~ /^event$/i;
+    shift->activity_type =~ /^event$/i ? 1 : 0;
     }
 
 #-- splits and joins
@@ -333,17 +346,17 @@ sub is_split {
 
 sub is_or_split {
     my $self = shift;
-    return $self->split_type =~ /^(OR|Inclusive)$/;
+    return $self->split_type =~ /^(OR|Inclusive)$/ ? 1 : 0;
     }
 
 sub is_xor_split {
     my $self = shift;
-    return $self->split_type =~ /^(XOR|Exclusive)$/;
+    return $self->split_type =~ /^(XOR|Exclusive)$/ ? 1 : 0;
     }
 
 sub is_and_split {
     my $self = shift;
-    return $self->split_type =~ /^(AND|Parallel)$/;
+    return $self->split_type =~ /^(AND|Parallel)$/ ? 1 : 0;
     }
 
 sub is_complex_split {
@@ -358,17 +371,17 @@ sub is_join {
 
 sub is_or_join {
     my $self = shift;
-    return $self->join_type =~ /^(OR|Inclusive)$/;
+    return $self->join_type =~ /^(OR|Inclusive)$/ ? 1 : 0;
     }
 
 sub is_xor_join {
     my $self = shift;
-    return $self->join_type =~ /^(XOR|Exclusive)$/;
+    return $self->join_type =~ /^(XOR|Exclusive)$/ ? 1 : 0;
     }
 
 sub is_and_join {
     my $self = shift;
-    return $self->join_type =~ /^(AND|Parallel)$/;
+    return $self->join_type =~ /^(AND|Parallel)$/ ? 1 : 0;
     }
 
 sub is_complex_join {
@@ -379,19 +392,19 @@ sub is_complex_join {
 #-- implementation_type shortcuts (No Tool Task SubFlow Reference)
 
 sub is_impl_no { 
-    shift->implementation_type =~ /^no$/i;
+    shift->implementation_type =~ /^no$/i ? 1 : 0;
     }
 
 sub is_impl_task {
-    shift->implementation_type =~ /^task|tool$/i;
+    shift->implementation_type =~ /^task|tool$/i ? 1 : 0;
     }
 
 sub is_impl_subflow {
-    shift->implementation_type =~ /^subflow$/i;
+    shift->implementation_type =~ /^subflow$/i ? 1 : 0;
     }
 
 sub is_impl_reference {
-    shift->implementation_type =~ /^reference$/i;
+    shift->implementation_type =~ /^reference$/i ? 1 : 0;
     }
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );

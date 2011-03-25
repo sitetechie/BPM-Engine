@@ -3,13 +3,16 @@ BEGIN {
     $BPM::Engine::Store::Result::Process::VERSION   = '0.001';
     $BPM::Engine::Store::Result::Process::AUTHORITY = 'cpan:SITETECH';
     }
+
 use namespace::autoclean;
 use Moose;
+BEGIN {
 extends qw/BPM::Engine::Store::Result/;
 with    qw/BPM::Engine::Store::ResultBase::Process
            BPM::Engine::Store::ResultRole::WithAssignments
           /;
-
+}
+__PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfd_process');
 __PACKAGE__->add_columns(
     process_id => {
@@ -17,7 +20,7 @@ __PACKAGE__->add_columns(
         is_auto_increment => 1,
         is_nullable       => 0,
         extras            => { unsigned => 1 }
-        },    
+        },
     process_uuid => {
         data_type         => 'CHAR',
         size              => 36,
@@ -28,7 +31,7 @@ __PACKAGE__->add_columns(
         data_type         => 'CHAR',
         size              => 36,
         is_nullable       => 0,
-        is_foreign_key    => 1,       
+        is_foreign_key    => 1,
         },
     process_uid => {
         data_type         => 'VARCHAR',
@@ -40,11 +43,11 @@ __PACKAGE__->add_columns(
         size              => 255,
         is_nullable       => 1,
         default_value     => 'A Process',
-        },    
+        },
     description => {
         data_type         => 'TEXT',
         is_nullable       => 1,
-        },    
+        },
     priority => {
         data_type         => 'BIGINT',
         default_value     => 0,
@@ -92,7 +95,7 @@ __PACKAGE__->add_columns(
         is_foreign_key    => 1,
         is_nullable       => 0,
         extras            => { unsigned => 1 }
-        },    
+        },
     data_fields => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -102,7 +105,7 @@ __PACKAGE__->add_columns(
         data_type         => 'TEXT',
         is_nullable       => 1,
         serializer_class  => 'JSON',
-        },    
+        },
     assignments => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -112,12 +115,12 @@ __PACKAGE__->add_columns(
         data_type         => 'TEXT',
         is_nullable       => 1,
         serializer_class  => 'JSON',
-        },     
+        },
     created => {
         data_type         => 'DATETIME',
         is_nullable       => 1,
         #timezone          => 'UTC',
-        },    
+        },
     );
 
 __PACKAGE__->set_primary_key('process_id');
@@ -142,7 +145,7 @@ __PACKAGE__->has_many(
     );
 
 __PACKAGE__->belongs_to(
-    participant_list => 'BPM::Engine::Store::Result::ParticipantList', 
+    participant_list => 'BPM::Engine::Store::Result::ParticipantList',
     'participant_list_id', { cascade_delete => 1 }
     );
 
@@ -157,7 +160,7 @@ sub new {
     my ($class, $attrs) = @_;
 
     $attrs->{process_name} ||= $attrs->{process_uid};
-    
+
     return $class->next::method($attrs);
     }
 
@@ -173,16 +176,19 @@ sub insert {
 
 sub TO_JSON {
     my $self = shift;
-    
-    my %parms = map { $_ => $self->$_ } grep { $self->$_ }
+
+    my %params = map { $_ => $self->$_ } grep { $self->$_ }
         qw/process_name process_uid description package_id version formal_params
-           data_fields assignments extended_attr created
+           data_fields assignments extended_attr
           /;
+    if($self->created) {
+        $params{created} = $self->created->TO_JSON; #->ymd;
+        }
     
-    return \%parms;
+    return \%params;
     }
 
-# not sure we need this
+# XXX not sure we need this
 sub sqlt_deploy_hook {
     my ($self, $sqlt_table) = @_;
 

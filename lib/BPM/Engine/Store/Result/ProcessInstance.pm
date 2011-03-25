@@ -6,14 +6,15 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
-extends qw/DBIx::Class Moose::Object/;
-with    qw/BPM::Engine::Store::ResultBase::ProcessInstance 
+extends qw/BPM::Engine::Store::Result/;
+with    qw/BPM::Engine::Store::ResultBase::ProcessInstance
            BPM::Engine::Store::ResultRole::WithAttributes/;
+
 use Silly::Werder;
 
 my $WORDGEN = Silly::Werder->new();
 
-__PACKAGE__->load_components(qw/TimeStamp InflateColumn::DateTime Core /);
+__PACKAGE__->load_components(qw/DynamicDefault Core /);
 __PACKAGE__->table('wfe_process_instance');
 __PACKAGE__->add_columns(
     instance_id => {
@@ -36,18 +37,18 @@ __PACKAGE__->add_columns(
         data_type         => 'VARCHAR',
         size              => 64,
         is_nullable       => 1,
+        dynamic_default_on_create => sub { $WORDGEN->get_werd() },
         },
     workflow_instance_id => { # state machine
         data_type         => 'INT',
         is_nullable       => 1,
-        #accessor => '_workflow_instance',
         },
     created => {
         data_type         => 'DATETIME',
         is_nullable       => 0,
         set_on_create     => 1,
         timezone          => 'UTC',
-        },    
+        },
     completed => {
         data_type         => 'DATETIME',
         is_nullable       => 1,
@@ -72,13 +73,8 @@ __PACKAGE__->has_many(
     );
 
 __PACKAGE__->belongs_to(
-    parent_activity_instance => 'BPM::Engine::Store::Result::ActivityInstance', 
+    parent_activity_instance => 'BPM::Engine::Store::Result::ActivityInstance',
     { 'foreign.token_id' => 'self.parent_ai_id' }
-    );
-
-__PACKAGE__->belongs_to(
-    workflow_instance => 'BPM::Engine::Store::Result::ProcessInstanceState',
-    { 'foreign.event_id' => 'self.workflow_instance_id' }
     );
 
 __PACKAGE__->has_many(
@@ -91,15 +87,6 @@ __PACKAGE__->has_many(
     { 'foreign.process_instance_id' => 'self.instance_id' }
     );
 
-sub new {
-    my ($class, $attrs) = @_;
-
-    $attrs->{instance_name} = $WORDGEN->get_werd() 
-        unless defined $attrs->{instance_name};
-
-    return $class->next::method($attrs);
-    }
-
 sub insert {
     my ($self, @args) = @_;
 
@@ -107,15 +94,25 @@ sub insert {
 
     $self->next::method(@args);
     $self->discard_changes;
-    my $rel = $self->create_related('workflow_instance', {
-        process_instance_id => $self->id,
+
+    my $rel = $self->create_related('state_events', {
         state => $self->workflow->initial_state,
         });
     $self->update({ workflow_instance_id => $rel->id });
-    
+
     $guard->commit;
 
     return $self;
+    }
+
+sub TO_JSON {
+    my $self = shift;
+    my $fields = {
+        map { $_ => $self->$_() } 
+            qw/instance_id process_id instance_name created completed/
+        };
+    # $fields->{attributes} = [ map { $_->TO_JSON } $self->attributes_rs->all ];
+    return $fields;
     }
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );

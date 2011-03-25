@@ -14,11 +14,13 @@ my $W = undef;
 sub get_workflow {
     unless($W) {
         my $yaml = do { local $/ = undef; <DATA> };
-        $W = load_workflow_from_yaml($yaml); #join('', <DATA>));
+        $W = load_workflow_from_yaml($yaml);
         $W->instance_class('BPM::Engine::Store::Result::ProcessInstanceState');
         }
     return $W;
     }
+
+no Moose::Role;
 
 1;
 __DATA__

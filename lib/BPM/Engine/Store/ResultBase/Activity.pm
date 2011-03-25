@@ -29,5 +29,7 @@ sub new_instance {
     return $ai;
     }
 
+no Moose::Role;
+
 1;
 __END__

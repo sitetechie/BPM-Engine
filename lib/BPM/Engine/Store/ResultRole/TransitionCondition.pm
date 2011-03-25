@@ -27,7 +27,8 @@ before apply => sub {
     my $state = $instance->activity;
 
     unless ($state->has_transition($self)) {
-        die($self->transition_uid . ' is not in ' . $instance->activity->activity_uid . '\'s current state');
+        die($self->transition_uid . ' is not in ' . 
+            $instance->activity->activity_uid . '\'s current state');
         }
 
     $self->clear_validators;
@@ -36,8 +37,7 @@ before apply => sub {
         $self->add_validator( sub {
             my ($transition, $activity_instance, @args) = @_;
             my $pi = $activity_instance->process_instance;
-            #my @attrib = map { name => $_->name, value => $_->value } $pi->attributes->all;
-            my %attr = map { $_->name => $_->value } $pi->attributes->all;
+            #my %attr = map { $_->name => $_->value } $pi->attributes->all;
             my $activity = $activity_instance->activity;
             my $evaluator = BPM::Engine::Util::ExpressionEvaluator->load(
                 process           => $pi->process,
@@ -45,7 +45,7 @@ before apply => sub {
                 activity          => $activity,
                 activity_instance => $activity_instance,
                 transition        => $transition,
-                attributes        => \%attr,
+                #attributes        => \%attr,
                 arguments         => [@args],
                 );
             my $res = $evaluator->evaluate($transition->condition_expr);
@@ -82,7 +82,9 @@ sub validate {
     return 1;
     }
 
-# ABSTRACT: Role for Transition condition evaluation
+no Moose::Role;
 
 1;
 __END__
+
+# ABSTRACT: Role for Transition condition evaluation

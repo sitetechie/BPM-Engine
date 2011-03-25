@@ -4,6 +4,7 @@ BEGIN {
     $BPM::Engine::Store::ResultSet::Package::AUTHORITY = 'cpan:SITETECH';    
     }
 
+use namespace::autoclean;
 use Moose;
 use Scalar::Util qw/blessed/;
 use XML::LibXML::Simple ();
@@ -12,6 +13,10 @@ use BPM::Engine::Exceptions qw/throw_model throw_store/;
 extends 'DBIx::Class::ResultSet';
 
 my %APPMAP = ();
+
+sub debug {
+    #my @caller = caller(0); warn $_[0] . ' at line ' . $caller[2] . "\n";
+    }
 
 sub create_from_xml {
     my ($self, $string) = @_;
@@ -76,13 +81,22 @@ sub _create_from_hash {
             if $args->{Applications};
 
         #-- elements: DataFields, ExtendedAttributes, Formal/ActualParameters
+        if($args->{Artifacts} && $args->{Artifacts}->{seq_Artifact}) {
+            $args->{Artifacts}->{Artifact} = [
+                map { $_->{Artifact} } 
+                grep { $_->{Artifact}->{ArtifactType} eq 'DataObject' }
+                @{ $args->{Artifacts}->{seq_Artifact} }
+                ];
+            delete $args->{Artifacts}->{seq_Artifact};
+            #warn Dumper($args->{Artifacts});
+            }
         _set_elements($entry, $args);
 
         #-- element: WorkflowProcesses
         _import_processes($entry, $args->{WorkflowProcesses}->{WorkflowProcess}) 
             if $args->{WorkflowProcesses};
-
         $entry->update();
+
         return $entry;
         };
 
@@ -94,10 +108,6 @@ sub _create_from_hash {
         }
 
     return $row;
-    }
-
-sub debug {
-    #warn $_[0];
     }
 
 sub _import_packhead {
@@ -350,7 +360,8 @@ sub _import_activity {
     #-- element: TransitionRestrictions
     # split_type => 'SplitType',
     # join_type  => 'JoinType',
-    if($args->{TransitionRestrictions}) {
+    if($args->{TransitionRestrictions} && 
+       $args->{TransitionRestrictions}->{TransitionRestriction}) {
         my @restrict = @{$args->{TransitionRestrictions}->{TransitionRestriction}};
         my $seen_split = 0;
         my $seen_join  = 0;        
@@ -505,19 +516,26 @@ sub _add_task {
         description => delete $task->{Description} || $activity->description,
         task_type   => $type,
         }) or die("Invalid Task");
+    
     if($type eq 'Tool' || $type eq 'Application') {
         my $app = $APPMAP{ $task->{Id} } 
             or die("No application for task $task->{Id}");
         $task_tool->application_id($app->id);
+        if($task->{ActualParameters}->{ActualParameter}) {
+            my $params = delete $task->{ActualParameters}->{ActualParameter};
+            $task_tool->actual_params($params);
+            }
         }
 
     _set_elements($task_tool, $task);
     delete $task->{Id};
     
     debug('Setting taskdata');
-
-    delete $task->{'WebServiceFaultCatch'};
+    
+    delete $task->{WebServiceFaultCatch};
+    delete $task->{ActualParameters};
     $task_tool->task_data($task) if(keys %{$task});
+    
     $task_tool->update();
     }
 
@@ -606,7 +624,9 @@ sub _import_transition {
         foreach my $type(grep { $tref->{$_} } qw/Split Join/) {
             my $rel = $type eq 'Split' ? 'from_split' : 'to_join';
             foreach my $activity_set(@{ $tref->{$type} }) {
-                $transition->create_related($rel, {
+                #XXX relation severed
+                #$transition->create_related($rel, {
+                $transition->create_related(transition_refs => {
                     activity_id   => $activity_set->[0],
                     position      => $activity_set->[1],
                     split_or_join => uc($type),
@@ -654,17 +674,22 @@ sub _set_elements {
     my $f = { formal_params => [ 'FormalParameters', 'FormalParameter' ] };
     my $d = { data_fields   => [ 'DataFields', 'DataField' ] };
     my $s = { assignments   => [ 'Assignments', 'Assignment' ] };
+    
+    my $i = { input_sets    => [ 'InputSets',  'InputSet'  ] };
+    my $o = { output_sets   => [ 'OutputSets', 'OutputSet' ] };
+    my $r = { artifacts     => [ 'Artifacts',  'Artifact'  ] };    
+
     my $m = { data_maps     => [ 'DataMappings', 'DataMapping' ] };
     my $e = { extended_attr => [ 'ExtendedAttributes', 'ExtendedAttribute' ] };
     my $v = { event_attr    => [ 'Event' ] };    
     my %types = (
-        Package      => [$e,$d],
+        Package      => [$e,$d,$r],
         Application  => [$f,$e],
         Process      => [$f,$e,$d,$s],
-        Activity     => [$e,$d,$s,$v],
+        Activity     => [$e,$d,$s,$v,$i,$o],
         ActivityTask => [$a,$m,$e],
         Transition   => [$s],
-        #Message(In|Out)      => [],
+        #Message(In|Out) => [],
         );
     my @pack = grep { ref($entry) =~ /^BPM::Engine::Store::Result::($_)$/ } 
                keys %types;
@@ -675,7 +700,8 @@ sub _set_elements {
         my $field = (keys %{$type})[0];
         my ($multi, $single) = @{ $type->{$field} };
         my $json = '';
-        #warn "Storing field $field multi $multi single $single type $type container $container entry $entry" if $container eq 'Package';
+        #warn "Storing field $field multi $multi single $single type $type container $container entry $entry" 
+            ; #if $container eq 'Package';
         if(!$single && $multi eq 'Event') {
             $json = delete $args->{$multi};
             my @event_types = keys %{$json};
@@ -713,7 +739,7 @@ sub _set_elements {
             $entry->$field($json);
             };
         if($@) {
-            warn "Error setting $field ($multi) as JSON: $@";
+            die "Error setting $field ($multi) as JSON: $@";
             }
         }
 
@@ -722,7 +748,10 @@ sub _set_elements {
 sub _hashxml {
     my $hash = shift;
     return unless(ref($hash) eq 'HASH');
+    
     foreach my $key(keys %{$hash}) {
+        $hash->{$key} = _serialize_schema($hash->{$key}) 
+            if($key eq 'DataType' && $hash->{$key}->{SchemaType});
         $hash->{$key} = _checkxml($hash->{$key});
         delete $hash->{$key} unless(defined $hash->{$key});
         }
@@ -736,13 +765,39 @@ sub _mapxml {
 sub _checkxml {
     my $val = shift;
     return unless $val;
-    return $val->textContent if blessed($val);
-    return $val->{content}   if ref($val);
+
+    if(blessed($val)) {
+        #warn "Inspecting " . $val->nodeName . ' withChildren ' . $val->hasChildNodes();
+        unless(ref($val) eq 'XML::LibXML::Element') {
+            die("Invalid node type, not an XML::LibXML::Element");
+            }
+        return unless $val->hasChildNodes();
+        return { 
+            content => $val->firstChild->textContent,
+            map { $_->nodeName => $_->value } $val->attributes()
+            };
+        }
+    elsif(ref($val) eq 'HASH' && defined $val->{content}) {
+        return $val->{content};
+        }
+    else {
+        return $val;
+        }
+    }
+
+sub _serialize_schema {
+    my $val = shift;
+    return unless $val;
+    
+    my $el = $val->{SchemaType}->{schema}->[0] or return;
+    die("Schema is not an 'XML::LibXML::Element'") 
+        unless ref($el) eq 'XML::LibXML::Element';
+    $val->{SchemaType} = $el->toString;
+    
     return $val;
     }
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
-no Moose;
 
 1;
 __END__

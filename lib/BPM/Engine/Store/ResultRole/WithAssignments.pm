@@ -4,8 +4,8 @@ BEGIN {
     $BPM::Engine::Store::ResultRole::WithAssignments::AUTHORITY = 'cpan:SITETECH';
     }
 
-use Moose::Role;
 use namespace::autoclean;
+use Moose::Role;
 
 sub start_assignments {
     my $self = shift;
@@ -17,10 +17,13 @@ sub start_assignments {
 sub end_assignments {
     my $self = shift;
     my $assignments = $self->assignments || [];
-    return grep { $_->{AssignTime} eq 'End' } @$assignments;
+    return grep { $_->{AssignTime} eq 'End' } 
+        @$assignments;
     }
 
-# ABSTRACT: Role for Process, Transition and Activity
+no Moose::Role;
 
 1;
 __END__
+
+# ABSTRACT: Role for Process, Transition and Activity

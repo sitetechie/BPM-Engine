@@ -17,14 +17,14 @@ sub is_enabled {
     if(!$activity->is_join) {
         die("Not a join " . $activity->activity_uid);
         }
+    elsif($activity->is_and_join) {
+        return $self->_and_join_should_fire;
+        }
     elsif($activity->is_or_join) {
         return $self->_or_join_should_fire;
         }
     elsif($activity->is_xor_join) {
         return 1;
-        }
-    elsif($activity->is_and_join) {
-        return $self->_and_join_should_fire;
         }
     elsif($activity->is_complex_join) {
         throw_abstract error => "Complex joins not implemented";
@@ -238,7 +238,7 @@ sub _mark_upstream_joined {
 
 no Moose::Role;
 
-# ABSTRACT: role for Activity Instances with joins
-
 1;
 __END__
+
+# ABSTRACT: role for Activity Instances with joins
