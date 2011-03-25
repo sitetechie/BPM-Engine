@@ -7,33 +7,34 @@ BEGIN {
 use MooseX::Declare;
 
 role BPM::Engine::Handler::ActivityInstanceHandler {
-  
+
   requires 'runner';
-  
+
   use Scalar::Util qw/blessed/;
   use BPM::Engine::Exceptions qw/throw_store/;
-  
-  method list_activity_instances (@args) {
-    
-      return $self->storage->resultset('ActivityInstance')->search_rs(@args);
+  use aliased 'BPM::Engine::Store::Result::ActivityInstance';
+
+  method get_activity_instances (@args) {
+
+      return $self->schema->resultset('ActivityInstance')->search_rs(@args);
       }
 
   method get_activity_instance (Int|HashRef $id, HashRef $args = {}) {
-    
-      return $self->storage->resultset('ActivityInstance')->find($id, $args) 
+
+      return $self->schema->resultset('ActivityInstance')->find($id, $args)
           || throw_store(error => "ActivityInstance '$id' not found");
       }
 
-  method change_activity_instance_state (Int|Object $ai, Str $state) {
-    
+  method change_activity_instance_state (Int|ActivityInstance $ai, Str $state) {
+
       $ai = $self->get_activity_instance(
           $ai, { prefetch => ['process_instance', 'activity'] }
           ) unless(blessed $ai);
-    
-      if ($state eq 'assign' || $state eq 'finish') {    
-          my $activity         = $ai->activity;        
+
+      if ($state eq 'assign' || $state eq 'finish') {
+          my $activity         = $ai->activity;
           my $process_instance = $ai->process_instance;
-          my $runner           = $self->runner($process_instance);            
+          my $runner           = $self->runner($process_instance);
           if($state eq 'assign') { # open.running
               # Execute the activity if it is now open.running.
               $runner->start_activity($activity, $ai, 1);
@@ -47,14 +48,14 @@ role BPM::Engine::Handler::ActivityInstanceHandler {
       else {
           $ai->apply_transition($state);
           }
-    
+
       return;
       }
 
-  method activity_instance_attribute (Int $id, @args) {
-    
-      my $instance = $self->get_activity_instance($id);
-      return $instance->attribute(@args);
+  method activity_instance_attribute (Int|ActivityInstance $ai, @args) {
+
+      $ai = $self->get_activity_instance($ai) unless(blessed $ai);
+      return $ai->attribute(@args);
       }
 
 }

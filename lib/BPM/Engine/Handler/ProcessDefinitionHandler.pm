@@ -11,15 +11,15 @@ role BPM::Engine::Handler::ProcessDefinitionHandler {
   use BPM::Engine::Types qw/Exception LibXMLDoc UUID/;
   use BPM::Engine::Exceptions qw/throw_engine throw_model throw_store/;
 
-  method list_packages (@args) {
-    
-      return $self->storage->resultset('Package')->search_rs(@args);
+  method get_packages (@args) {
+
+      return $self->schema->resultset('Package')->search_rs(@args);
       }
 
   method create_package (Str|ScalarRef|LibXMLDoc $args) {
-      
-      my $package = eval { 
-          $self->storage->resultset('Package')->create_from_xpdl($args); 
+
+      my $package = eval {
+          $self->schema->resultset('Package')->create_from_xpdl($args);
           };
       if(my $err = $@) {
           $self->error($err);
@@ -30,26 +30,35 @@ role BPM::Engine::Handler::ProcessDefinitionHandler {
       }
 
   method delete_package (UUID $id) {
-      
-      my $package = $self->storage->resultset('Package')->find($id) 
-          or throw_store(error => "Package '$id' not found");
-    
+
+      my $package = $self->schema->resultset('Package')->find($id)
+          or do {
+            $self->error("Package '$id' not found");
+            throw_store(error => "Package '$id' not found")
+            };
+
       return $package->delete;
       }
 
-  method list_process_definitions (@args) {
-    
-      return $self->storage->resultset('Process')->search_rs(@args);
+  method get_process_definitions (@args) {
+
+      return $self->schema->resultset('Process')->search_rs(@args);
       }
 
   method get_process_definition (Int|HashRef $id, HashRef $args = {}) {
-    
+
       my $pid = ref($id) ? $id : { process_id => $id };
-    
-      return $self->storage->resultset('Process')->find($pid, $args) 
-          || throw_store(error => "Process '$id' not found");
+
+      return $self->schema->resultset('Process')->find($pid, $args)
+          || do {
+            my $proc = $pid->{process_id} || $pid->{process_uid} || '';
+            my $error = "Process $proc not found";
+            $self->error($error);
+            throw_store(error => $error);
+            };
       }
 
 }
 
 1;
+__END__
