@@ -382,7 +382,6 @@ sub _execute_transitions {
 
     # evaluate efferent transitions
     foreach my $transition(@transitions) {
-        my $count = scalar @transitions;
         if($transition->condition_type eq 'NONE' ||
            $transition->condition_type eq 'CONDITION') {
             my $t_instance;
