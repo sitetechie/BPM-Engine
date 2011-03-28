@@ -10,13 +10,13 @@ use namespace::autoclean;
 before '_execute_implementation' => sub {
     my ($self, $activity, $instance) = @_;
 
-    if($activity->input_sets) {
+    if ($activity->input_sets) {
         my $pi         = $instance->process_instance;
         my $artifacts  = $pi->process->package->artifacts;
         my $attributes = $pi->attributes_rs;
 
         my @inputs = ();
-        foreach my $set(@{$activity->input_sets}) {
+        foreach my $set (@{ $activity->input_sets }) {
             @inputs = _validate_inputset($pi, $set, $attributes, $artifacts);
             last if scalar @inputs;
             }
@@ -32,15 +32,15 @@ before '_execute_implementation' => sub {
 
 after '_execute_implementation' => sub {
     my ($self, $task, $instance) = @_;
-#XXX task?
+    #XXX task?
     my $activity = $instance->activity;
-    if($activity->output_sets) {
+    if ($activity->output_sets) {
         my $pi         = $instance->process_instance;
         my $artifacts  = $pi->process->package->artifacts;
         my $attributes = $pi->attributes_rs;
         my $result     = $instance->taskresult;
 
-        foreach my $set(@{$activity->output_sets}) {
+        foreach my $set (@{ $activity->output_sets }) {
             _set_output($pi, $set, $attributes, $artifacts, $result);
             }
         }
@@ -55,26 +55,29 @@ sub _validate_inputset {
 
     my @inputs = ();
 
-    foreach my $input(@{$ioset->{Input}}, @{$ioset->{ArtifactInput}}) {
+    foreach my $input (@{ $ioset->{Input} }, @{ $ioset->{ArtifactInput} }) {
         my ($art) = grep { $input->{ArtifactId} eq $_->{Id} } @{$artifacts};
-        die("ArtifactId '" . $input->{ArtifactId} . " not specified") unless $art;
+        die("ArtifactId '" . $input->{ArtifactId} . " not specified")
+            unless $art;
 
-        if($art->{ArtifactType} eq 'DataObject') {
+        if ($art->{ArtifactType} eq 'DataObject') {
             die "Useless use of empty Artifact" unless $art->{DataObject};
-            die "Useless use of empty DataObject" unless $art->{DataObject}->{DataField};
+            die "Useless use of empty DataObject"
+                unless $art->{DataObject}->{DataField};
 
-            my @fields = map { $attributes->find({ name => $_->{Id} })->value } 
-                @{$art->{DataObject}->{DataField}};
+            my @fields =
+                map { $attributes->find({ name => $_->{Id} })->value }
+                @{ $art->{DataObject}->{DataField} };
 
-            if($art->{'RequiredForStart'}) {
-                my @vals = grep { $_ } @fields;
-                return if(scalar(@vals) != scalar (@fields));
+            if ($art->{'RequiredForStart'}) {
+                my @vals = grep {$_} @fields;
+                return if (scalar(@vals) != scalar(@fields));
                 }
 
-            if(scalar @fields == 1) {
+            if (scalar @fields == 1) {
                 push(@inputs, $fields[0]);
                 }
-            elsif(scalar @fields) {
+            elsif (scalar @fields) {
                 push(@inputs, [@fields]);
                 }
             }
@@ -83,7 +86,7 @@ sub _validate_inputset {
             }
         }
 
-    foreach my $input(@{$ioset->{PropertyInput}}) {
+    foreach my $input (@{ $ioset->{PropertyInput} }) {
         my $attr = $input->{PropertyId};
         push(@inputs, $attributes->find({ name => $attr })->value);
         }
@@ -94,20 +97,23 @@ sub _validate_inputset {
 sub _set_output {
     my ($pi, $ioset, $attributes, $artifacts, $result) = @_;
 
-    foreach my $output(@{$ioset->{Output}}) {
+    foreach my $output (@{ $ioset->{Output} }) {
         my ($art) = grep { $output->{ArtifactId} eq $_->{Id} } @{$artifacts};
-        die("ArtifactId '" . $output->{ArtifactId} . "' not specified") unless $art;
+        die("ArtifactId '" . $output->{ArtifactId} . "' not specified")
+            unless $art;
 
-        if($art->{ArtifactType} eq 'DataObject') {
+        if ($art->{ArtifactType} eq 'DataObject') {
             die "Useless use of empty Artifact" unless $art->{DataObject};
-            die "Useless use of empty DataObject" unless $art->{DataObject}->{DataField};
+            die "Useless use of empty DataObject"
+                unless $art->{DataObject}->{DataField};
 
-            my @attr = map { $attributes->find({ name => $_->{Id} }) } 
-                @{$art->{DataObject}->{DataField}};
+            my @attr =
+                map { $attributes->find({ name => $_->{Id} }) }
+                @{ $art->{DataObject}->{DataField} };
 
-            foreach my $attr(@attr) {
+            foreach my $attr (@attr) {
                 my $val = shift @$result or last;
-                $attr->update({ value => [$val]});
+                $attr->update({ value => [$val] });
                 }
             }
         else {

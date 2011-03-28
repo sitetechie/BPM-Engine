@@ -20,8 +20,8 @@ before 'start_process' => sub {
         process          => $self->process,
         process_instance => $self->process_instance,
         );
-    
-    foreach my $ass(@assignments) {
+
+    foreach my $ass (@assignments) {
         $evaluator->assign($ass->{Target}, $ass->{Expression});
         }
     };
@@ -37,7 +37,7 @@ before 'complete_process' => sub {
         process_instance => $self->process_instance,
         );
 
-    foreach my $ass(@assignments) {
+    foreach my $ass (@assignments) {
         $evaluator->assign($ass->{Target}, $ass->{Expression});
         }
     };
@@ -55,7 +55,7 @@ before 'start_activity' => sub {
         process_instance  => $self->process_instance,
         );
 
-    foreach my $ass(@assignments) {
+    foreach my $ass (@assignments) {
         $evaluator->assign($ass->{Target}, $ass->{Expression});
         }
     };
@@ -73,7 +73,7 @@ before 'complete_activity' => sub {
         process_instance  => $self->process_instance,
         );
 
-    foreach my $ass(@assignments) {
+    foreach my $ass (@assignments) {
         $evaluator->assign($ass->{Target}, $ass->{Expression});
         }
     };
@@ -89,13 +89,13 @@ around '_execute_transition' => sub {
         #args              => [@args],
         );
 
-    foreach my $ass($transition->start_assignments) {
+    foreach my $ass ($transition->start_assignments) {
         $evaluator->assign($ass->{Target}, $ass->{Expression});
         }
 
     my $res = $self->$orig($transition, $instance);
 
-    foreach my $ass($transition->end_assignments) {
+    foreach my $ass ($transition->end_assignments) {
         $evaluator->assign($ass->{Target}, $ass->{Expression});
         }
 

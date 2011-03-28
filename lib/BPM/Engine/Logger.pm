@@ -9,17 +9,17 @@ use Moose;
 use MooseX::StrictConstructor;
 
 with qw/
-  BPM::Engine::Role::LoggerAPI
-  MooseX::LogDispatch::Levels
-  /;
+    BPM::Engine::Role::LoggerAPI
+    MooseX::LogDispatch::Levels
+    /;
 
 $Log::Dispatch::Config::CallerDepth = 1;
 
 has log_dispatch_conf => (
-   is      => 'ro',
-   lazy    => 1,
-   default => '/etc/bpmengine/logger.conf'
- );
+    is      => 'ro',
+    lazy    => 1,
+    default => '/etc/bpmengine/logger.conf'
+    );
 
 __PACKAGE__->meta->make_immutable;
 

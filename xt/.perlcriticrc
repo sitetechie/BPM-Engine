@@ -20,8 +20,10 @@ minimum_regex_length_to_complain_about = 10
 allow = _build_schema _build_logger _build_process _build_graph
 
 
-#[CodeLayout::RequireTidyCode]
-#perltidyrc = xt/perltidyrc
+[CodeLayout::RequireTidyCode]
+severity  = 2
+perltidyrc = xt/perltidyrc
+
 
 #[CodeLayout::ProhibitTrailingWhitespace]
 #severity  = 2

@@ -3,7 +3,7 @@ BEGIN {
     $BPM::Engine::Handler::ActivityInstanceHandler::VERSION   = '0.001';
     $BPM::Engine::Handler::ActivityInstanceHandler::AUTHORITY = 'cpan:SITETECH';
     }
-## no critic (RequireEndWithOne)
+## no critic (RequireEndWithOne, RequireTidyCode)
 use MooseX::Declare;
 
 role BPM::Engine::Handler::ActivityInstanceHandler {

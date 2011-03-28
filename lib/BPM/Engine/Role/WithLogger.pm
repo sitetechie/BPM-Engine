@@ -16,16 +16,15 @@ has 'logger' => (
     );
 
 has 'log_dispatch_conf' => (
-    is         => 'ro',
-    lazy       => 1,
-    default    => '/etc/bpmengine/logger.conf',
+    is      => 'ro',
+    lazy    => 1,
+    default => '/etc/bpmengine/logger.conf',
     );
 
 sub _build_logger {
     my $self = shift;
-    return BPM::Engine::Logger->new({
-        log_dispatch_conf => $self->log_dispatch_conf
-        });
+    return BPM::Engine::Logger->new(
+        { log_dispatch_conf => $self->log_dispatch_conf });
     }
 
 no Moose::Role;

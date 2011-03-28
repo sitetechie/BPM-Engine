@@ -10,12 +10,13 @@ use warnings;
 
 use base 'MooseX::Types::Combine';
 
-__PACKAGE__->provide_types_from(qw/
-    BPM::Engine::Types::Internal
-    MooseX::Types::Moose
-    MooseX::Types::UUID
-    MooseX::Types::DBIx::Class
-    /);
+__PACKAGE__->provide_types_from(
+    qw/ BPM::Engine::Types::Internal
+        MooseX::Types::Moose
+        MooseX::Types::UUID
+        MooseX::Types::DBIx::Class
+        /
+        );
 
 1;
 __END__

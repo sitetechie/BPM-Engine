@@ -9,14 +9,12 @@ use Moose::Role;
 use BPM::Engine::Types qw/CodeRef Str/;
 
 has 'callback' => (
-    traits     => ['Code'],
-    is         => 'ro',
-    isa        => CodeRef|Str,
-    required   => 0,
-    predicate  => 'has_callback',
-    handles    => {
-        call_callback => 'execute',
-        },
+    traits    => ['Code'],
+    is        => 'ro',
+    isa       => CodeRef | Str,
+    required  => 0,
+    predicate => 'has_callback',
+    handles   => { call_callback => 'execute', },
     );
 
 no Moose::Role;

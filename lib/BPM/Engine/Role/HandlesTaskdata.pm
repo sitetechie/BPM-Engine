@@ -16,21 +16,22 @@ requires qw/
 before 'execute_task' => sub {
     my ($self, $task, $activity_instance) = @_;
 
-    my $pi       = $self->process_instance or die("Process instance not found");
-    my $process  = $self->process or die("Process not found");
+    my $pi      = $self->process_instance or die("Process instance not found");
+    my $process = $self->process          or die("Process not found");
     my $activity = $activity_instance->activity or die("Activity not found");
-    my $tdata    = $task->task_data;
+    my $tdata = $task->task_data;
 
-    my $mtype    = $task->task_type eq 'Send' ? 'Message' : 'MessageIn';
-    my $aparams  = $tdata->{$mtype}->{ActualParameters}->{ActualParameter};
-    my $params   = _service_params($pi, $aparams);
+    my $mtype   = $task->task_type eq 'Send' ? 'Message' : 'MessageIn';
+    my $aparams = $tdata->{$mtype}->{ActualParameters}->{ActualParameter};
+    my $params  = _service_params($pi, $aparams);
 
     my $args = {
         meta => {
             # XXX Do GUID somewhere else (exec_impl) or not at all (same as activity_instance->id)?
-            id                  => Data::GUID->new()->as_string,
-            name                => $task->task_name || $activity->activity_name
-                                || $activity->activity_uid,
+            id   => Data::GUID->new()->as_string,
+            name => $task->task_name
+                || $activity->activity_name
+                || $activity->activity_uid,
             type                => $task->task_type,
             process_id          => $pi->process_id,
             process_instance_id => $pi->id,
@@ -42,11 +43,12 @@ before 'execute_task' => sub {
         service    => _service_vars($tdata->{'WebServiceOperation'}),
         message    => _message($tdata->{$mtype}, $process, $params),
         performers => _performers($activity->participants_rs),
-        users      => _performers($process->participants_rs({
-                participant_uid => $tdata->{Performers}->{Performer}
-                })
+        users      => _performers(
+            $process->participants_rs(
+                { participant_uid => $tdata->{Performers}->{Performer} }
+                )
             ),
-        };
+            };
 
     $activity_instance->update({ taskdata => $args });
 
@@ -58,13 +60,15 @@ sub _performers {
 
     my @p = ();
     while (my $rec = $p_rs->next) {
-        push(@p, {
-            id   => $rec->id,
-            type => $rec->participant_type,
-            uid  => $rec->participant_uid,
-            description   => $rec->description,
-            ext_reference => $rec->attributes->{ExternalReference},
-            });
+        push(
+            @p, {
+                id            => $rec->id,
+                type          => $rec->participant_type,
+                uid           => $rec->participant_uid,
+                description   => $rec->description,
+                ext_reference => $rec->attributes->{ExternalReference},
+            }
+            );
         }
 
     return \@p;
@@ -73,18 +77,17 @@ sub _performers {
 sub _message {
     my ($msg, $process, $params) = @_;
 
-    my $res = { args => $params  };
+    my $res = { args => $params };
 
-    foreach my $prop(qw/Id Name FaultName/) {
-        $res->{lc($prop)} = $msg->{$prop} if $msg->{$prop};
+    foreach my $prop (qw/Id Name FaultName/) {
+        $res->{ lc($prop) } = $msg->{$prop} if $msg->{$prop};
         }
 
-    foreach my $prop('To','From') {
-        if($msg->{$prop}) {
-            my $rs = $process->participants_rs({
-                participant_uid => $msg->{$prop}
-                });
-            $res->{lc($prop)} = _performers($rs);
+    foreach my $prop ('To', 'From') {
+        if ($msg->{$prop}) {
+            my $rs =
+                $process->participants_rs({ participant_uid => $msg->{$prop} });
+            $res->{ lc($prop) } = _performers($rs);
             }
         }
 
@@ -92,28 +95,28 @@ sub _message {
     }
 
 sub _service_vars {
-    my $svc  = shift;
+    my $svc = shift;
 
-    my $end  = $svc->{Service}->{EndPoint}->{ExternalReference};
+    my $end = $svc->{Service}->{EndPoint}->{ExternalReference};
 
     return {
-        name      => $svc->{Service}->{ServiceName},
-        operation => $svc->{OperationName},
-        port      => $svc->{Service}->{PortName},
-        type      => $svc->{Service}->{EndPoint}->{EndPointType},
+        name          => $svc->{Service}->{ServiceName},
+        operation     => $svc->{OperationName},
+        port          => $svc->{Service}->{PortName},
+        type          => $svc->{Service}->{EndPoint}->{EndPointType},
         ext_reference => {
             xref      => $end->{xref},
             location  => $end->{location},
             namespace => $end->{namespace},
             }
-        };
+            };
     }
 
 sub _service_params {
     my ($pi, $params) = @_;
 
     my @results = ();
-    foreach my $attr(@$params) {
+    foreach my $attr (@$params) {
         push(@results, $pi->attribute($attr->{content})->value);
         }
 

@@ -9,7 +9,7 @@ use MooseX::StrictConstructor;
 use DateTime;
 use BPM::Engine::Types qw/Bool ArrayRef CodeRef Exception Row/;
 use BPM::Engine::Exceptions qw/throw_model throw_abstract throw_runner/;
-use namespace::autoclean; # -also => [qr/^_/];
+use namespace::autoclean;    # -also => [qr/^_/];
 
 with qw/
     MooseX::Traits
@@ -18,40 +18,40 @@ with qw/
     /;
 
 BEGIN {
-  for my $event (qw/start continue complete execute/){
-    for my $entity (qw/process activity transition task/){
-        __PACKAGE__->meta->add_method( "cb_$event\_$entity" => sub {
-            my $self = shift;
-            return 1 unless $self->has_callback;
-            return $self->call_callback($self, $entity, $event, @_);
-            });
+    for my $event (qw/start continue complete execute/) {
+        for my $entity (qw/process activity transition task/) {
+            __PACKAGE__->meta->add_method(
+                "cb_$event\_$entity" => sub {
+                    my $self = shift;
+                    return 1 unless $self->has_callback;
+                    return $self->call_callback($self, $entity, $event, @_);
+                    }
+                    );
+            }
         }
     }
-  }
 
-has '+_trait_namespace' => (
-    default => 'BPM::Engine::Plugin'
+has '+_trait_namespace' => (default => 'BPM::Engine::Plugin');
+
+has 'engine' => (
+    is       => 'ro',
+    isa      => 'BPM::Engine',
+    weak_ref => 1,
     );
 
-has 'engine'   => (
+has 'process' => (
     is         => 'ro',
-    isa        => 'BPM::Engine',
-    weak_ref   => 1,
-    );
-
-has 'process'  => (
-    is         => 'ro',
-    isa        => Row['Process'],
+    isa        => Row ['Process'],
     lazy_build => 1,
     );
 
 has 'process_instance' => (
-    is         => 'ro',
-    isa        => Row['ProcessInstance'],
-    required   => 1,
+    is       => 'ro',
+    isa      => Row ['ProcessInstance'],
+    required => 1,
     );
 
-has 'graph'    => (
+has 'graph' => (
     is         => 'rw',
     lazy_build => 1,
     );
@@ -76,41 +76,39 @@ has '_is_running' => (
     isa => Bool
     );
 
-has '_activity_stack' => ( # not a stack, but a queue
-    isa => ArrayRef,
-    is => 'rw',
+has '_activity_stack' => (    # not a stack, but a queue
+    isa     => ArrayRef,
+    is      => 'rw',
     default => sub { [] },
-    traits     => ['Array'],
+    traits  => ['Array'],
     handles => {
         '_queue_count' => 'count',
         '_queue_next'  => 'shift',
         '_queue_push'  => 'push',
         '_queue_clear' => 'clear',
         }
-    );
+        );
 
-has '_deferred_stack' => ( # not a stack, but a queue
-    isa => ArrayRef,
-    is => 'rw',
+has '_deferred_stack' => (    # not a stack, but a queue
+    isa     => ArrayRef,
+    is      => 'rw',
     default => sub { [] },
-    traits     => ['Array'],
+    traits  => ['Array'],
     handles => {
         '_defer_count' => 'count',
         '_defer_next'  => 'shift',
         '_defer_push'  => 'push',
         '_defer_clear' => 'clear',
-        }
-    );
+        },
+        );
 
 sub start_process {
     my $self = shift;
 
     $self->cb_start_process($self->process, $self->process_instance);
 
-    eval {
-        $self->process_instance->apply_transition('start');
-        };
-    if($@) {
+    eval { $self->process_instance->apply_transition('start'); };
+    if ($@) {
         throw_runner error => "Could not start process: $@";
         }
 
@@ -118,19 +116,20 @@ sub start_process {
         $self->complete_process;
         return;
         };
-    
-    foreach my $activity(@start) {
-        $activity->is_start_activity or throw_model error => 'Not a start event';
-        if($activity->is_auto_start) {
-            my $ai = $activity->new_instance({
-                process_instance_id => $self->process_instance->id
-                });
+
+    foreach my $activity (@start) {
+        $activity->is_start_activity
+            or throw_model error => 'Not a start event';
+
+        if ($activity->is_auto_start) {
+            my $ai = $activity->new_instance(
+                { process_instance_id => $self->process_instance->id });
             $self->start_activity($activity, $ai, 0);
             }
         }
 
     $self->_run;
-    
+
     return;
     }
 
@@ -169,19 +168,19 @@ sub _run {
         eval {
             $self->_execute_activity_instance($act_ctx->[0], $act_ctx->[1]);
             };
-        if(my $err = $@) { 
+        if (my $err = $@) {
             throw_runner error => "Could not execute activity: $err";
             }
 
         my %acted = ();
-        $acted{$act_ctx->[0]->id}++;
+        $acted{ $act_ctx->[0]->id }++;
         $self->debug("runner: _run DrainInner " . $act_ctx->[0]->activity_uid);
         # drain deferred queue
         my %seen = ();
         while (my $def_ctx = $self->_defer_next) {
             my ($activity, $instance) = ($def_ctx->[0], $def_ctx->[1]);
-            last if $seen{$instance->id}++; # full circle on current deferreds
-            next if $acted{$activity->id}++;
+            last if $seen{ $instance->id }++; # full circle on current deferreds
+            next if $acted{ $activity->id }++;
             $instance->discard_changes;
             next unless $instance->is_deferred;
             $instance->update({ deferred => undef });
@@ -194,17 +193,17 @@ sub _run {
 
     die("Inconclusive process state") if $self->_queue_count();
 
-    if($did_something) {
+    if ($did_something) {
         die("Inconclusive processdb state") if $self->_defer_count();
         $self->_defer_clear();
         $self->_is_running(0);
         }
-    elsif($self->_defer_count) {
+    elsif ($self->_defer_count) {
         $self->debug("runner: DrainAfter");
         my %seen = ();
         while (my $def_ctx = $self->_defer_next) {
             my ($activity, $instance) = ($def_ctx->[0], $def_ctx->[1]);
-            last if $seen{$instance->id}++; # full circle on current deferreds
+            last if $seen{ $instance->id }++; # full circle on current deferreds
             #next if $acted{$activity->id}++;
             $instance->discard_changes;
             next unless $instance->is_deferred;
@@ -215,7 +214,7 @@ sub _run {
 
         $self->_is_running(0);
 
-        if($self->_queue_count) {
+        if ($self->_queue_count) {
             $self->warning("runner: SecondRun by DrainAfter");
             $self->_run;
             }
@@ -223,7 +222,7 @@ sub _run {
     else {
         $self->_is_running(0);
         }
-    
+
     return;
     }
 
@@ -236,30 +235,31 @@ sub _execute_activity_instance {
 
     my $completed = 0;
     # Route
-    if($activity->is_route_type) {
+    if ($activity->is_route_type) {
         #$self->debug("runner: route type " . $activity->activity_uid);
         $completed = 1;
         }
     # Implementations are No, Task, SubFlow or Reference
-    elsif($activity->is_implementation_type) {
-        $self->debug("runner: executing implementation activity '" .
-            $activity->activity_uid . "'");
+    elsif ($activity->is_implementation_type) {
+        $self->debug("runner: executing implementation activity '"
+                . $activity->activity_uid
+                . "'");
         $completed = $self->_execute_implementation($activity, $instance);
         }
     # BlockActivity executes an ActivitySet
-    elsif($activity->is_block_type) {
+    elsif ($activity->is_block_type) {
         $self->error("runner: BlockActivity not implemented yet ...");
         throw_abstract error => 'BlockActivity not implemented yet';
         }
     # Events just complete, for now
-    elsif($activity->is_event_type) {
+    elsif ($activity->is_event_type) {
         #$self->notice("runner: Events not implemented yet ...");
         #throw_abstract error => 'Events not implemented yet';
         $completed++;
         }
     else {
-        throw_model
-            error => "Unsupported activity type " . $activity->activity_type;
+        throw_model error => "Unsupported activity type "
+            . $activity->activity_type;
         }
 
     if ($completed && $activity->is_auto_finish) {
@@ -272,25 +272,25 @@ sub _execute_implementation {
 
     my $completed = 0;
 
-    if($activity->is_impl_subflow) {
+    if ($activity->is_impl_subflow) {
         $self->error("runner: subflows not implemented yet ...");
         throw_abstract error => 'Subflows not implemented yet';
         }
-    elsif($activity->is_impl_reference) {
+    elsif ($activity->is_impl_reference) {
         $self->error("runner: reference not implemented yet ...");
         throw_abstract error => 'Reference not implemented yet';
         }
-    elsif($activity->is_impl_task) {
-        my ($i,$j) = (0,0);
-        foreach my $task($activity->tasks->all) {
+    elsif ($activity->is_impl_task) {
+        my ($i, $j) = (0, 0);
+        foreach my $task ($activity->tasks->all) {
             # inject into sync/async event engine
-            $i++ if($self->execute_task($task, $instance));
+            $i++ if ($self->execute_task($task, $instance));
             #$i++ if $task->run($activity, $instance);
             $j++;
             }
         $completed = $i == $j ? 1 : 0;
         }
-    elsif($activity->is_impl_no) {
+    elsif ($activity->is_impl_no) {
         # 'No' implementation completes immediately
         $completed = 1;
         }
@@ -306,7 +306,7 @@ sub _execute_implementation {
 sub execute_task {
     my ($self, $task, $instance) = @_;
 
-    if($self->cb_execute_task($task, $instance)) {
+    if ($self->cb_execute_task($task, $instance)) {
         return 1;
         }
 
@@ -321,8 +321,8 @@ sub complete_activity {
     $instance->apply_transition('finish');
     $instance->update({ completed => DateTime->now() });
 
-    if($activity->is_end_activity()) {
-        unless($self->process_instance->activity_instances_rs->active->count) {
+    if ($activity->is_end_activity()) {
+        unless ($self->process_instance->activity_instances_rs->active->count) {
             $self->complete_process();
             return;
             }
@@ -331,7 +331,7 @@ sub complete_activity {
         $self->_execute_transitions($activity, $instance);
         }
 
-    if($run) {
+    if ($run) {
         $self->_run;
         }
     }
@@ -348,7 +348,7 @@ sub complete_process {
     $self->_queue_clear();
     $self->_defer_clear();
 
-    if($pi->parent_ai_id) {
+    if ($pi->parent_ai_id) {
         my $pai = $pi->parent_activity_instance;
         $self->_complete_parent_activity($pai->activity, $pai);
         }
@@ -365,68 +365,73 @@ sub _execute_transitions {
     my ($self, $activity, $instance) = @_;
 
     my $pref = { prefetch => ['from_activity', 'to_activity'] };
-    my @transitions = $activity->is_split ?
-        $activity->transitions_by_ref({},$pref)->all :
-        $activity->transitions({},$pref)->all;
-    unless(@transitions) {
+    my @transitions =
+          $activity->is_split
+        ? $activity->transitions_by_ref({}, $pref)->all
+        : $activity->transitions({}, $pref)->all;
+    unless (@transitions) {
+        my $act_id =
+               $activity->activity_name
+            || $activity->activity_uid
+            || $activity->id;
         throw_model error =>
-            "Model error: no outgoing transitions for activity '" .
-            ($activity->activity_name || $activity->activity_uid ||
-             $activity->id) . "'";
+            "Model error: no outgoing transitions for activity '$act_id'";
         }
 
-    my (@instances)                    = ();
-    my (@blocked)                      = ();
+    my (@instances) = ();
+    my (@blocked)   = ();
     my ($stop_following, $fired_count) = (0, 0);
-    my ($otherwise, $exception)        = ();
+    my ($otherwise, $exception) = ();
 
     # evaluate efferent transitions
-    foreach my $transition(@transitions) {
-        if($transition->condition_type eq 'NONE' ||
-           $transition->condition_type eq 'CONDITION') {
+    foreach my $transition (@transitions) {
+        if (   $transition->condition_type eq 'NONE'
+            || $transition->condition_type eq 'CONDITION') {
             my $t_instance;
-            unless($stop_following) {
-                $t_instance = $self->_execute_transition($transition, $instance, 0);
+            unless ($stop_following) {
+                $t_instance =
+                    $self->_execute_transition($transition, $instance, 0);
                 }
-            if($t_instance) {
+            if ($t_instance) {
                 push(@instances, [$transition, $t_instance]);
                 $fired_count++;
                 # only one transition in an XOR split can fire.
                 $stop_following++ if $activity->is_xor_split;
                 }
-            elsif($activity->is_split) {
+            elsif ($activity->is_split) {
                 my $split = $instance->split
-                    or die("No join found for split " . $activity->activity_uid);
+                    or die("No split for " . $activity->activity_uid);
                 $split->set_transition($transition->id, 'blocked');
                 push(@blocked, [$transition, $instance]);
                 }
             }
-        elsif($transition->condition_type eq 'OTHERWISE') {
+        elsif ($transition->condition_type eq 'OTHERWISE') {
             $otherwise = $transition;
             }
-        elsif($transition->condition_type eq 'DEFAULTEXCEPTION'
+        elsif ($transition->condition_type eq 'DEFAULTEXCEPTION'
             || $transition->condition_type eq 'EXCEPTION') {
             $exception = $transition;
             }
 
         }
 
-    if($fired_count == 0) {
-        unless($otherwise) {
-            throw_model(error =>
-                "Deadlock: OTHERWISE transition missing on activity '" .
-                $activity->activity_uid . "'"
-                );
+    if ($fired_count == 0) {
+        unless ($otherwise) {
+            throw_model(
+                error => "Deadlock: OTHERWISE transition missing on activity '"
+                    . $activity->activity_uid
+                    . "'");
             }
         my $t_instance = $self->_execute_transition($otherwise, $instance, 0);
-        if($t_instance) {
+        if ($t_instance) {
             push(@instances, [$otherwise, $t_instance]);
             }
         else {
-            throw_runner error => "Execution of transition with 'Otherwise' condition failed";
+            throw_runner error =>
+                "Execution of transition with 'Otherwise' condition failed";
             }
         }
-    elsif($otherwise && $activity->is_split) {
+    elsif ($otherwise && $activity->is_split) {
         my $split = $instance->split
             or die("No join found for split " . $activity->activity_uid);
         $split->set_transition($otherwise->id, 'blocked');
@@ -434,7 +439,7 @@ sub _execute_transitions {
 
     # activate successor activities
     my $followed_back = 0;
-    foreach my $inst(@instances) {
+    foreach my $inst (@instances) {
         $followed_back++ if $inst->[0]->is_back_edge;
         my $r_instance = $inst->[1];
         my $r_activity = $r_instance->activity;
@@ -444,7 +449,7 @@ sub _execute_transitions {
     # blocked paths may trigger downstream deferred activities which must now be
     # resolved; signal deferred activity instances on other branches in the
     # wf-net when paths were blocked and any transition downstream was followed
-    if(scalar(@blocked) && $followed_back != scalar @instances) {
+    if (scalar(@blocked) && $followed_back != scalar @instances) {
         $self->_signal_upstream_orjoins_if_in_split_branch(@blocked);
         }
 
@@ -456,24 +461,20 @@ sub _execute_transition {
 
     #XXX mitigate expensive debugging
     my $tid = $transition->transition_uid || $transition->id || 'noid';
-    $self->debug("runner: executing transition $tid from " .
-        $transition->from_activity->activity_uid . ' to ' .
-        $transition->to_activity->activity_uid
-        );
+    $self->debug("runner: executing transition $tid from "
+            . $transition->from_activity->activity_uid . ' to '
+            . $transition->to_activity->activity_uid);
 
     return unless $self->cb_execute_transition($transition, $from_instance);
 
-    my $to_instance = eval {
-        $transition->apply($from_instance);
-        };
+    my $to_instance = eval { $transition->apply($from_instance); };
 
     my $err = $@;
-    if($err) {
-        $self->debug("runner: transition '" .
-            $transition->transition_uid .
-            "' did not result in a new activity_instance : $err"
-            );
-        if(is_Exception($err)) {
+    if ($err) {
+        $self->debug("runner: transition '"
+                . $transition->transition_uid
+                . "' did not result in a new activity_instance : $err");
+        if (is_Exception($err)) {
             # condition false
             return if $err->isa('BPM::Engine::Exception::Condition');
             #warn $err->trace->as_string;
@@ -485,14 +486,14 @@ sub _execute_transition {
             throw_model error => $err;
             }
         }
-    elsif(!$to_instance) {
+    elsif (!$to_instance) {
         $self->error("Applying transition did not result in an instance");
         throw_runner error => "Applying transition did not return an instance";
         }
-    
+
     $self->_run if $run;
-    
-    return $to_instance;    
+
+    return $to_instance;
     }
 
 sub _enqueue_ai {
@@ -500,24 +501,26 @@ sub _enqueue_ai {
 
     $self->debug("runner: _enqueue activity " . $activity->activity_uid);
     my $should_fire = $activity->is_join ? $instance->is_enabled() : 1;
-    if($should_fire) {
-        if($instance->is_deferred) {
+    if ($should_fire) {
+        if ($instance->is_deferred) {
             #$instance->update({ deferred => \'NULL' });
             $instance->update({ deferred => undef })->discard_changes;
             }
         $instance->fire_join if $activity->is_join;
 
-        if($activity->is_auto_start) {
-            $self->debug("runner: _enqueue Pushing instance " .
-                $activity->activity_uid . " to active queue");
+        if ($activity->is_auto_start) {
+            $self->debug("runner: _enqueue Pushing instance "
+                    . $activity->activity_uid
+                    . " to active queue");
             $self->start_activity($activity, $instance, 0);
             }
         }
     else {
         $instance->update({ deferred => DateTime->now });
 
-        $self->debug("runner: _enqueue Pushing instance " .
-            $activity->activity_uid . " to deferred queue");
+        $self->debug("runner: _enqueue Pushing instance "
+                . $activity->activity_uid
+                . " to deferred queue");
 
         $self->_defer_push([$activity, $instance]) unless $deferred;
         }
@@ -528,18 +531,19 @@ sub _signal_upstream_orjoins_if_in_split_branch {
 
     my @deferred = $self->process_instance->activity_instances->deferred->all;
 
-    foreach my $instance(@deferred) {
+    foreach my $instance (@deferred) {
 
-        $self->debug("runner: _run Pushing db instance " .
-            $instance->activity->activity_uid . " to deferred queue");
+        $self->debug("runner: _run Pushing db instance "
+                . $instance->activity->activity_uid
+                . " to deferred queue");
 
         my $graph = $self->graph;
 
-        foreach my $block(@blocked) {
+        foreach my $block (@blocked) {
             my $tr   = $block->[0];
             my $ai   = $block->[1];
             my $a_to = $tr->to_activity;
-            if($graph->is_reachable($a_to->id, $instance->activity->id)) {
+            if ($graph->is_reachable($a_to->id, $instance->activity->id)) {
                 $self->_defer_push([$instance->activity, $instance]);
                 }
             }

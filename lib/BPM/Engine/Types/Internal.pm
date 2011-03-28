@@ -3,7 +3,7 @@ BEGIN {
     $BPM::Engine::Types::Internal::VERSION   = '0.001';
     $BPM::Engine::Types::Internal::AUTHORITY = 'cpan:SITETECH';
     }
-
+## no critic (RequireTidyCode)
 use strict;
 use warnings;
 

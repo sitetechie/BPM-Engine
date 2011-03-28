@@ -1,4 +1,5 @@
 package BPM::Engine;
+
 BEGIN {
     $BPM::Engine::VERSION   = '0.001';
     $BPM::Engine::AUTHORITY = 'cpan:SITETECH';
@@ -28,7 +29,7 @@ with 'BPM::Engine::Role::EngineAPI';
 
 #has '+configfile'       => ( default => '/etc/bpmengine/engine.yaml' );
 
-has '+_trait_namespace' => ( default => 'BPM::Engine::Trait' );
+has '+_trait_namespace' => (default => 'BPM::Engine::Trait');
 
 has 'runner_traits' => (
     isa       => ArrayRef,
@@ -47,7 +48,7 @@ sub runner {
         engine           => $self,
         logger           => $self->logger,
         };
-    $args->{callback} = $self->callback if $self->has_callback;
+    $args->{callback} = $self->callback      if $self->has_callback;
     $args->{traits}   = $self->runner_traits if $self->has_runner_traits;
 
     return BPM::Engine::ProcessRunner->new_with_traits($args);

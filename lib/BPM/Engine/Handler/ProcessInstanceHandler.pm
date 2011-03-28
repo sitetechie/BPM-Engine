@@ -3,7 +3,7 @@ BEGIN {
     $BPM::Engine::Handler::ProcessInstanceHandler::VERSION   = '0.001';
     $BPM::Engine::Handler::ProcessInstanceHandler::AUTHORITY = 'cpan:SITETECH';
     }
-## no critic (RequireEndWithOne)
+## no critic (RequireEndWithOne, RequireTidyCode)
 use MooseX::Declare;
 
 role BPM::Engine::Handler::ProcessInstanceHandler {

@@ -8,17 +8,17 @@ use namespace::autoclean;
 use Moose::Role;
 
 requires qw(
-  log
-  
-  debug
-  info
-  notice
-  warning
-  error
-  critical
-  alert
-  emergency
-);
+    log
+
+    debug
+    info
+    notice
+    warning
+    error
+    critical
+    alert
+    emergency
+    );
 
 no Moose::Role;
 

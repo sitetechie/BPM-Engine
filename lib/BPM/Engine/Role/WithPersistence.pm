@@ -18,11 +18,11 @@ has schema => (
     );
 
 has 'connect_info' => (
-    is         => 'ro',
-    isa        => ConnectInfo,
-    coerce     => 1,
-    required   => 0,
-    predicate  => 'has_connect_info',
+    is        => 'ro',
+    isa       => ConnectInfo,
+    coerce    => 1,
+    required  => 0,
+    predicate => 'has_connect_info',
     );
 
 sub _build_schema {
@@ -33,17 +33,17 @@ sub _build_schema {
 
 sub BUILD {
     my $self = shift;
-    
+
     confess "Either 'connect_info' or 'schema' must be supplied"
         unless ($self->has_connect_info || $self->has_schema);
-    
+
     return;
     }
 
 around 'BUILDARGS' => sub {
     my $orig = shift;
     my $args = $orig->(@_);
-    
+
     throw_param error => "Invalid connection arguments"
         unless ($args->{connect_info} || $args->{schema});
 
