@@ -41,6 +41,7 @@ build_requires  'Test::Exception'            => '0.29';
 build_requires  'Test::Moose'                => '1.17';
 build_requires  'Test::Fatal'                => '0.003';
 build_requires  'Test::Requires'             => '0.06';
+build_requires  'Test::NoWarnings'           => '1.02';
 
 requires        'aliased'                    => '0';
 requires        'parent'                     => '0';
