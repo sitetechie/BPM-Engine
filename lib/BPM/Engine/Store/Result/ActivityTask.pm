@@ -4,11 +4,12 @@ BEGIN {
     $BPM::Engine::Store::Result::ActivityTask::AUTHORITY = 'cpan:SITETECH';
     }
 
-use namespace::autoclean;
 use Moose;
-extends qw/DBIx::Class Moose::Object/;
+use MooseX::NonMoose;
+use namespace::autoclean;
+extends 'DBIx::Class::Core';
 
-__PACKAGE__->load_components(qw/ InflateColumn::Serializer Core /);
+__PACKAGE__->load_components(qw/ InflateColumn::Serializer /);
 __PACKAGE__->table('wfd_activity_task');
 __PACKAGE__->add_columns(
     task_id => {
@@ -82,6 +83,16 @@ __PACKAGE__->belongs_to(
 
 __PACKAGE__->belongs_to( # might_have?
     application => 'BPM::Engine::Store::Result::Application', 'application_id'
+    );
+
+__PACKAGE__->has_many(
+    performers => 'BPM::Engine::Store::Result::Performer',
+    { 'foreign.container_id' => 'self.task_id' },
+    { where => { 'performer_scope' => 'Task' } }
+    );
+
+__PACKAGE__->many_to_many(
+    participants => 'performers', 'participant'
     );
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );

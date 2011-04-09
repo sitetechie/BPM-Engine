@@ -16,6 +16,19 @@ role BPM::Engine::Handler::ProcessDefinitionHandler {
       return $self->schema->resultset('Package')->search_rs(@args);
       }
 
+  method get_package (UUID|HashRef $id, HashRef $args = {}) {
+
+      my $pid = ref($id) ? $id : { package_id => $id };
+
+      return $self->schema->resultset('Package')->find($pid, $args)
+          || do {
+            my $pack = $pid->{package_id} || $pid->{package_uid} || '';
+            my $error = "Package $pack not found";
+            $self->logger->error($error);
+            throw_store(error => $error);
+            };
+      }  
+  
   method create_package (Str|ScalarRef|LibXMLDoc $args) {
 
       my $package = eval {
@@ -45,7 +58,7 @@ role BPM::Engine::Handler::ProcessDefinitionHandler {
       return $self->schema->resultset('Process')->search_rs(@args);
       }
 
-  method get_process_definition (Int|HashRef $id, HashRef $args = {}) {
+  method get_process_definition (UUID|HashRef $id, HashRef $args = {}) {
 
       my $pid = ref($id) ? $id : { process_id => $id };
 
@@ -53,7 +66,7 @@ role BPM::Engine::Handler::ProcessDefinitionHandler {
           || do {
             my $proc = $pid->{process_id} || $pid->{process_uid} || '';
             my $error = "Process $proc not found";
-            $self->error($error);
+            $self->logger->error($error);
             throw_store(error => $error);
             };
       }

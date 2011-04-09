@@ -6,10 +6,11 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
-extends qw/DBIx::Class Moose::Object/;
+use MooseX::NonMoose;
+extends qw/DBIx::Class::Core/;
 with qw/Class::Workflow::Instance/;
 
-__PACKAGE__->load_components(qw/ Core /);
+__PACKAGE__->load_components(qw/TimeStamp/);
 __PACKAGE__->table('wfe_activity_instance_journal');
 __PACKAGE__->add_columns(
     event_id => {
@@ -39,6 +40,13 @@ __PACKAGE__->add_columns(
     prev => {
         data_type         => 'INT',
         is_nullable       => 1,
+        size              => 11,        
+        },
+    created => {
+        data_type         => 'DATETIME',
+        is_nullable       => 1,
+        set_on_create     => 1,
+        timezone          => 'UTC',
         },
     );
 

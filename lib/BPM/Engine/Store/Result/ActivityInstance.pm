@@ -15,7 +15,7 @@ BEGIN {
              BPM::Engine::Store::ResultRole::WithAttributes/;
   }
 
-__PACKAGE__->load_components(qw/ Core /);
+__PACKAGE__->load_components(qw/InflateColumn::Serializer/);
 __PACKAGE__->table('wfe_activity_instance'); #process_token
 __PACKAGE__->add_columns(
     token_id => {
@@ -166,7 +166,7 @@ sub insert {
     $self->discard_changes;
     
     my $state = $self->create_related('state_events', {
-        state => $self->workflow->initial_state,
+        state => $self->workflow->get_state($self->workflow->initial_state),
         });    
     $self->update({ workflow_instance_id => $state->id });    
     
@@ -196,8 +196,9 @@ sub TO_JSON {
     my %struct = map { $_ => $self->$_ } grep { $self->$_ }
         (qw/
             token_id parent_token_id process_instance_id activity_id
-            transition_id workflow_instance_id prev tokenset 
+            transition_id workflow_instance_id tokenset 
              taskresult created deferred completed
+             state
             /); # taskdata inputset # 
     
     foreach my $rel(qw/workitems attributes prev next/) { #  activity

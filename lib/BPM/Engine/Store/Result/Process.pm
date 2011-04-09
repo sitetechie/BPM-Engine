@@ -6,22 +6,18 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
-BEGIN {
 extends qw/BPM::Engine::Store::Result/;
 with    qw/BPM::Engine::Store::ResultBase::Process
            BPM::Engine::Store::ResultRole::WithAssignments
           /;
-}
-__PACKAGE__->load_components(qw/ Core /);
+
+__PACKAGE__->load_components(qw/
+    InflateColumn::DateTime InflateColumn::Serializer UUIDColumns
+    /);
+
 __PACKAGE__->table('wfd_process');
 __PACKAGE__->add_columns(
     process_id => {
-        data_type         => 'INT',
-        is_auto_increment => 1,
-        is_nullable       => 0,
-        extras            => { unsigned => 1 }
-        },
-    process_uuid => {
         data_type         => 'CHAR',
         size              => 36,
         is_nullable       => 0,
@@ -90,12 +86,6 @@ __PACKAGE__->add_columns(
         size              => 20,
         is_nullable       => 1,
         },
-    participant_list_id => {
-        data_type         => 'INT',
-        is_foreign_key    => 1,
-        is_nullable       => 0,
-        extras            => { unsigned => 1 }
-        },
     data_fields => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -124,10 +114,10 @@ __PACKAGE__->add_columns(
     );
 
 __PACKAGE__->set_primary_key('process_id');
-__PACKAGE__->uuid_columns('process_uuid');
+__PACKAGE__->uuid_columns('process_id');
 __PACKAGE__->add_unique_constraint( [qw/package_id process_uid version/] );
 
-__PACKAGE__->might_have(
+__PACKAGE__->belongs_to(
     'package' => 'BPM::Engine::Store::Result::Package',
     { 'foreign.package_id' => 'self.package_id' }
     );
@@ -144,14 +134,17 @@ __PACKAGE__->has_many(
     instances => 'BPM::Engine::Store::Result::ProcessInstance','process_id'
     );
 
-__PACKAGE__->belongs_to(
-    participant_list => 'BPM::Engine::Store::Result::ParticipantList',
-    'participant_list_id', { cascade_delete => 1 }
+__PACKAGE__->has_many(
+    scoped_participants => 'BPM::Engine::Store::Result::Participant',
+    { 'foreign.parent_node' => 'self.process_id' },
+    { where => { participant_scope => 'Process' } }
     );
 
 __PACKAGE__->has_many(
     participants => 'BPM::Engine::Store::Result::Participant',
-    'participant_list_id'
+    [{ 'foreign.parent_node' => 'self.process_id' },
+     { 'foreign.parent_node' => 'self.package_id' },
+    ],
     );
 
 with 'BPM::Engine::Store::ResultRole::WithGraph';
@@ -162,16 +155,6 @@ sub new {
     $attrs->{process_name} ||= $attrs->{process_uid};
 
     return $class->next::method($attrs);
-    }
-
-sub insert {
-    my ($self, @args) = @_;
-
-    my $plist = $self->result_source->schema
-        ->resultset('ParticipantList')->create({});
-    $self->participant_list_id($plist->id);
-
-    $self->next::method(@args);
     }
 
 sub TO_JSON {

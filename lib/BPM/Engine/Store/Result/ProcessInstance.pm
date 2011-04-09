@@ -14,7 +14,7 @@ use Silly::Werder;
 
 my $WORDGEN = Silly::Werder->new();
 
-__PACKAGE__->load_components(qw/DynamicDefault Core /);
+__PACKAGE__->load_components(qw/TimeStamp DynamicDefault/);
 __PACKAGE__->table('wfe_process_instance');
 __PACKAGE__->add_columns(
     instance_id => {
@@ -24,11 +24,11 @@ __PACKAGE__->add_columns(
         extras            => { unsigned => 1 }
         },
     process_id => {
-        data_type         => 'INT',
+        data_type         => 'CHAR',
+        size              => 36,
         is_nullable       => 0,
         is_foreign_key    => 1,
-        extras            => { unsigned => 1 },
-        },
+        },    
     parent_ai_id => {     # parent blockactivity
         data_type         => 'INT',
         is_nullable       => 1,
@@ -96,7 +96,7 @@ sub insert {
     $self->discard_changes;
 
     my $rel = $self->create_related('state_events', {
-        state => $self->workflow->initial_state,
+        state => $self->workflow->get_state($self->workflow->initial_state),
         });
     $self->update({ workflow_instance_id => $rel->id });
 

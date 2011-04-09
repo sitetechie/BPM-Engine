@@ -30,10 +30,10 @@ __PACKAGE__->add_columns(
         is_nullable       => 1,
         },
     process_id => {
-        data_type         => 'INT',
-        is_foreign_key    => 1,
+        data_type         => 'CHAR',
+        size              => 36,
         is_nullable       => 0,
-        extras            => { unsigned => 1 },
+        is_foreign_key    => 1,
         },    
     process_instance_id => {
         data_type         => 'INT',

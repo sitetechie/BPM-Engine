@@ -6,13 +6,11 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
-#BEGIN {
-  extends qw/BPM::Engine::Store::Result Moose::Object/;
-  with    qw/BPM::Engine::Store::ResultBase::Activity
-             BPM::Engine::Store::ResultRole::WithAssignments/;
-#  }
+extends qw/BPM::Engine::Store::Result/;
+with    qw/BPM::Engine::Store::ResultBase::Activity
+           BPM::Engine::Store::ResultRole::WithAssignments/;
 
-__PACKAGE__->load_components(qw/ Core /);
+__PACKAGE__->load_components(qw/ InflateColumn::Serializer /);
 __PACKAGE__->table('wfd_activity');
 __PACKAGE__->add_columns(
     activity_id => {
@@ -22,17 +20,11 @@ __PACKAGE__->add_columns(
         extras            => { unsigned => 1 }
         },
     process_id => {
-        data_type         => 'INT',
+        data_type         => 'CHAR',
+        size              => 36,
         is_nullable       => 0,
         is_foreign_key    => 1,
-        extras            => { unsigned => 1 },
-        },
-    # not used, may become 'lane' or 'pool'
-    performer_participant_id => {
-        data_type         => 'INT',
-        is_nullable       => 1,
-        is_foreign_key    => 1,
-        },
+        },    
     activity_uid => {
         data_type         => 'VARCHAR',
         size              => 64,
@@ -225,8 +217,11 @@ __PACKAGE__->has_many(
 
 # performers and participants
 __PACKAGE__->has_many(
-    performers => 'BPM::Engine::Store::Result::ActivityPerformer', 'activity_id'
+    performers => 'BPM::Engine::Store::Result::Performer',
+    { 'foreign.container_id' => 'self.activity_id' },
+    { where => { performer_scope => 'Activity' } }
     );
+
 __PACKAGE__->many_to_many(
     participants => 'performers', 'participant'
     );

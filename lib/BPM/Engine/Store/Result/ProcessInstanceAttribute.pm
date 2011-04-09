@@ -7,9 +7,9 @@ BEGIN {
 use namespace::autoclean;
 use Moose;
 use BPM::Engine::Exceptions qw/throw_abstract/;
-extends qw/BPM::Engine::Store::Result Moose::Object/;
+extends qw/BPM::Engine::Store::Result/;
 
-__PACKAGE__->load_components(qw/ Core /);
+__PACKAGE__->load_components(qw/InflateColumn::Serializer/);
 __PACKAGE__->table('wfe_process_instance_attr');
 __PACKAGE__->add_columns(
     process_instance_id => {

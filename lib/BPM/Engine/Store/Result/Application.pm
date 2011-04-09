@@ -62,8 +62,15 @@ __PACKAGE__->set_primary_key(qw/ application_id /);
 __PACKAGE__->might_have(
     'package' => 'BPM::Engine::Store::Result::Package',
     { 'foreign.package_id' => 'self.parent_node' },
-    { application_scope => 'package' }
+    { application_scope => 'Package' }
     );
+
+__PACKAGE__->might_have(
+    'process' => 'BPM::Engine::Store::Result::Process',
+    { 'foreign.process_id' => 'self.parent_node' },
+    { application_scope => 'Process' }
+    );
+
 
 1;
 __END__

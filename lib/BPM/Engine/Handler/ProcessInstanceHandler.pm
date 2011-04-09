@@ -9,6 +9,7 @@ use MooseX::Declare;
 role BPM::Engine::Handler::ProcessInstanceHandler {
 
   use Scalar::Util qw/blessed/;
+  use BPM::Engine::Types qw/UUID/;  
   use BPM::Engine::Exceptions qw/throw_store throw_abstract/;
   use aliased 'BPM::Engine::Store::Result::Process';
   use aliased 'BPM::Engine::Store::Result::ProcessInstance';
@@ -16,7 +17,7 @@ role BPM::Engine::Handler::ProcessInstanceHandler {
   requires 'runner';
   requires 'get_process_definition';
 
-  method create_process_instance (Int|Process $process, HashRef $args = {}) {
+  method create_process_instance (UUID|Process $process, HashRef $args = {}) {
 
       $process =
         $self->get_process_definition($process, { prefetch => 'package' })

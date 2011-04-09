@@ -6,13 +6,13 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
-extends qw/BPM::Engine::Store::Result Moose::Object/;
+extends qw/BPM::Engine::Store::Result/;
 with qw/
            BPM::Engine::Store::ResultBase::ProcessTransition
            BPM::Engine::Store::ResultRole::WithAssignments
        /;
 
-__PACKAGE__->load_components(qw/ Core /);
+#__PACKAGE__->load_components(qw/ Core /);
 __PACKAGE__->table('wfd_transition');
 __PACKAGE__->add_columns(
     transition_id => {
@@ -22,11 +22,11 @@ __PACKAGE__->add_columns(
         extras            => { unsigned => 1 }
         },    
     process_id => {
-        data_type         => 'INT',
+        data_type         => 'CHAR',
+        size              => 36,
         is_nullable       => 0,
         is_foreign_key    => 1,
-        extras            => { unsigned => 1 },        
-        },
+        },    
     from_activity_id => { # state
         data_type         => 'INT',
         is_nullable       => 0,
@@ -139,3 +139,10 @@ sub to_join {
 
 1;
 __END__
+
+    process_id => {
+        data_type         => 'INT',
+        is_nullable       => 0,
+        is_foreign_key    => 1,
+        extras            => { unsigned => 1 },
+        },

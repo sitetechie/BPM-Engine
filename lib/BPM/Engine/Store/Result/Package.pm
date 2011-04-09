@@ -6,7 +6,7 @@ BEGIN {
 
 use strict;
 use warnings;
-use base qw/DBIx::Class/;
+use base qw/DBIx::Class::Core/;
 
 __PACKAGE__->load_components(qw/ InflateColumn::Serializer UUIDColumns Core /);
 __PACKAGE__->table('wfd_package');
@@ -114,12 +114,6 @@ __PACKAGE__->add_columns(
         size              => 255,
         is_nullable       => 1,
         },
-    participant_list_id => {
-        data_type         => 'INT',
-        is_foreign_key    => 1,
-        is_nullable       => 0,
-        extras            => { unsigned => 1 }
-        },    
     responsible_list_id => {
         data_type         => 'VARCHAR',
         size              => 20,
@@ -149,27 +143,13 @@ __PACKAGE__->has_many(
     processes => 'BPM::Engine::Store::Result::Process','package_id'
     );
 
-__PACKAGE__->belongs_to(
-    participant_list => 'BPM::Engine::Store::Result::ParticipantList', 
-    'participant_list_id', { cascade_delete => 1 }
-    );
-
 __PACKAGE__->has_many(
     participants => 'BPM::Engine::Store::Result::Participant',
-    'participant_list_id'
+    { 'foreign.parent_node' => 'self.package_id' }, 
+    { where => { participant_scope => 'Package' } }
     );
 
 #__PACKAGE__->many_to_many( package_transitions => 'processes', 'transitions' );
-
-sub insert {
-    my ($self, @args) = @_;
-
-    my $plist = $self->result_source->schema
-        ->resultset('ParticipantList')->create({});
-    $self->participant_list_id($plist->id);
-
-    $self->next::method(@args);
-    }
 
 sub TO_JSON {
     my $self = shift;
