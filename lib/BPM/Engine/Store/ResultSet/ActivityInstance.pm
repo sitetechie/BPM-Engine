@@ -38,6 +38,23 @@ sub completed {
                   { order_by => \'deferred ASC' })->search(@args);
     }
 
+sub TO_JSON {
+    my $rs = shift;
+    my @instances = ();
+    while(my $row = $rs->next) {
+        my $instance = $row->TO_JSON;
+        $instance->{uri} = '/wfcs/activities/' . $row->id;
+        push(@instances, $instance);
+        }
+    
+    return {
+        total     => $rs->pager->total_entries, # scalar @instances, totalResultsAvailable
+        row_count => $rs->pager->entries_on_this_page, # totalResultsReturned
+        page      => $rs->pager->current_page, # firstResultPosition
+        results   => [ @instances ],
+        };
+    }
+
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 
 1;
