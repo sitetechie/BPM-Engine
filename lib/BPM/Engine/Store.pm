@@ -51,15 +51,13 @@ Prefix: wfd_
 
 =item * Participant
 
-=item * ParticipantList
-
 =item * Application
 
 =item * Process
 
 =item * Activity
 
-=item * ActivityPerformer
+=item * Performer
 
 =item * ActivityTask
 
