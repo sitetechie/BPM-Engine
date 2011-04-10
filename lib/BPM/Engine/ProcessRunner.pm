@@ -7,8 +7,9 @@ BEGIN {
 use Moose;
 use MooseX::StrictConstructor;
 use DateTime;
-use BPM::Engine::Types qw/Bool ArrayRef CodeRef Exception Row/;
+use BPM::Engine::Types qw/Bool ArrayRef HashRef CodeRef Exception Row/;
 use BPM::Engine::Exceptions qw/throw_model throw_abstract throw_runner/;
+use BPM::Engine::Util::ExpressionEvaluator;
 use namespace::autoclean;    # -also => [qr/^_/];
 
 with qw/
@@ -41,13 +42,13 @@ has 'engine' => (
 
 has 'process' => (
     is         => 'ro',
-    isa        => Row ['Process'],
+    isa        => Row['Process'],
     lazy_build => 1,
     );
 
 has 'process_instance' => (
     is       => 'ro',
-    isa      => Row ['ProcessInstance'],
+    isa      => Row['ProcessInstance'],
     required => 1,
     );
 
@@ -55,6 +56,33 @@ has 'graph' => (
     is         => 'rw',
     lazy_build => 1,
     );
+
+has 'stash' => ( # heap
+    is      => 'rw',
+    isa     => HashRef,
+    default => sub { {} },
+    #traits => [qw(MergeHashRef)],
+    );
+
+has 'dryrun' => ( # simulate
+    is            => 'ro',
+    isa           => Bool,
+    default       => 0,
+    #documentation => 'Make a dry-run and do not execute any tasks [Default: False]',
+    );
+
+has 'evaluator' => (
+    is         => 'rw',
+    lazy_build => 1,
+    );
+    
+sub _build_evaluator {
+    my $self = shift;
+    return BPM::Engine::Util::ExpressionEvaluator->load(
+        process          => $self->process,
+        process_instance => $self->process_instance,
+        );
+    }
 
 with qw/
     BPM::Engine::Role::HandlesIO
@@ -234,11 +262,13 @@ sub _execute_activity_instance {
     return unless $self->cb_execute_activity($activity, $instance);
 
     my $completed = 0;
+    
     # Route
     if ($activity->is_route_type) {
         #$self->debug("runner: route type " . $activity->activity_uid);
         $completed = 1;
         }
+    
     # Implementations are No, Task, SubFlow or Reference
     elsif ($activity->is_implementation_type) {
         $self->debug("runner: executing implementation activity '"
@@ -246,11 +276,13 @@ sub _execute_activity_instance {
                 . "'");
         $completed = $self->_execute_implementation($activity, $instance);
         }
+    
     # BlockActivity executes an ActivitySet
     elsif ($activity->is_block_type) {
         $self->error("runner: BlockActivity not implemented yet ...");
         throw_abstract error => 'BlockActivity not implemented yet';
         }
+    
     # Events just complete, for now
     elsif ($activity->is_event_type) {
         #$self->notice("runner: Events not implemented yet ...");
@@ -285,7 +317,6 @@ sub _execute_implementation {
         foreach my $task ($activity->tasks->all) {
             # inject into sync/async event engine
             $i++ if ($self->execute_task($task, $instance));
-            #$i++ if $task->run($activity, $instance);
             $j++;
             }
         $completed = $i == $j ? 1 : 0;
@@ -317,8 +348,9 @@ sub complete_activity {
     my ($self, $activity, $instance, $run) = @_;
 
     $self->cb_complete_activity($activity, $instance);
-
+    
     $instance->apply_transition('finish');
+    $instance->fire_join if $activity->is_join;    
     $instance->update({ completed => DateTime->now() });
 
     if ($activity->is_end_activity()) {
@@ -331,9 +363,7 @@ sub complete_activity {
         $self->_execute_transitions($activity, $instance);
         }
 
-    if ($run) {
-        $self->_run;
-        }
+    $self->_run if $run;
     }
 
 sub complete_process {
@@ -465,7 +495,7 @@ sub _execute_transition {
             . $transition->from_activity->activity_uid . ' to '
             . $transition->to_activity->activity_uid);
 
-    return unless $self->cb_execute_transition($transition, $from_instance);
+    $self->cb_execute_transition($transition, $from_instance);
 
     my $to_instance = eval { $transition->apply($from_instance); };
 
@@ -506,7 +536,7 @@ sub _enqueue_ai {
             #$instance->update({ deferred => \'NULL' });
             $instance->update({ deferred => undef })->discard_changes;
             }
-        $instance->fire_join if $activity->is_join;
+        #$instance->fire_join if $activity->is_join;
 
         if ($activity->is_auto_start) {
             $self->debug("runner: _enqueue Pushing instance "
@@ -579,6 +609,10 @@ BPM::Engine::ProcessRunner - Runs Processes
 
   my $runner = BPM::Engine::ProcessRunner->new();
   $runner->start_process();
+
+  # somewhere else, after completing a task, from an asynchronous task handler...
+  
+  $runner->complete_activity($activity, $instance, 1);
 
 =head1 DESCRIPTION
 

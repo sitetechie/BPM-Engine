@@ -6,12 +6,12 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose::Role;
-use BPM::Engine::Types qw/ConnectInfo/;
+use BPM::Engine::Types qw/ConnectInfo Schema/;
 use BPM::Engine::Store;
 use BPM::Engine::Exceptions qw/throw_param/;
 
 has schema => (
-    isa        => 'BPM::Engine::Store',
+    isa        => Schema['BPM::Engine::Store'],
     is         => 'ro',
     lazy_build => 1,
     predicate  => 'has_schema',
