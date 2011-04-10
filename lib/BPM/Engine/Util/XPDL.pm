@@ -13,14 +13,13 @@ use XML::LibXML;
 use XML::LibXML::XPathContext;
 use BPM::XPDL;
 use BPM::Engine::Types qw/Exception/;
-use BPM::Engine::Exceptions qw/throw_model throw_install/;
+use BPM::Engine::Exceptions qw/throw_model throw_install throw_param/;
 
-use Exporter qw(import);
-use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(xml_doc xpdl_doc xpdl_hash);
+use parent qw/Exporter/;
+our @EXPORT = qw/xml_doc xpdl_doc xpdl_hash/;
 
 sub xml_doc {
-    my $arg = shift or die("Empty file or string"); # file or string
+    my $arg = shift or throw_param error => "Empty file or string";
 
     my $parser = XML::LibXML->new;
     my $doc = undef;
@@ -31,19 +30,20 @@ sub xml_doc {
             die "Invalid XML: $@" if $@;
             }
         elsif(!ref($arg)) {
-            die "Invalid XML: Empty file name" unless $arg;
+            throw_param error => "Invalid XML: Empty file name" unless $arg;
             unless(-f $arg) {
                 $arg = File::Basename::fileparse($arg);
-                die "File '$arg' not found";
+                throw_param error => "File '$arg' not found";
                 }
             $doc = eval { $parser->parse_file($arg); };
             die "Invalid XML: $@" if $@;
             }
         else {
-            die "Invalid argument ref '$arg'";
+            throw_param error => "Invalid argument ref '$arg'";
             }
         };
     if(my $err = $@) {
+        $err->rethrow() if(is_Exception($err));
         throw_model error => $err;
         }
 
@@ -78,12 +78,12 @@ sub xpdl_doc {
 
         eval { $schema->validate($doc); };
         
-        if($@) {
-            if(ref($@) eq 'XML::LibXML::Error') {
-                die "Non-conformant XML: " . $@->message .
-                 " in file " . File::Basename::fileparse($@->file) .
+        if(my $err = $@) {
+            if(ref($err) eq 'XML::LibXML::Error') {
+                die "Non-conformant XML: " . $err->message .
+                 " in file " . File::Basename::fileparse($err->file) .
                  " (schema " . File::Basename::fileparse($schema_file) . ")" .
-                 ($@->line ? ' line ' . $@->line : '');
+                 ($err->line ? ' line ' . $err->line : '');
                 #die $@ if $@->level > 2;
                 }
             else {
@@ -91,6 +91,7 @@ sub xpdl_doc {
                 }
             }
         };
+    
     if(my $err = $@) {
         $err->rethrow() if(is_Exception($err));
         throw_model error => $err;
