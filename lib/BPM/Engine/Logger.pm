@@ -8,10 +8,7 @@ use namespace::autoclean;
 use Moose;
 use MooseX::StrictConstructor;
 
-with qw/
-    BPM::Engine::Role::LoggerAPI
-    MooseX::LogDispatch::Levels
-    /;
+with qw/MooseX::LogDispatch::Levels MooseX::LogDispatch::Interface/;
 
 $Log::Dispatch::Config::CallerDepth = 1;
 

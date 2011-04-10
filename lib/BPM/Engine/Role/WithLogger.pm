@@ -9,16 +9,25 @@ use Moose::Role;
 use BPM::Engine::Logger;
 
 has 'logger' => (
-    does       => 'BPM::Engine::Role::LoggerAPI',
+    does       => 'MooseX::LogDispatch::Interface',
     is         => 'ro',
     lazy_build => 1,
-    handles    => 'BPM::Engine::Role::LoggerAPI',
+    handles    => 'MooseX::LogDispatch::Interface',
     );
 
 has 'log_dispatch_conf' => (
-    is      => 'ro',
-    lazy    => 1,
-    default => '/etc/bpmengine/logger.conf',
+    is       => 'ro',
+    #isa      => 'Log::Dispatch::Configurator|Str|HashRef',
+    lazy     => 1,
+    required => 1,
+    default  => sub {
+        return {
+            class     => 'Log::Dispatch::Screen',
+            min_level => 'info',
+            stderr    => 1,
+            format    => '[%p] %m at %F line %L%n',
+            };
+        },
     );
 
 sub _build_logger {
