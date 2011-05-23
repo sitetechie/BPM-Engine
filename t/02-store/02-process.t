@@ -31,7 +31,6 @@ ok($p_meta->does_role('BPM::Engine::Store::ResultRole::WithAssignments'), '... P
 ok($p_meta->does_role('BPM::Engine::Store::ResultRole::WithGraph'), '... Process->meta does_role Store::ResultRole::WithGraph');
 
 is($process->process_name('A Process'),'A Process');
-ok($process->participant_list_id);
 
 my $activity = $process->add_to_activities({
     activity_uid     => 1,

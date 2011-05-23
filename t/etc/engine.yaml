@@ -7,6 +7,6 @@ connect_info:
     sqlite_unicode: 1
     #mysql_enable_utf8: 1
     #pg_enable_utf8: 1
-    on_connect_call: use_foreign_keys
-    on_connect_do:
-      - PRAGMA synchronous = OFF
+    #on_connect_call: use_foreign_keys
+    #on_connect_do:
+    #  - PRAGMA synchronous = OFF

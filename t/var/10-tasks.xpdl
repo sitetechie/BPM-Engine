@@ -45,6 +45,13 @@
                     </DataType>
                 </FormalParameter>
             </FormalParameters>
+
+            <Participants>
+                <Participant Id="Sales" Name="Sales">
+                    <ParticipantType Type="ROLE"/>
+                </Participant>
+            </Participants>
+
             <Activities>
 
 <!-- Send -->
@@ -219,8 +226,6 @@
                         </Task> 
                     </Implementation> 
                 </Activity>
-
-
 
             </Activities>
             <Transitions>

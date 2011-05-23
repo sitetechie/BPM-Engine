@@ -33,6 +33,10 @@ isa_ok($ai, 'BPM::Engine::Store::Result::ActivityInstance');
 
 is($pi->activity_instances->count, 1, 'AI count matches');
 
+my $ai_meta = $ai->meta;
+ok($ai_meta->does_role('BPM::Engine::Store::ResultBase::ActivityInstance'), '... ActivityInstance->meta does_role Store::ResultBase::ActivityInstance');
+ok(!$ai_meta->does_role('Class::Workflow::Instance'), '... ActivityInstance->meta does not do role Class::Workflow::Instance');
+
 #-- activity_instance interface
 
 is($ai->process_instance->id, $pi->id);

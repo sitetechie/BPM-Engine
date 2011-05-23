@@ -4,8 +4,6 @@ use Test::More;
 use Test::Exception;
 use t::TestUtils;
 
-use Data::Dumper;
-
 #-- InitialValue in FormalParameters/DataFields
 
 my $xml = q|
@@ -39,11 +37,7 @@ my ($engine, $process) = process_wrap($xml);
 my $pi = $process->new_instance();
 
 is($pi->attribute('number')->value, 55);
-#warn Dumper $pi->attribute('number')->value;
-
 is($pi->attribute('string')->value, 'Some Thing');
-#warn Dumper $pi->attribute('array')->value;
-
 is_deeply($pi->attribute('array')->value, [55,56]);
 is_deeply($pi->attribute('hash')->value, { some => 'thing' });
 is_deeply($pi->attribute('hasharray')->value, [{ nr => 55, desc => ['thing'] }]);

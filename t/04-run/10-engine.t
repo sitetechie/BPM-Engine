@@ -256,7 +256,7 @@ my $str = '';
 throws_ok( sub { $engine->create_package(\$str) }, qr/Empty String/, 'Validation failed' );
 throws_ok( sub { $engine->create_package(\$str) }, 'BPM::Engine::Exception::Model', 'Validation failed' );
 throws_ok( sub { $engine->create_package($str) }, qr/Empty file/, 'Empty String' );
-throws_ok( sub { $engine->create_package($str) }, 'BPM::Engine::Exception::Model', 'Validation failed' );
+throws_ok( sub { $engine->create_package($str) }, 'BPM::Engine::Exception::Parameter', 'Validation failed' );
 
 my $doc = XML::LibXML->new->parse_string('<root/>');
 throws_ok( sub { $engine->create_package($doc) }, qr/XPDLVersion not defined/, 'Validation failed' );
@@ -312,8 +312,8 @@ isa_ok($process, 'BPM::Engine::Store::Result::Process');
 
 throws_ok( sub { $engine->create_process_instance() },          qr/Validation failed/, 'Validation failed' );
 throws_ok( sub { $engine->create_process_instance('string') },  qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->create_process_instance(987654321) }, qr/Process 987654321 not found/, 'Validation failed' );
-throws_ok( sub { $engine->create_process_instance(987654321) }, 'BPM::Engine::Exception::Database', 'Validation failed' );
+throws_ok( sub { $engine->create_process_instance(987654321) }, qr/Validation failed/, 'Validation failed' );
+throws_ok( sub { $engine->create_process_instance('3C2B6B44-E2DB-1014-857D-7D16527AAD97') }, qr/Process 3C2B6B44-E2DB-1014-857D-7D16527AAD97 not found/, 'Process not found' );
 
 ok(my $pi0 = $engine->create_process_instance($process->id));
 isa_ok($pi0, 'BPM::Engine::Store::Result::ProcessInstance');

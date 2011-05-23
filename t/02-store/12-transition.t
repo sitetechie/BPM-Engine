@@ -9,12 +9,9 @@ use BPM::Engine::Store;
 use DateTime;
 use Data::Dumper;
 
-my ($engine, $process);
-
 #-- OR inclusive join
 # after all valid transitions join fires
-if(1) {
-    my $x = '<Activities>
+my $x = '<Activities>
                 <Activity Id="A">
                     <TransitionRestrictions>
                         <TransitionRestriction>
@@ -63,21 +60,31 @@ if(1) {
             </Transitions>
     ';
 
-    #$x =~ s/StartMode="Manual" FinishMode="Manual"//g;
-    ($engine, $process) = process_wrap($x);
-    ok($process);
+#$x =~ s/StartMode="Manual" FinishMode="Manual"//g;
+my ($engine, $process) = process_wrap($x);
+ok($process);
 
-    #-- step through the process
+my $aiA = $process->start_activities->[0]->new_instance({
+    process_instance_id => $process->new_instance->id
+    });
 
-    my $aiA = $process->start_activities->[0]->new_instance({
-        process_instance_id => $process->new_instance->id
-        });
+my $tAB = $process->transitions->find({ transition_uid => 'A-B' });
+my $tAC = $process->transitions->find({ transition_uid => 'A-C' });
+my $tBC = $process->transitions->find({ transition_uid => 'B-C' });
+my $tBD = $process->transitions->find({ transition_uid => 'B-D' });
+my $tCD = $process->transitions->find({ transition_uid => 'C-D' });
 
-    my $tAB = $process->transitions->find({ transition_uid => 'A-B' });
-    my $tAC = $process->transitions->find({ transition_uid => 'A-C' });
-    my $tBC = $process->transitions->find({ transition_uid => 'B-C' });
-    my $tBD = $process->transitions->find({ transition_uid => 'B-D' });
-    my $tCD = $process->transitions->find({ transition_uid => 'C-D' });
+#-- check roles
+
+my $t_meta = $tAB->meta;
+ok($t_meta->does_role('BPM::Engine::Store::ResultBase::ProcessTransition'), '... Transition->meta does_role Store::ResultBase::ProcessTransition');
+ok($t_meta->does_role('BPM::Engine::Store::ResultRole::TransitionCondition'), '... Transition->meta does_role Store::ResultRole::TransitionCondition');
+ok(!$t_meta->does_role('Class::Workflow::Transition'), '... Transition->meta does not do role Class::Workflow::Transition');
+ok(!$t_meta->does_role('Class::Workflow::Transition::Validate::Simple'), '... Transition->meta does not do role Class::Workflow::Transition::Validate::Simple');
+ok(!$t_meta->does_role('Class::Workflow::Transition::Deterministic'), '... Transition->meta does not do role Class::Workflow::Transition::Deterministic');
+ok(!$t_meta->does_role('Class::Workflow::Transition::Strict'), '... Transition->meta does not do role Class::Workflow::Transition::Strict');
+
+#-- step through the process
 
 # before apply
 $tAB->clear_validators();
@@ -122,21 +129,20 @@ throws_ok(sub { $tAB->apply($aiA) }, 'BPM::Engine::Exception::Expression');
 
 $tAB->update({ condition_type => 'NONE' });
 
-    my $aiB = eval { $tAB->apply($aiA); };
-    ok($aiB);
+my $aiB = eval { $tAB->apply($aiA); };
+ok($aiB);
 
-    my $aiC = eval { $tAC->apply($aiA); };
+my $aiC = eval { $tAC->apply($aiA); };
 
-    $aiC = eval { $tBC->apply($aiB); };
-    ok($aiC);
-    ok(!$aiC->is_enabled);
+$aiC = eval { $tBC->apply($aiB); };
+ok($aiC);
+ok(!$aiC->is_enabled);
 
-    my $aiD = eval { $tBD->apply($aiB); };
-   #ok($aiC->is_enabled);
+my $aiD = eval { $tBD->apply($aiB); };
+#ok($aiC->is_enabled);
 
-    $aiD = eval { $tCD->apply($aiC); };
-    ok($aiD);
-    ok(!$aiD->is_enabled);    
-}
+$aiD = eval { $tCD->apply($aiC); };
+ok($aiD);
+ok(!$aiD->is_enabled);    
 
 done_testing();

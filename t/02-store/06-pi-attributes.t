@@ -116,8 +116,6 @@ like(  exception { $pi->attribute('counter') }, qr/Attribute named 'counter' not
 is(exception { $pi->create_attributes('params', [$formal1]) }, undef);
 ok($pi->attribute('counter'));
 
-use Data::Dumper;
-
 $pi = $process->new_instance();
 # mysql: execute failed: Data truncated for column 'scope'
 #ok( !$pi->create_attributes('blah', [{ Id => 'number', IsArray => 0, InitialValue => { content => 55 }, DataType => { BasicType => { Type => 'STRING' } } }]) );
@@ -129,12 +127,8 @@ ok( !$pi->create_attributes(fields => [{ Id => 'hasharray', IsArray => 1, Initia
 
 is($pi->attribute('number')->value, 55);
 is($pi->attribute('string')->value, 'Some Thing');
-#warn Dumper $pi->attribute('array')->value->[0];
 is_deeply($pi->attribute('array')->value, [55]);
 is_deeply($pi->attribute('hash')->value, { some => 'thing' });
-#warn Dumper $pi->attribute('hasharray')->value->[0];
 is_deeply($pi->attribute('hasharray')->value, [{ nr => 55 }]);
 
-
 done_testing;
-

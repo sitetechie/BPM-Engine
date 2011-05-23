@@ -4,26 +4,6 @@ use Test::More;
 use Test::Fatal;
 use t::TestUtils;
 
-###
-if(0){
-    my $build_value = sub {
-        my $init = shift || {};
-        return undef unless defined $init->{content};
-        my $ivalue = $init->{content} or return undef;
-warn "Value found $ivalue";
-return $ivalue;
-        };
-
-ok(!defined &$build_value());
-ok(!&$build_value());
-ok(defined &$build_value({ content => ''}));
-ok(!&$build_value({ content => ''}));
-exit;
-}
-
-###
-
-
 no warnings 'redefine';
 sub diag {}
 use warnings;
@@ -52,20 +32,11 @@ sub do_stuff {}
 my $pr;
 
 like(exception { $pr = BPM::Engine::ProcessRunner->new() }, qr/Attribute \(process_instance\) is required/);
-if(0){
-#ok($pr = BPM::Engine::ProcessRunner->with_traits(qw/MyTrait/)->new());
-#Can't locate BPM/Engine/TraitFor/ProcessRunner/MyTrait.pm
-ok($pr = BPM::Engine::ProcessRunner->with_traits(qw/+MyTrait/)->new());
+like(exception { $pr = BPM::Engine::ProcessRunner->with_traits(qw/+MyTrait/)->new() }, qr/Attribute \(process_instance\) is required/, 'Invalid arguments');
+like(exception { $pr = BPM::Engine::ProcessRunner->with_traits(qw/+MyTrait/)->new({ process_instance => {} }) }, qr/Attribute \(process_instance\) does not pass the type constraint/, 'Invalid arguments');
 
-ok($pr->can('stuff'));
-
-#ok($pr = BPM::Engine::ProcessRunner->new(traits => ['+MyTrait']));
-#Found unknown attribute(s) passed to the constructor
-
-ok($pr = BPM::Engine::ProcessRunner->new_with_traits(traits => ['+MyTrait']));
-ok($pr->can('stuff'));
-}
-#########
+#ok($pr = BPM::Engine::ProcessRunner->new_with_traits(traits => ['+MyTrait']));
+#ok($pr->can('stuff'));
 
 use_ok('BPM::Engine');
 my $engine = BPM::Engine->new(
@@ -78,7 +49,7 @@ my $engine = BPM::Engine->new(
     schema => schema(),
     callback => sub {
         my($runner, $entity, $event, $node, $instance) = @_;
-#        return 1 if ($entity eq 'activity' || $event ne 'execute');
+        # return 1 if ($entity eq 'activity' || $event ne 'execute');
         my $act = $entity eq 'process' ? $node->process_uid :
             ($entity eq 'transition' ? $node->transition_uid : $instance->activity->activity_uid);
         #diag "$event $entity $act"; # unless $entity eq 'task';
@@ -108,6 +79,8 @@ sub complete_active {
 
 sub test_state {
     my (%args) = @_;
+
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     my $rs_def = $engine->get_activity_instances->deferred({
         process_instance_id => $pi->id,
@@ -162,7 +135,8 @@ if(1) {
 
   complete_active();  # complete B
   diag "--- A+B+B1 completed, B1 active, C deferred";
-  test_state(completed => ['A','B','B1'], active => ['B1'], deferred => ['C']);
+  #test_state(completed => ['A','B','B1'], active => ['B1'], deferred => ['C']);
+  test_state(completed => ['A','B'], active => ['B1'], deferred => ['B1','C']);
 
   complete_active();  # complete B1
   diag "--- B2 active";
@@ -170,11 +144,13 @@ if(1) {
 
   complete_active();  # complete B2
   diag "--- C active";
-  test_state(completed => ['A','B','B1','B1','B2','C'], active => ['C'], deferred => ['D']);
+  #test_state(completed => ['A','B','B1','B1','B2','C'], active => ['C'], deferred => ['D']);
+  test_state(completed => ['A','B','B1','B1','B2'], active => ['C'], deferred => ['C','D']);
 
   complete_active();  # complete C
   diag "--- D active";
-  test_state(completed => ['A','B','B1','B1','B2','C','C','D'], active => ['D'], deferred => []);
+  #test_state(completed => ['A','B','B1','B1','B2','C','C','D'], active => ['D'], deferred => []);
+  test_state(completed => ['A','B','B1','B1','B2','C','C'], active => ['D'], deferred => ['D']);
 
   complete_active();  # complete D
   diag "--- D completed";
@@ -252,7 +228,8 @@ if(1){
   # (preferred strategy), otherwise End has to take care of executing SM (bad)
 
   complete_active(); # complete E+SM, which sets first End from deferred to completed when enabling second End
-  test_state(completed => [qw/B C DC E End MC SM/], active => [qw/End/], deferred => []);
+  #test_state(completed => [qw/B C DC E End MC SM/], active => [qw/End/], deferred => []);
+  test_state(completed => [qw/B C DC E MC SM/], active => [qw/End/], deferred => [qw/End/]);
 
   complete_active(); # complete End
   test_state(completed => [qw/B C DC E End End MC SM/], active => [qw//], deferred => [qw//]);
@@ -303,7 +280,8 @@ if(1) {
   test_state(completed => ['B','C','C','DC','DC','MC','XOR','XOR'], active => ['D'], deferred => ['SM']);
 
   complete_active();  # complete D
-  test_state(completed => [qw/B C C D DC DC MC SM XOR XOR/], active => ['SM'], deferred => []);
+  #test_state(completed => [qw/B C C D DC DC MC SM XOR XOR/], active => ['SM'], deferred => []);
+  test_state(completed => [qw/B C C D DC DC MC XOR XOR/], active => ['SM'], deferred => ['SM']);
 
   complete_active();  # complete SM
   test_state(completed => [qw/B C C D DC DC MC SM SM XOR XOR/], active => ['End'], deferred => []);

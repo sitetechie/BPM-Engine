@@ -33,8 +33,14 @@ can_ok($engine, @methods);
 # default logger
 
 isa_ok($engine->logger, 'BPM::Engine::Logger');
-is($engine->log_dispatch_conf, '/etc/bpmengine/logger.conf');
-is($engine->logger->log_dispatch_conf, '/etc/bpmengine/logger.conf');
+my $defconf = {
+            class     => 'Log::Dispatch::Screen',
+            min_level => 'info',
+            stderr    => 1,
+            format    => '[%p] %m at %F line %L%n',
+            };
+is_deeply($engine->log_dispatch_conf, $defconf);
+is_deeply($engine->logger->log_dispatch_conf, $defconf);
 
 #ok(!$engine->warning('a warning'));
 #ok(!$engine->error('an error'));
@@ -46,7 +52,7 @@ ok($engine = BPM::Engine->new(
   connect_info => $dsn,
   ));
 isa_ok($engine->logger, 'BPM::Engine::Logger');
-is($engine->log_dispatch_conf, '/etc/bpmengine/logger.conf');
+is_deeply($engine->log_dispatch_conf, $defconf);
 is($engine->logger->log_dispatch_conf, '/etc/bpmengine/logger.conf');
 
 #ok(!$engine->warning('a warning'));
@@ -70,7 +76,7 @@ ok($engine = BPM::Engine->new(
   ));
 
 my $elogger = $engine->logger;
-is($engine->log_dispatch_conf, '/etc/bpmengine/logger.conf');
+is_deeply($engine->log_dispatch_conf, $defconf);
 is($elogger->log_dispatch_conf, './t/etc/logger_file.conf');
 is($logger->log_dispatch_conf, './t/etc/logger_file.conf');
 

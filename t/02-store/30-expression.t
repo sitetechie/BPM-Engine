@@ -6,6 +6,25 @@ use t::TestUtils;
 
 BEGIN { use_ok('BPM::Engine::Util::ExpressionEvaluator'); }
 
+#------------------------------------------------------------------------
+# setting (render)
+# <InitialValue>
+#
+# rendering
+# <Script>
+# output = ...
+#
+# getting
+# <ActualParameter>sbflw1.data</ActualParameter>
+#
+# setting
+# <Target>product.prices[0..2]</Target>
+# <Expression>attribute('tt_hash').prices.0 + 10</Expression>
+#
+# evalling
+# <Condition Type="CONDITION">attribute.counter > 3</Condition>
+#------------------------------------------------------------------------
+
 #-- setup a test process_instance
 
 my $xml = q|
@@ -39,8 +58,6 @@ $pi->add_to_attributes({
     is_array => 1,
     value          => [{ store => { bicycle => 'Gazelle' } }]
     });
-
-
 
 #-- constructor -------------------------------------------
 
@@ -200,8 +217,6 @@ $xe->assign('t_hash.desc','"baz"');
 is($pi->attribute('t_hash')->value->{id}, 18);
 is($pi->attribute('t_hash')->value->{foo}, 'bar');
 is($pi->attribute('t_hash')->value->{desc}, 'baz');
-use Data::Dumper;
-#warn Dumper($pi->attribute('t_hash')->value);
 
 $xe->assign('t_hash', "[% output({ id => 'XYZ-2000', desc => 'Bogon Generator',
             prices => [66.60, 88],
@@ -209,25 +224,4 @@ $xe->assign('t_hash', "[% output({ id => 'XYZ-2000', desc => 'Bogon Generator',
             }) %]");
 is($pi->attribute('t_hash')->value->{desc}, 'Bogon Generator');
 
-
 done_testing;
-
-1;
-__END__
-
-# setting (render)
-<InitialValue>
-
-# rendering
-<Script>
- output = ...
-
-# getting
-<ActualParameter>sbflw1.data</ActualParameter>
-
-# setting
-<Target>product.prices[0..2]</Target>
-<Expression>attribute('tt_hash').prices.0 + 10</Expression>
-
-# evalling
-<Condition Type="CONDITION">attribute.counter > 3</Condition>

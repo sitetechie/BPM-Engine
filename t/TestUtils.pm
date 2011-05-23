@@ -14,6 +14,7 @@ our @EXPORT = qw/ $dsn schema process_wrap runner /;
 my ($_schema, $_attr);
 our ($dsn, $user, $password, $DEBUG) = 
     @ENV{map { "BPMTEST_${_}" } qw/DSN USER PASS KEEP/};
+
 if($dsn && $user && !$DEBUG) {
     $_attr = { RaiseError => 1, AutoCommit => 1 };
     }

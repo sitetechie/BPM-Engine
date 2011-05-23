@@ -25,6 +25,13 @@
                     </DataType>
                 </FormalParameter>
             </FormalParameters>
+
+            <Participants>
+                <Participant Id="Sales" Name="Sales">
+                    <ParticipantType Type="ROLE"/>
+                </Participant>
+            </Participants>
+
             <Activities>
 
 <!-- Send -->
@@ -137,7 +144,7 @@
                 <Activity Id="service2" Name="Service 2">
                   <Implementation>
                     <Task>
-                      <TaskService[% IF 0 %]  Id="org.Interapy.Treatments.Depression.Task23.Create"Name="Activity"[% END %] Implementation="Other">
+                      <TaskService Implementation="Other">
                           <MessageIn Id="3" Name="m3" From="you" To="me" FaultName="MyBad"/>
                           <MessageOut Id="4" Name="m4" From="me" To="you" FaultName="ServerMadeABooBoo"/>
                           <WebServiceOperation OperationName="service_task">
@@ -199,8 +206,6 @@
                         </Task> 
                     </Implementation> 
                 </Activity>
-
-
 
             </Activities>
             <Transitions>
