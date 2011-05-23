@@ -43,10 +43,9 @@ my $string = qq!
 </Package>
 !;
 
-my $fh = IO::File->new('./t/01-package-rs.xml');
+my $fh = IO::File->new('./t/02-store/01-package-rs.xml');
 
-foreach my $xmlin(\$string, $fh, undef, './t/02-store/01-package-rs.xml') {
-
+foreach my $xmlin(\$string, $fh, './t/02-store/01-package-rs.xml') {
     my $package = $rs->create_from_xml($xmlin);
     isa_ok($package, 'BPM::Engine::Store::Result::Package');
 
@@ -81,9 +80,9 @@ my $xpdl = q|<?xml version="1.0" encoding="UTF-8"?>
             <Implementation><Task><TaskManual/></Task></Implementation></Activity></Activities>
         </WorkflowProcess></WorkflowProcesses></Package>|;
 
-my $fh = IO::File->new('./t/01-basic.xpdl');
+my $fh = IO::File->new('./t/var/01-basic.xpdl');
 
-foreach my $xml(\$xpdl, $fh, undef, './t/01-basic.xpdl') {
+foreach my $xml(\$xpdl, $fh, './t/var/01-basic.xpdl') {
     my $package = $rs->create_from_xpdl($xml);
     isa_ok($package, 'BPM::Engine::Store::Result::Package');
     #is($package->discard_changes->package_uid, 'TestPackage');

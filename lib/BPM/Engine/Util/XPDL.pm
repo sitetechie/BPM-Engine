@@ -15,12 +15,13 @@ use XML::LibXML::Simple ();
 use BPM::XPDL;
 use BPM::Engine::Types qw/Exception/;
 use BPM::Engine::Exceptions qw/throw_model throw_install throw_param/;
+use Scalar::Util qw/blessed/;
 use parent qw/Exporter/;
 our @EXPORT_OK = qw/xml_doc xml_hash xpdl_doc xpdl_hash/;
 our %EXPORT_TAGS = (all => [@EXPORT_OK]);
 
 sub xml_doc {
-    my $arg = shift or throw_param error => "Empty file, string or IO handle";
+    my $arg = shift or throw_param error => "Empty file, string or IO handle (xml_doc)";
 
     my $parser = XML::LibXML->new;
     my $doc = undef;
@@ -30,7 +31,7 @@ sub xml_doc {
             $doc = eval { $parser->parse_string($$arg); };
             die "Invalid XML from string: $@" if $@;
             }
-        elsif(ref($arg) eq 'IO::Handle') {
+        elsif(blessed($arg) && $arg->isa('IO::Handle')) {
             $doc = eval { $parser->parse_fh($arg); };
             die "Invalid XML from io handle: $@" if $@;
             }
@@ -56,7 +57,7 @@ sub xml_doc {
     }
 
 sub xml_hash {
-    my $arg = shift or throw_param error => "Empty file, string or IO handle";
+    my $arg = shift or throw_param error => "Empty file, string or IO handle (xml_hash)";
     
     my $xmldata = XML::LibXML::Simple::XMLin($arg, ForceArray => [qw/
         ExtendedAttribute FormalParameter DataField ActualParameter
@@ -71,7 +72,7 @@ sub xml_hash {
     }
 
 sub xpdl_doc {
-    my $doc = shift or throw_param error => "Empty file, string or IO handle";
+    my $doc = shift or throw_param error => "Empty file, string or IO handle (xpdl_doc)";
 
     $doc = xml_doc($doc) unless(ref($doc) eq 'XML::LibXML::Document');
 
@@ -121,7 +122,7 @@ sub xpdl_doc {
     }
 
 sub xpdl_hash {
-    my $arg = shift or throw_param error => "Empty file, string or IO handle";
+    my $arg = shift or throw_param error => "Empty file, string or IO handle (xpdl_hash)";
 
     my $doc  = xpdl_doc($arg);
     my $xpdl;
