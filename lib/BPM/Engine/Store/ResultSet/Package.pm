@@ -6,9 +6,9 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose;
+use MooseX::NonMoose;
 use Scalar::Util qw/blessed/;
-use XML::LibXML::Simple ();
-use BPM::Engine::Util::XPDL qw/xpdl_hash/;
+use BPM::Engine::Util::XPDL ':all';
 use BPM::Engine::Exceptions qw/throw_model throw_store/;
 extends 'DBIx::Class::ResultSet';
 
@@ -19,27 +19,19 @@ sub debug {
     }
 
 sub create_from_xml {
-    my ($self, $string) = @_;
+    my ($self, $arg) = @_;
 
-    my $xmldata = XML::LibXML::Simple::XMLin($string,
-      ForceArray => [qw/
-        ExtendedAttribute FormalParameter DataField ActualParameter
-        Participant Application Responsible
-        WorkflowProcess Activity Transition TransitionRestriction
-        /],
-      NormaliseSpace => 2,
-      ValueAttr => [ 'GraphConformance' ],
-      );    
-
-    return $self->_create_from_hash($xmldata);
+    $arg = xml_hash($arg) unless(ref($arg) eq 'HASH');
+    
+    return $self->_create_from_hash($arg);
     }
 
 sub create_from_xpdl {
-    my ($self, $args) = @_;
+    my ($self, $arg) = @_;
 
-    $args = xpdl_hash($args) unless(ref($args) eq 'HASH');
+    $arg = xpdl_hash($arg) unless(ref($arg) eq 'HASH');
     
-    return $self->_create_from_hash($args);
+    return $self->_create_from_hash($arg);
     }
 
 sub _create_from_hash {
@@ -103,8 +95,8 @@ sub _create_from_hash {
     my $row;
     eval { $row = $schema->txn_do($create_txn); };
     if(my $err = $@) {
-        throw_store error => "$err" if(ref($err));
-        throw_model error => $err;
+        throw_store error => "StoreError $err" if(ref($err));
+        throw_model error => 'ModelError' . $err;
         }
 
     return $row;
@@ -152,37 +144,25 @@ sub _import_participants {
     my ($entry, $args) = @_;
 
     debug('Importing participants');
-    
-    my $idx = 0;
+
     foreach my $part_proto(@{$args}) {
-        my $participant = _import_participant(
-            $entry->participant_list, $part_proto, $idx
-            );
-        $participant->update();
-        $idx++;
+        my $pid = delete $part_proto->{Id};
+        my $participant = 
+          $entry->result_source->schema->resultset('Participant')->create({
+            participant_uid   => $pid,
+            participant_name  => delete $part_proto->{Name} || $pid,
+            description       => delete $part_proto->{Description},
+            participant_type  => $part_proto->{ParticipantType}->{Type},
+            parent_node       => $entry->id,            
+            participant_scope => ref($entry) =~ /Package/
+                 ? 'Package' : 'Process',
+            });
+        delete $part_proto->{ParticipantType};
+        $participant->update({ attributes => $part_proto }) 
+            if (keys %{$part_proto});
         }
 
     return;
-    }
-
-sub _import_participant {
-    my ($plist, $args, $index) = @_;
-
-    my $pid = delete $args->{Id};
-    my $participant = $plist->add_to_participants({
-        participant_uid   => $pid,
-        participant_name  => delete $args->{Name} || $pid,
-        description       => delete $args->{Description},
-        participant_type  => delete $args->{ParticipantType}->{Type},
-        });
-    
-    while (my($key, $value) = each %{$args->{ParticipantType}}) {
-        $args->{$key} = $value;
-        }
-    delete $args->{ParticipantType};
-    $participant->attributes($args) if(keys %{$args});
-    
-    return $participant;
     }
 
 sub _import_applications {
@@ -348,7 +328,8 @@ sub _import_activity {
     if($args->{Deadline}) {
         my @deadlines = @{ $args->{Deadline}->{Deadline} };
         foreach my $dead(@deadlines) {
-            die("Illegal deadline") if ($deadline_map->{$dead->{'ExceptionName'}});
+            die("Illegal deadline") 
+                if ($deadline_map->{$dead->{'ExceptionName'}});
             $deadline_map->{$dead->{'ExceptionName'}} = {
                 activity_id  => $activity->id,
                 duration     => $dead->{'DeadlineDuration'},
@@ -399,7 +380,7 @@ sub _import_activity {
     if($args->{Performers}) {
         my @performers = ref($args->{Performers}->{Performer}) ? 
                          @{$args->{Performers}->{Performer}} : 
-                         $args->{Performers}->{Performer};
+                         ($args->{Performers}->{Performer});
         _import_performers($process, $activity, @performers);
         }
 
@@ -458,18 +439,27 @@ sub _prepare_task {
     $task->{Script} = $task->{Script}->textContent 
         if(ref($task->{Script}) eq 'XML::LibXML::Element');
 
-    # values for XML::LibXML::Element elements
-    my $actual_params = delete $task->{ActualParameters}->{ActualParameter};
-    if($actual_params) {
-        $task->{ActualParameters}->{ActualParameter} = _mapxml($actual_params);
-        }
-
-    # normalize Actual and TestValue XML::LibXML::Element elements
-    my $maps = $task->{DataMappings}->{DataMapping};
-    if($maps) {
-        foreach(@{$maps}) {
-            $_->{TestValue} = _checkxml($_->{TestValue});
-            $_->{Actual}    = _checkxml($_->{Actual});
+    # TaskApplication values for XML::LibXML::Element elements
+    if ($type eq 'Application') {
+        my $actual_params = delete $task->{ActualParameters}->{ActualParameter};
+        if($actual_params) {
+            $task->{ActualParameters}->{ActualParameter} = 
+                _mapxml($actual_params);
+            }
+        else {
+            delete $task->{ActualParameters};
+            }
+        
+        # normalize Actual and TestValue XML::LibXML::Element elements
+        my $maps = $task->{DataMappings}->{DataMapping};
+        if($maps) {
+            foreach(@{$maps}) {
+                $_->{TestValue} = _checkxml($_->{TestValue});
+                $_->{Actual}    = _checkxml($_->{Actual});
+                }
+            }
+        else {
+            delete $task->{DataMappings};
             }
         }
     
@@ -479,28 +469,33 @@ sub _prepare_task {
         MessageIn  => 'user|service', 
         MessageOut => 'user|service'
         );
+    
     foreach my $msgtype(keys %msgtypes) {
-        if(my $del = delete $task->{$msgtype}->{ActualParameters}->{ActualParameter}) {
-            my $re = $msgtypes{$msgtype};
-            if($type =~ /$re/i) {
-                $task->{$msgtype}->{ActualParameters}->{ActualParameter} = _mapxml($del);
+        my $re = $msgtypes{$msgtype};
+        if($type =~ /$re/i) {
+            my $msg = $task->{$msgtype};
+            
+            my $params = $msg->{ActualParameters}->{ActualParameter};            
+            if($params) {
+                $msg->{ActualParameters}->{ActualParameter} = _mapxml($params);
                 }
             else {
-                die("XPDL trying to set nonsense $msgtype ActualParameters");
+                delete $msg->{ActualParameters};
                 }
-            }
-        
-        if(my $del = delete $task->{$msgtype}->{DataMappings}->{DataMapping}) {        
-            my $re = $msgtypes{$msgtype};
-            if($type =~ /$re/i) {
-                foreach ( @{ $task->{$msgtype}->{DataMappings}->{DataMapping} } ) {
+            
+            my $dmap = $msg->{DataMappings}->{DataMapping};
+            if($dmap) {
+                foreach ( @{ $msg->{DataMappings}->{DataMapping} } ) {
                     $_->{TestValue} = _checkxml($_->{TestValue});
                     $_->{Actual}    = _checkxml($_->{Actual});
-                    }
+                    }                
                 }
             else {
-                die("XPDL trying to set nonsense $msgtype ActualParameters");
+                delete $msg->{DataMappings};
                 }
+            }
+        elsif ($task->{$msgtype}) {
+            delete $task->{$msgtype};
             }
         }
     }
@@ -517,7 +512,7 @@ sub _add_task {
         task_type   => $type,
         }) or die("Invalid Task");
     
-    if($type eq 'Tool' || $type eq 'Application') {
+    if ($type eq 'Tool' || $type eq 'Application') {
         my $app = $APPMAP{ $task->{Id} } 
             or die("No application for task $task->{Id}");
         $task_tool->application_id($app->id);
@@ -526,39 +521,42 @@ sub _add_task {
             $task_tool->actual_params($params);
             }
         }
-
+    elsif ($type eq 'User' || $type eq 'Manual') {
+        if($task->{Performers}) {
+            my @performers = ref($task->{Performers}->{Performer}) ?
+                             @{$task->{Performers}->{Performer}} :
+                             ($task->{Performers}->{Performer});
+            _import_performers($activity->process, $task_tool, @performers);
+            }        
+        }
+    
     _set_elements($task_tool, $task);
     delete $task->{Id};
     
     debug('Setting taskdata');
-    
     delete $task->{WebServiceFaultCatch};
     delete $task->{ActualParameters};
+    delete $task->{Performers};
     $task_tool->task_data($task) if(keys %{$task});
-    
     $task_tool->update();
     }
 
 sub _import_performers {
-    my ($process, $activity, @performers) = @_;
+    my ($process, $container, @performers) = @_;
 
     debug('Importing performers');
 
-    my $i = 0;
     foreach my $performer(@performers) {
-        die("Invalid Performer (Missing element data)") unless $performer;
-        my $participant =
-            $process->participant_list->participants({
-                participant_uid => $performer
-                })->first
-            || $process->package->participant_list->participants({
-                participant_uid => $performer
-                })->first
-            or die("Illegal Performer $performer (Participant unknown)");
-        $activity->add_to_performers({
-            participant_id => $participant->id,
-            performer_index => $i++,
-            }) or die("Performer $performer not created");
+        die("Invalid Performer '$performer' (Missing element data)") 
+            unless $performer;
+        my $participant = 
+            $process->participants->find({ participant_uid => $performer }) 
+            or die("Invalid Performer '$performer' (Participant unknown)");
+        $container->add_to_performers({
+            participant_id   => $participant->id,
+            container_id     => $container->id,
+            performer_scope  => ref($container) =~ /Task/ ? 'Task' : 'Activity',
+            }) or die("Performer '$performer' not created");
         }
     }
 
@@ -664,7 +662,6 @@ sub _trim {
 #-- elements:
 # DataFields, ExtendedAttributes, FormalParameters, ActualParameters,
 # DataMappings, Assignments
-use Data::Dumper;
 sub _set_elements {
     my ($entry, $args) = @_;
 
@@ -683,11 +680,11 @@ sub _set_elements {
     my $e = { extended_attr => [ 'ExtendedAttributes', 'ExtendedAttribute' ] };
     my $v = { event_attr    => [ 'Event' ] };    
     my %types = (
-        Package      => [$e,$d,$r],
-        Application  => [$f,$e],
-        Process      => [$f,$e,$d,$s],
-        Activity     => [$e,$d,$s,$v,$i,$o],
-        ActivityTask => [$a,$m,$e],
+        Package      => [$e, $d, $r],
+        Application  => [$f, $e],
+        Process      => [$f, $e, $d, $s],
+        Activity     => [$e, $d, $s, $v, $i, $o],
+        ActivityTask => [$a, $m, $e],
         Transition   => [$s],
         #Message(In|Out) => [],
         );
@@ -701,7 +698,7 @@ sub _set_elements {
         my ($multi, $single) = @{ $type->{$field} };
         my $json = '';
         #warn "Storing field $field multi $multi single $single type $type container $container entry $entry" 
-            ; #if $container eq 'Package';
+            #if $container eq 'Package';
         if(!$single && $multi eq 'Event') {
             $json = delete $args->{$multi};
             my @event_types = keys %{$json};
@@ -716,7 +713,7 @@ sub _set_elements {
             $json = delete $args->{$multi}->{$single};
             delete $args->{$multi};
             next unless $json->[0];
-            # get rid of XML::LibXML::Element objects from mixed-scheme elements
+            # get rid of XML::LibXML::Element objects from mixed-schema elements
             if($multi eq 'ExtendedAttributes' && ref($json->[0]) eq 'XML::LibXML::Element') {
                 $json = [map { 
                           { Name => $_->getAttribute('Name') , 
@@ -726,8 +723,9 @@ sub _set_elements {
             elsif($container eq 'ActivityTask' && $multi eq 'ActualParameters') {
                 $json = _mapxml($json);
                 }
-            elsif($multi =~ /^(DataFields|DataMappings|Assignments|FormalParameters)$/) {
+            elsif($multi =~ /^(Artifacts|DataFields|DataMappings|Assignments|FormalParameters)$/) {
                 foreach(@{$json}) {
+                    delete $_->{'NodeGraphicsInfos'};
                     _hashxml($_);
                     }
                 }
@@ -739,6 +737,8 @@ sub _set_elements {
             $entry->$field($json);
             };
         if($@) {
+#use Data::Dumper;
+#warn Dumper $json;            
             die "Error setting $field ($multi) as JSON: $@";
             }
         }
@@ -801,3 +801,59 @@ __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 
 1;
 __END__
+
+=pod
+
+=head1 NAME
+
+BPM::Engine::Util::XPDL - XPDL parsing helper functions
+
+=head1 VERSION
+
+0.001
+
+=head1 SYNOPSIS
+
+    my $rs = $schema->resultset('Package');
+    my $package = $rs->create_from_xpdl('/path/to/workflows.xpdl');
+
+=head1 DESCRIPTION
+
+This module extends L<DBIx::Class::ResultSet|DBIx::Class::ResultSet> for the 
+C<Package> table.
+
+=head1 METHODS
+
+=head2 create_from_xpdl
+
+    my $package = $rs->create_from_xpdl($input);
+
+Takes xml input and returns a newly created Package row. Input can be a file, 
+URL, string or io stream; see C<xpdl_hash()> in 
+L<BPM::Engine::Util::XPDL|BPM::Engine::Util::XPDL> for details.
+
+=head1 EXCEPTIONS
+
+If the XML is found to be inconsistent, C<create_from_xpdl()> just dies with an 
+error message and nothing is inserted in the database.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<BPM::Engine::Store::Result::Package|BPM::Engine::Store::Result::Package>
+
+=back
+
+=head1 AUTHOR
+
+Peter de Vos, C<< <sitetech@cpan.org> >>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2010, 2011 Peter de Vos C<< <sitetech@cpan.org> >>.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlartistic>.
+
+=cut

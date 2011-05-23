@@ -37,7 +37,7 @@ sub _render {
         local $SIG{ALRM} = sub { die "Timed out processing expression\n" }; # \n required
         alarm 1;
         $content = $_engine->render_string($template, $args);
-        alarm 0;
+        alarm 0; # restore
         };
     
     if(my $err = $@) {
@@ -101,6 +101,11 @@ sub assign {
         $pi->attribute($root => $output);
         }
     
+    }
+
+sub dotop {
+    my ($self, $trg) = @_;
+    return $self->render('var.' . $trg);
     }
 
 __PACKAGE__->meta->make_immutable;

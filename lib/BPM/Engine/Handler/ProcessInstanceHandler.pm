@@ -40,7 +40,7 @@ role BPM::Engine::Handler::ProcessInstanceHandler {
   method start_process_instance (Int|ProcessInstance $pi, HashRef $args = {}) {
 
       $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      foreach(keys %{$args}) {
+      foreach (keys %{$args}) {
           $pi->attribute($_ => $args->{$_});
           }
 

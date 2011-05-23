@@ -7,6 +7,7 @@ BEGIN {
 use namespace::autoclean;
 use Moose::Role;
 use Data::GUID;
+use Try::Tiny;
 
 requires qw/
     process_instance
@@ -16,14 +17,11 @@ requires qw/
 before 'execute_task' => sub {
     my ($self, $task, $activity_instance) = @_;
 
-    my $pi      = $self->process_instance or die("Process instance not found");
-    my $process = $self->process          or die("Process not found");
+    my $pi       = $self->process_instance or die("Process instance not found");
+    my $process  = $self->process          or die("Process not found");
     my $activity = $activity_instance->activity or die("Activity not found");
-    my $tdata = $task->task_data;
-
-    my $mtype   = $task->task_type eq 'Send' ? 'Message' : 'MessageIn';
-    my $aparams = $tdata->{$mtype}->{ActualParameters}->{ActualParameter};
-    my $params  = _service_params($pi, $aparams);
+    my $tdata    = $task->task_data;
+    my $mtype    = $task->task_type eq 'Send' ? 'Message' : 'MessageIn';
 
     my $args = {
         meta => {
@@ -37,47 +35,62 @@ before 'execute_task' => sub {
             process_instance_id => $pi->id,
             activity_id         => $activity->id,
             token_id            => $activity_instance->id,
-            task_id             => $task->id,
+            task_id             => $task->id,            
             },
-        parameters => $task->actual_params,
-        service    => _service_vars($tdata->{'WebServiceOperation'}),
-        message    => _message($tdata->{$mtype}, $process, $params),
+        parameters => $task->actual_params, # XXX expression ApplicationFormalParams
+        message    => _message($self, $tdata->{$mtype}, $process, $pi),
+        service    => _service($tdata->{'WebServiceOperation'}),        
         performers => _performers($activity->participants_rs),
-        users      => _performers(
-            $process->participants_rs(
-                { participant_uid => $tdata->{Performers}->{Performer} }
-                )
-            ),
-            };
+        users      => _performers($task->participants_rs),
+#            $process->participants_rs(
+#                { participant_uid => $tdata->{Performers}->{Performer} }
+#                )
+#            ),
+        };
 
     $activity_instance->update({ taskdata => $args });
-
+    
     return;
     };
 
 sub _performers {
-    my ($p_rs) = @_;
-
-    my @p = ();
-    while (my $rec = $p_rs->next) {
-        push(
-            @p, {
-                id            => $rec->id,
-                type          => $rec->participant_type,
-                uid           => $rec->participant_uid,
-                description   => $rec->description,
-                ext_reference => $rec->attributes->{ExternalReference},
-            }
-            );
-        }
-
-    return \@p;
+    my $p_rs = shift;
+    return [ map { _performer($_) } $p_rs->all ];
+    
+    #my @p = ();
+    #while (my $rec = $p_rs->next) {
+    #    push(@p, _performer($rec));
+    #    }
+    #
+    #confess("Performers not found") unless scalar @p;
+    #
+    #return \@p;
     }
 
-sub _message {
-    my ($msg, $process, $params) = @_;
+sub _performer {
+    my $rec = shift or confess("Need performer");
+    return {
+        id            => $rec->id,
+        type          => $rec->participant_type,
+        uid           => $rec->participant_uid,
+        description   => $rec->description,
+        ext_reference => $rec->attributes
+            ? $rec->attributes->{ExternalReference} : undef,
+        };
+    }
 
-    my $res = { args => $params };
+
+sub _message {
+    my ($self, $msg, $process, $pi) = @_;
+
+    return undef unless $msg;
+
+    my $res = {};
+
+    my $aparams  = $msg->{ActualParameters}->{ActualParameter};
+    if ($aparams) {
+        $res->{args} = _message_params($self, $pi, $aparams);
+        }
 
     foreach my $prop (qw/Id Name FaultName/) {
         $res->{ lc($prop) } = $msg->{$prop} if $msg->{$prop};
@@ -85,17 +98,55 @@ sub _message {
 
     foreach my $prop ('To', 'From') {
         if ($msg->{$prop}) {
-            my $rs =
-                $process->participants_rs({ participant_uid => $msg->{$prop} });
-            $res->{ lc($prop) } = _performers($rs);
+            my $prt = $process->participants_rs
+                ->find({ participant_uid => $msg->{$prop} })
+                or die("No participant found for '$prop' " . $msg->{$prop});
+            $res->{ lc($prop) } = _performer($prt);
             }
         }
 
     return $res;
     }
 
-sub _service_vars {
-    my $svc = shift;
+sub _message_params {
+    my ($self, $pi, $params) = @_;
+
+    my @results = ();
+    foreach my $attr (@$params) {
+        
+        my $output;
+        if ($attr->{ScriptType} && $attr->{ScriptType} =~ /xslate/i) {
+            try {
+                $output = $self->evaluator->render($attr->{content});
+                }
+            catch {
+                $output = "SCRIPT ERROR $_ "; 
+                #warn Dumper $attr->{content};                
+                #$output = $attr->{content};
+                };
+            }
+        elsif ($attr->{content} =~ /\./) {
+            #die("Dotted content needs ScriptType");
+            try {            
+                $output = $self->evaluator->dotop($attr->{content});
+                }
+            catch {
+                $output = "SCRIPT.DOTTED ERROR $_";                
+                };
+            }
+        else {            
+            $output = $pi->attribute($attr->{content})->value;
+            }
+
+        # XXX expression
+        push(@results, $output);
+        }
+
+    return \@results;
+    }
+
+sub _service {
+    my $svc = shift or return undef;
 
     my $end = $svc->{Service}->{EndPoint}->{ExternalReference};
 
@@ -109,18 +160,7 @@ sub _service_vars {
             location  => $end->{location},
             namespace => $end->{namespace},
             }
-            };
-    }
-
-sub _service_params {
-    my ($pi, $params) = @_;
-
-    my @results = ();
-    foreach my $attr (@$params) {
-        push(@results, $pi->attribute($attr->{content})->value);
-        }
-
-    return \@results;
+        };
     }
 
 no Moose::Role;
@@ -165,7 +205,11 @@ The task type
 
 =item * process_id
 
+The id of the process
+
 =item * process_instance_id
+
+The id of the process instance
 
 =item * activity_id
 
@@ -200,9 +244,7 @@ Representation of the WebServiceOperation from task_data in Result::ActivityTask
 
 =item * port
 
-=item * ext_reference
-
-A hash with keys C<xref>, C<namespace> and C<location>
+=item * ext_reference: a hash with keys C<xref>, C<namespace> and C<location>
 
 =back
 

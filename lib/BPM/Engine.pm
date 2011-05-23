@@ -45,7 +45,7 @@ sub runner {
 
     my $args = {
         process_instance => $pi,
-        engine           => $self,
+        #engine           => $self,
         logger           => $self->logger,
         };
     $args->{callback} = $self->callback      if $self->has_callback;
@@ -98,7 +98,7 @@ definitions
 Create and run a process instance  
   
   my $instance = $engine->create_process_instance(
-      $process, 'Client xyz', { param1 => 'value1' }
+      $process, { param1 => 'value1' }
       );
 
   $engine->start_process_instance($instance);
@@ -154,7 +154,7 @@ already.
 
 =item C<< logger => $logger // BpmEngineLogger >>
 
-A logger object that implements the L<BPM::Engine::Role::LoggerAPI> role,
+A logger object that implements the L<MooseX::LogDispatch::Interface> role,
 defaults to a L<BPM::Engine::Logger> instance constructed with
 C<log_dispatch_conf>.
 
@@ -236,7 +236,7 @@ with a configuration file. Example:
 
 =head3 get_package
 
-    $package = $engine->get_package($package_id);
+    $package = $engine->get_package($package_uuid);
 
 =head3 create_package
 
@@ -244,7 +244,7 @@ with a configuration file. Example:
 
 =head3 delete_package
 
-    $engine->delete_package($package_id);
+    $engine->delete_package($package_uuid);
 
 =head3 get_process_definitions
 

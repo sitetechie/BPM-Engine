@@ -34,7 +34,8 @@ sub _build_schema {
 sub BUILD {
     my $self = shift;
 
-    confess "Either 'connect_info' or 'schema' must be supplied"
+    confess "Invalid connection arguments - "
+        . "either 'connect_info' or 'schema' must be supplied"
         unless ($self->has_connect_info || $self->has_schema);
 
     return;
@@ -44,7 +45,8 @@ around 'BUILDARGS' => sub {
     my $orig = shift;
     my $args = $orig->(@_);
 
-    throw_param error => "Invalid connection arguments"
+    throw_param error => "Invalid connection arguments - "
+        . "either 'connect_info' or 'schema' must be supplied"
         unless ($args->{connect_info} || $args->{schema});
 
     return $args;

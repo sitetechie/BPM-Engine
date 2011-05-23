@@ -620,6 +620,10 @@ Implements the workflow enactment logic.
 
 =head1 CONSTRUCTOR
 
+=head2 new
+
+Returns a new BPM::Engine::ProcessRunner instance.
+
 =head1 METHODS
 
 =head2 start_process
@@ -676,12 +680,6 @@ set the completion datetime, and clear the activity instance execution queues.
     $runner->debug('Something happened');
 
 log, debug, info, notice, warning, error, critical, alert, emergency
-
-=head1 PRIVATE METHODS
-
-=head2 _run
-
-=head2 _execute_transitions
 
 =head1 AUTHOR
 

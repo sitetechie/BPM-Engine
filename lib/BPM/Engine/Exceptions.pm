@@ -233,14 +233,6 @@ Abstract method. Aliased as C<throw_abstract>.
 
 =back
 
-=head1 BUGS AND LIMITATIONS
-
-No bugs have been reported.
-
-Please report any bugs or feature requests to
-C<bug-BPM-Engine@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
 =head1 AUTHOR
 
 Peter de Vos <sitetech@cpan.org>

@@ -3,11 +3,11 @@ BEGIN {
     $BPM::Engine::Util::YAMLWorkflowLoader::VERSION   = '0.001';
     $BPM::Engine::Util::YAMLWorkflowLoader::AUTHORITY = 'cpan:SITETECH';
     }
-## no critic (ProhibitMultiplePackages)
+
 use Moose;
 use Class::Workflow;
 extends 'Class::Workflow::YAML';
-use namespace::clean; # -except => 'load_workflow_from_yaml';
+use namespace::clean;
 use Sub::Exporter -setup => { exports => [ qw(load_workflow_from_yaml) ] };
 
 sub empty_workflow {
@@ -26,6 +26,7 @@ sub load_workflow_from_yaml {
 
 __PACKAGE__->meta->make_immutable;
 
+## no critic (ProhibitMultiplePackages)
 {
 package 
   BPM::Engine::Class::Workflow::State;

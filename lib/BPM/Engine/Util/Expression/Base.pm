@@ -1,4 +1,3 @@
-
 package BPM::Engine::Util::Expression::Base;
 BEGIN {
     $BPM::Engine::Util::Expression::Base::VERSION   = '0.001';
