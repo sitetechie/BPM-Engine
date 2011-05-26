@@ -25,7 +25,8 @@ role BPM::Engine::Handler::ActivityInstanceHandler {
           || throw_store(error => "ActivityInstance '$id' not found");
       }
 
-  method change_activity_instance_state (Int|ActivityInstance $ai, Str $state) {
+  method change_activity_instance_state 
+      (Int|HashRef|ActivityInstance $ai, Str $state) {
 
       $ai = $self->get_activity_instance(
           $ai, { prefetch => ['process_instance', 'activity'] }
@@ -35,13 +36,13 @@ role BPM::Engine::Handler::ActivityInstanceHandler {
           my $activity         = $ai->activity;
           my $process_instance = $ai->process_instance;
           my $runner           = $self->runner($process_instance);
-          if($state eq 'assign') { # open.running
+          if($state eq 'assign') {
               # Execute the activity if it is now open.running.
               $runner->start_activity($activity, $ai, 1);
               }
-          elsif($state eq 'finish') { # closed.completed
+          elsif($state eq 'finish') {
               # Fire the activity's efferent transitions if it is
-              # now closed.complete.
+              # now closed.completed.
               $runner->complete_activity($activity, $ai, 1);
               }
           }
@@ -49,7 +50,7 @@ role BPM::Engine::Handler::ActivityInstanceHandler {
           $ai->apply_transition($state);
           }
 
-      return;
+      return $ai;
       }
 
   method activity_instance_attribute (Int|ActivityInstance $ai, @args) {

@@ -24,7 +24,7 @@ throws_ok(
 
 lives_ok( sub { BPM::Engine->new( connect_info => $dsn ) }, 'Valid connect_info' );
 lives_ok( sub { BPM::Engine->new({ connect_info => $dsn }) }, 'Valid connect_info' );
-dies_ok( sub { BPM::Engine->new( connect_info => {} ) }, 'Valid connect_info' );
+dies_ok(  sub { BPM::Engine->new( connect_info => {} ) }, 'Valid connect_info' );
 
 #- logger
 
@@ -58,13 +58,13 @@ else {
     'Invalid config file'
     );
 
-    ok($e = BPM::Engine->new_with_config(connect_info => $dsn));
+  ok($e = BPM::Engine->new_with_config(connect_info => $dsn));
     #qr[Specified configfile '/etc/bpmengine.yaml' does not exist],'Invalid config file'
     #like($e->connect_info->{dsn}, qr/^dbi:SQLite/);
     ok(!$e->connect_info->{user});
-    }
+  }
 
-  lives_ok(
+lives_ok(
     sub { BPM::Engine->new_with_config(configfile => 'nonexistantfile', connect_info => $dsn) },
     #qr/Specified configfile 'nonexistantfile' does not exist/,
     'Invalid config file ignored'
@@ -244,7 +244,6 @@ my $engine = BPM::Engine->new(
 # test hack: deploy memory db
 #$engine->schema->deploy if($dsn =~ /:memory:/);
 
-if(1){
 is($engine->get_packages->count, 0, 'No Packages');
 is($engine->get_process_definitions->count, 0, 'No Processes');
 
@@ -300,7 +299,6 @@ is($engine->get_process_definitions->count, 0, 'Process deleted');
 
 #-- ProcessInstance Methods (Handler::ProcessInstanceHandler)
 #----------------------------------------------------------------------------
-}
 
 $package = $engine->create_package('./t/var/08-samples.xpdl');
 my @procs = $engine->get_process_definitions({ process_uid => 'unstructured-inclusive-tasks' })->all;
@@ -318,8 +316,9 @@ throws_ok( sub { $engine->create_process_instance('3C2B6B44-E2DB-1014-857D-7D165
 ok(my $pi0 = $engine->create_process_instance($process->id));
 isa_ok($pi0, 'BPM::Engine::Store::Result::ProcessInstance');
 
-ok(my $pi = $engine->create_process_instance($process));
+ok(my $pi = $engine->create_process_instance($process, { instance_name => 'my process instance' }));
 isa_ok($pi, 'BPM::Engine::Store::Result::ProcessInstance');
+is($pi->instance_name, 'my process instance');
 
 #-- list_process_instances
 
@@ -349,16 +348,10 @@ throws_ok( sub { $engine->start_process_instance(987654321) }, 'BPM::Engine::Exc
 
 my $args = { splitA => 'B1', splitB => 'B1' };
 
-################
-
-#use Data::Dumper;
 is($pi->process->process_uid,'unstructured-inclusive-tasks');
-#warn Dumper $pi->attribute_hash;
+
 $engine->start_process_instance($pi, $args);
 
-########
-
-#warn "process " . $ai ? 'completed' : 'running';
 is($pi->workflow_instance->state->name, 'closed.completed');
 is($pi->state, 'closed.completed');
 
@@ -370,10 +363,39 @@ is($pi->state, 'closed.completed');
 
 #-- change_process_instance_state
 
+my $pi1 = $engine->create_process_instance($process);
+
+throws_ok(
+    sub { $engine->change_process_instance_state($pi1, 'open.your.eyes') },
+    qr/There's no 'open.your.eyes' transition from open.not_running.ready/,
+    'Invalid process instance state change failed'
+    );
+
+is($pi1->state, 'open.not_running.ready');
+my $st = $engine->change_process_instance_state($pi1, 'start');
+is($pi1->state, 'open.running');
+$engine->change_process_instance_state($pi1, 'terminate');
+is($pi1->state, 'closed.cancelled.terminated');
+
+my $pi2 = $engine->create_process_instance($process);
+$engine->change_process_instance_state($pi2, 'start');
+$engine->change_process_instance_state($pi2, 'abort');
+is($pi2->state, 'closed.cancelled.aborted');
+
+my $pi3 = $engine->create_process_instance($process);
+$engine->change_process_instance_state($pi3, 'start');
+$engine->change_process_instance_state($pi3, 'suspend');
+is($pi3->state, 'open.not_running.suspended');
+$engine->change_process_instance_state($pi3, 'resume');
+is($pi3->state, 'open.running');
+$engine->change_process_instance_state($pi3, 'finish');
+is($pi3->state, 'closed.completed');
+
 #-- delete_process_instance
-is($engine->get_process_instances->count, 2, 'First process instance found');
+
+is($engine->get_process_instances->count, 5, 'First process instance found');
 ok($engine->delete_process_instance($pi));
-is($engine->get_process_instances->count, 1, 'First process instance deleted');
+is($engine->get_process_instances->count, 4, 'First process instance deleted');
 
 
 #-- Activity Methods (Handler::ActivityInstanceHandler)

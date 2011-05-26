@@ -50,6 +50,27 @@ role BPM::Engine::Handler::ProcessInstanceHandler {
       return;
       }
 
+  method delete_process_instance (Int|HashRef|ProcessInstance $pi) {
+
+      $pi = $self->get_process_instance($pi) unless(blessed $pi);
+      return $pi->delete;
+      }
+
+  method process_instance_attribute 
+      (Int|HashRef|ProcessInstance $pi, Str $attr, Str $value?) {
+
+      $pi = $self->get_process_instance($pi) unless(blessed $pi);
+      return defined($value) ?
+          $pi->attribute($attr => $value ) :
+          $pi->attribute($attr);
+      }
+
+  method change_process_instance_state (Int|ProcessInstance $pi, Str $state) {
+
+      $pi = $self->get_process_instance($pi) unless(blessed $pi);
+      $pi->apply_transition($state);
+      }
+
   method terminate_process_instance (Int|ProcessInstance $pi) {
 
       $pi = $self->get_process_instance($pi) unless(blessed $pi);
@@ -60,26 +81,6 @@ role BPM::Engine::Handler::ProcessInstanceHandler {
 
       $pi = $self->get_process_instance($pi) unless(blessed $pi);
       throw_abstract(error => 'Method not implemented');
-      }
-
-  method delete_process_instance (Int|ProcessInstance $pi) {
-
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      $pi->delete;
-      }
-
-  method process_instance_attribute (Int|ProcessInstance $pi, Str $attr, Str $value?) {
-
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      return $value ?
-          $pi->attribute($attr => $value ) :
-          $pi->attribute($attr);
-      }
-
-  method change_process_instance_state (Int|ProcessInstance $pi, Str $state) {
-
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      $pi->apply_transition($state);
       }
 
 }

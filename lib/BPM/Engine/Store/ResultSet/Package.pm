@@ -806,7 +806,7 @@ __END__
 
 =head1 NAME
 
-BPM::Engine::Util::XPDL - XPDL parsing helper functions
+BPM::Engine::Store::ResultSet::Package - Package DBIC resultset
 
 =head1 VERSION
 

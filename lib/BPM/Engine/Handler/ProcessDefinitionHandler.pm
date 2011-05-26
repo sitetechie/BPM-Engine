@@ -42,10 +42,11 @@ role BPM::Engine::Handler::ProcessDefinitionHandler {
       return $package;
       }
 
-  method delete_package (UUID $id) {
+  method delete_package (UUID|HashRef $id) {
 
       my $package = $self->schema->resultset('Package')->find($id)
           or do {
+            $id = $id->{package_id} || $id->{package_uid} || '' if (ref($id));
             $self->error("Package '$id' not found");
             throw_store(error => "Package '$id' not found")
             };

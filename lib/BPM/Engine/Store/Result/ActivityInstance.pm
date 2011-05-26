@@ -201,9 +201,9 @@ sub TO_JSON {
              state
             /); # taskdata inputset # 
     
-    foreach my $rel(qw/workitems attributes prev next/) { #  activity
-        #$data{$rel} = $self->$rel;
-        }
+    #foreach my $rel(qw/workitems attributes prev next/) { #  activity
+    #    $struct{$rel} = $self->$rel;
+    #    }
     
     return \%struct;
     }
