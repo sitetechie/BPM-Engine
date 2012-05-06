@@ -6,12 +6,12 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose::Role;
-use BPM::Engine::Types qw/CodeRef Str/;
+use BPM::Engine::Types qw/CodeRef/;
 
 has 'callback' => (
     traits    => ['Code'],
-    is        => 'ro',
-    isa       => CodeRef | Str,
+    is        => 'rw',
+    isa       => CodeRef,
     required  => 0,
     predicate => 'has_callback',
     handles   => { call_callback => 'execute', },
@@ -42,6 +42,8 @@ L<BPM::Engine::ProcessRunner|BPM::Engine::ProcessRunner>.
 =head2 callback
 
 =head1 METHODS
+
+=head2 has_callback
 
 =head2 call_callback
 
