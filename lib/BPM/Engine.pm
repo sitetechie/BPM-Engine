@@ -9,7 +9,7 @@ use 5.010;
 use namespace::autoclean;
 use Moose;
 use MooseX::StrictConstructor;
-use Scalar::Util ();
+#use Scalar::Util ();
 use BPM::Engine::Exceptions qw/throw_engine/;
 use BPM::Engine::Store;
 use BPM::Engine::ProcessRunner;
@@ -41,11 +41,11 @@ has 'runner_traits' => (
 sub runner {
     my ($self, $pi) = @_;
 
-    Scalar::Util::weaken($self);
+    #Scalar::Util::weaken($self);
 
     my $args = {
         process_instance => $pi,
-        #engine           => $self,
+        #engine           => $self, # DEPRECATED
         logger           => $self->logger,
         };
     $args->{callback} = $self->callback      if $self->has_callback;
@@ -73,14 +73,14 @@ BPM::Engine - Business Process Execution Engine
 
 =head1 SYNOPSIS
 
-Create a new bpm engine  
+Create a new BPM engine  
   
   use BPM::Engine;
 
   my $callback = sub {
-        my($runner, $entity, $event, $node, $instance) = @_;
-        ...
-        };
+      my($runner, $entity, $event, $node, $instance) = @_;
+      ...
+      };
 
   my $engine = BPM::Engine->new(
       log_dispatch_conf => 'log.conf',
@@ -688,7 +688,7 @@ You can contribute or fork this project via GitHub:
 
 =head1 BUGS
 
-Plenty. Along with error conditions not being handled gracefully etc.
+Probably. Along with error conditions not being handled gracefully etc.
 
 They will be fixed in due course as I start using this more seriously,
 however in the meantime, patches are welcome :)

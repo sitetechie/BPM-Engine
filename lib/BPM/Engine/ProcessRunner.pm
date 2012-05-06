@@ -34,11 +34,12 @@ BEGIN {
 
 has '+_trait_namespace' => (default => 'BPM::Engine::Plugin');
 
-has 'engine' => (
-    is       => 'ro',
-    isa      => 'BPM::Engine',
-    weak_ref => 1,
-    );
+# DEPRECATED
+#has 'engine' => (
+#    is       => 'ro',
+#    isa      => 'BPM::Engine',
+#    weak_ref => 1,
+#    );
 
 has 'process' => (
     is         => 'ro',
@@ -104,7 +105,7 @@ has '_is_running' => (
     isa => Bool
     );
 
-has '_activity_stack' => (    # not a stack, but a queue
+has '_activity_stack' => (    # not a stack but a queue, actually
     isa     => ArrayRef,
     is      => 'rw',
     default => sub { [] },
@@ -117,7 +118,7 @@ has '_activity_stack' => (    # not a stack, but a queue
         }
         );
 
-has '_deferred_stack' => (    # not a stack, but a queue
+has '_deferred_stack' => (    # not a stack but a queue, actually
     isa     => ArrayRef,
     is      => 'rw',
     default => sub { [] },
@@ -316,7 +317,7 @@ sub _execute_implementation {
         my ($i, $j) = (0, 0);
         foreach my $task ($activity->tasks->all) {
             # inject into sync/async event engine
-            $i++ if ($self->execute_task($task, $instance));
+            $i++ if ($self->dryrun || $self->execute_task($task, $instance));
             $j++;
             }
         $completed = $i == $j ? 1 : 0;
@@ -592,7 +593,7 @@ __END__
 
 =head1 NAME
 
-BPM::Engine::ProcessRunner - Runs Processes
+BPM::Engine::ProcessRunner - Runs workflow processes
 
 =head1 VERSION
 
@@ -600,29 +601,193 @@ BPM::Engine::ProcessRunner - Runs Processes
 
 =head1 SYNOPSIS
 
-  use BPM::Engine::ProcessRunner;
+    use BPM::Engine::ProcessRunner;
 
-  my $callback = sub {
-        my($runner, $entity, $event, $node, $instance) = @_;
-        ...
+    my $callback = sub {
+        my($runner, $entity, $action, $node, $instance) = @_;
+        ...        
+        return 1;
         };
 
-  my $runner = BPM::Engine::ProcessRunner->new();
-  $runner->start_process();
-
-  # somewhere else, after completing a task, from an asynchronous task handler...
+    my $runner = BPM::Engine::ProcessRunner->new(
+        process_instance => $instance,
+        callback         => $callback,
+        );
   
-  $runner->complete_activity($activity, $instance, 1);
+    $runner->start_process();
+
+    # somewhere else, after completing a task, 
+    # from an asynchronous task handler...
+  
+    $runner->complete_activity($activity, $instance, 1);
 
 =head1 DESCRIPTION
 
 Implements the workflow enactment logic.
 
+=head1 CALLBACKS
+
+The methods in this package emit callback events to a callback handler that may 
+be passed to the constructor. If no callback handler is specified, the default 
+return values are applied for these event calls.
+
+The following callback actions are emitted for a process event:
+
+=over 4
+
+=item I<start_process>
+
+Arguments: $process, $process_instance
+
+=item I<start_activity>
+
+Arguments: $activity, $instance
+
+=item I<continue_activity>
+
+Arguments: $activity, $instance
+
+=item I<execute_activity>
+
+Argments: $activity, $instance
+
+On this event, the callback should return false if the workflow process should
+be interrupted, true (default) if otherwise, which executes the activity and
+progresses the workflow.
+
+=item I<execute_task>
+
+Argments: $task, $activity_instance
+
+Returning true (default) will assume the task completed and call
+C<complete_activity()> within ProcessRunner. Return false to halt the process
+thread.
+
+=item I<complete_activity>
+
+Arguments: $activity, $instance
+
+=item I<execute_transition>
+
+Arguments: $transition, $from_instance
+
+=item I<complete_process>
+
+Arguments: $process, $process_instance
+
+Returning true (default) will set the process state to C<closed.comleted>.
+
+=back
+
+Callback methods are directly available under its name prefixed by C<cb_>, for
+example
+
+    $runner->cb_start_process($process, $process_instance);
+ 
+The callback handler receives the following options:
+
+=over 4
+
+=item * C<$runner>
+
+This ProcessRunner instance.
+
+=item C<$entity>
+
+Type of entity the node represents. This is either I<process>, I<activity>,
+I<transition> or I<task>.
+
+=item C<$action>
+
+The event action called on the entity. This is either I<start>, I<continue>,
+I<complete> or I<execute>.
+
+=item C<$node>
+
+The first argument passed to the C<cb_*> callback method, the respective entity
+node in the process that this callback is emitted for. On activity callbacks,
+this is the activity object, the task object on task callbacks, the process
+object for process entities, and transition for transition calls.
+
+=item C<$instance>
+
+The second argument passed to the C<cb_*> callback method, being the instance
+for the node called on. In case of a transition callback, this is the activity
+instance the transition originated from (the activity being executed).
+
+=back
+
+The callback should return true on succesful/normal processing of events, and
+false if something stalled or went wrong. Example:
+
+    my $callback = sub {
+        my($runner, $entity, $action, $node, $instance) = @_;
+            
+        ## call your task execution sub when tasks need executing:
+        if ($entity eq 'task' && $action eq 'execute') {
+            return &execute_task($node, $instance); 
+            }
+
+        return 1;
+        };
+
+    my $runner = BPM::Engine::ProcessRunner->new(
+        callback => $callback,
+        process_instance => $pi
+        );
+
+
+
 =head1 CONSTRUCTOR
 
 =head2 new
 
-Returns a new BPM::Engine::ProcessRunner instance.
+Returns a new BPM::Engine::ProcessRunner instance. Optional arguments are:
+
+=over 4
+
+=item C<< process_instance => $process_instance >>
+
+The process instance to run. Required.
+
+=item C<< callback => \&cb >>
+
+Optional callback I<&cb> which is called on all process instance events.
+
+=item C<< dryrun => 0 | 1 >>
+
+Boolean indicating whether or not the execute_task phase should be skipped.
+Defaults to 0.
+
+=back
+
+=head1 ATTRIBUTE METHODS
+
+=head2 process_instance
+
+The L<BPM::Engine::Store::Result::ProcessInstance> to run.
+
+=head2 process
+
+The L<BPM::Engine::Store::Result::Process> of the process instance.
+
+=head2 graph
+
+The directed graph (an instance of L<Graph::Directed>) for the process.
+
+=head2 stash
+
+Returns a hash reference stored as a heap, that is local to this
+runner object that lets you store any information you want.
+
+=head2 dryrun
+
+Returns the C<dryrun> flag
+
+=head2 evaluator
+
+Returns the L<BPM::Engine::Util::ExpressionEvaluator> object attached to this 
+instance.
 
 =head1 METHODS
 
@@ -630,9 +795,9 @@ Returns a new BPM::Engine::ProcessRunner instance.
 
     $runner->start_process;
 
-Call the 'start_process' callback, set the process instance to the 'started' state,
-and call start_activity() with an activity instance created for each of the
-auto_start start activities.
+Call the 'start_process' callback, set the process instance to the 'started' 
+state, and call start_activity() with an activity instance created for each of 
+the auto_start start activities.
 
 =head2 start_activity
 

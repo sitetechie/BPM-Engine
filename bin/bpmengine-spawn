@@ -23,6 +23,7 @@ GetOptions(
 pod2usage(1) if $help;
 
 my @connect_info = ('dbi:SQLite:dbname=t/var/bpmengine.db');
+#my @connect_info = ('dbi:mysql:bpmengine', 'root');
 my $schema = BPM::Engine::Store->connect(@connect_info) or die "Failed to connect";
 
 if ($ddl) {

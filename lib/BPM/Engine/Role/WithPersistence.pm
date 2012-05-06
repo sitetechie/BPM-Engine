@@ -31,7 +31,8 @@ sub _build_schema {
         or die("Could not connect to Store");
     }
 
-sub BUILD {
+sub BUILD {}
+after BUILD => sub {
     my $self = shift;
 
     confess "Invalid connection arguments - "
@@ -39,7 +40,7 @@ sub BUILD {
         unless ($self->has_connect_info || $self->has_schema);
 
     return;
-    }
+    };
 
 around 'BUILDARGS' => sub {
     my $orig = shift;
