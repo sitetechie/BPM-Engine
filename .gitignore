@@ -3,6 +3,7 @@
 Debian_CPANTS.txt
 blib/
 _build/
+_dev/
 cover_db/
 inc/
 .last_cover_stats
