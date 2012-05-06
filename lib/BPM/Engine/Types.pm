@@ -1,4 +1,3 @@
-
 package BPM::Engine::Types;
 BEGIN {
     $BPM::Engine::Types::VERSION   = '0.001';

@@ -9,7 +9,7 @@ use Cwd ();
 use Test::Requires 'DBD::SQLite';
 
 use parent qw/Exporter/;
-our @EXPORT = qw/ $dsn schema process_wrap runner /;
+our @EXPORT = qw/ $dsn schema process_wrap process_wrap_xml runner /;
 
 my ($_schema, $_attr);
 our ($dsn, $user, $password, $DEBUG) = 
@@ -52,7 +52,7 @@ sub schema {
     return $_schema;
     }
 
-sub process_wrap {
+sub process_wrap_xml {
     my ($xml, $pack, $v) = @_;
 
     $xml  ||= '';
@@ -65,7 +65,15 @@ sub process_wrap {
         <Vendor/><Created/></PackageHeader>|
          . $pack . '<WorkflowProcesses><WorkflowProcess Id="TestProcess"><ProcessHeader/>'
          . $xml  . '</WorkflowProcess></WorkflowProcesses></Package>';
+    
+    return $xml;
+    }
 
+sub process_wrap {
+    my (@args) = @_;
+    
+    my $xml = process_wrap_xml(@args);
+    
     eval "require BPM::Engine" or die "failed to require engine: $@";
 
     my $engine = BPM::Engine->new(schema => schema());
@@ -142,6 +150,12 @@ Creates a BPM::Engine instance and imports a single-process Package, returns the
 engine and the process result row.
 
     my ($engine, $process) = process_wrap($process_xml, $package_xml);
+
+=head2 process_wrap_xml
+
+Generates XPDL package definition for snippets of xml.
+
+    my $xml = process_wrap_xml($process_xml, $package_xml);
 
 =over
 

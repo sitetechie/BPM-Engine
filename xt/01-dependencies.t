@@ -73,7 +73,7 @@ my %required;
 }
 
 for ( sort keys %used ) {
-    next if /^(Graph::Directed|DBIx::Class::Schema|Moose::Role|MooseX::Types::Moose|Template::Stash|XML::LibXML::XPathContext|BPM::Engine|inc|t)(::|$)/;
+    next if /^(Graph::Directed|DBIx::Class::Schema|DBIx::Class::Core|Moose::Role|MooseX::Types::Moose|Template::Stash|XML::LibXML::XPathContext|BPM::Engine|inc|t)(::|$)/;
     next if /^5/;
     my $first_in = Module::CoreList->first_release($_);
     #next if defined $first_in and $first_in <= 5.00803;
