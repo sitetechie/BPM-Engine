@@ -20,6 +20,7 @@
 ^notes
 ^todo
 ^ToDo$
+^_dev
 ## avoid OS X finder files
 \.DS_Store$
 ## skip komodo project files
