@@ -1,6 +1,6 @@
 package BPM::Engine::Role::HandlesAssignments;
 BEGIN {
-    $BPM::Engine::Role::HandlesAssignments::VERSION   = '0.001';
+    $BPM::Engine::Role::HandlesAssignments::VERSION   = '0.01';
     $BPM::Engine::Role::HandlesAssignments::AUTHORITY = 'cpan:SITETECH';
     }
 

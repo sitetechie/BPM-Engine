@@ -1,6 +1,6 @@
 package BPM::Engine::Role::WithCallback;
 BEGIN {
-    $BPM::Engine::Role::WithCallback::VERSION   = '0.001';
+    $BPM::Engine::Role::WithCallback::VERSION   = '0.01';
     $BPM::Engine::Role::WithCallback::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -30,7 +30,7 @@ BPM::Engine::Role::WithCallback - Engine and ProcessRunner role providing a call
 
 =head1 VERSION
 
-version 0.001
+version 0.01
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 package BPM::Engine::Util::YAMLWorkflowLoader;
 BEGIN {
-    $BPM::Engine::Util::YAMLWorkflowLoader::VERSION   = '0.001';
+    $BPM::Engine::Util::YAMLWorkflowLoader::VERSION   = '0.01';
     $BPM::Engine::Util::YAMLWorkflowLoader::AUTHORITY = 'cpan:SITETECH';
     }
 

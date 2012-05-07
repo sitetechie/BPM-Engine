@@ -1,6 +1,6 @@
 package BPM::Engine::Logger;
 BEGIN {
-    $BPM::Engine::Logger::VERSION   = '0.001';
+    $BPM::Engine::Logger::VERSION   = '0.01';
     $BPM::Engine::Logger::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -31,7 +31,7 @@ BPM::Engine::Logger - Engine and ProcessRunner logger object
 
 =head1 VERSION
 
-version 0.001
+version 0.01
 
 =head1 DESCRIPTION
 

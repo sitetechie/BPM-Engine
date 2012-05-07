@@ -1,6 +1,6 @@
 package BPM::Engine::Handler::ProcessDefinitionHandler;
 BEGIN {
-    $BPM::Engine::Handler::ProcessDefinitionHandler::VERSION   = '0.001';
+    $BPM::Engine::Handler::ProcessDefinitionHandler::VERSION   = '0.01';
     $BPM::Engine::Handler::ProcessDefinitionHandler::AUTHORITY = 'cpan:SITETECH';
     }
 ## no critic (RequireEndWithOne, RequireTidyCode)
@@ -85,7 +85,7 @@ BPM::Engine::Handler::ProcessDefinitionHandler - Engine role
 
 =head1 VERSION
 
-version 0.001
+version 0.01
 
 =head1 DESCRIPTION
 

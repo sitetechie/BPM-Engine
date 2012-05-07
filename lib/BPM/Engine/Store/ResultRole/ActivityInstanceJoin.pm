@@ -1,6 +1,6 @@
 package BPM::Engine::Store::ResultRole::ActivityInstanceJoin;
 BEGIN {
-    $BPM::Engine::Store::ResultRole::ActivityInstanceJoin::VERSION   = '0.001';
+    $BPM::Engine::Store::ResultRole::ActivityInstanceJoin::VERSION   = '0.01';
     $BPM::Engine::Store::ResultRole::ActivityInstanceJoin::AUTHORITY = 'cpan:SITETECH';
     }
 ## no critic (ProhibitCascadingIfElse)

@@ -1,6 +1,6 @@
 package BPM::Engine::Util::XPDL;
 BEGIN {
-    $BPM::Engine::Util::XPDL::VERSION   = '0.001';
+    $BPM::Engine::Util::XPDL::VERSION   = '0.01';
     $BPM::Engine::Util::XPDL::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -235,7 +235,7 @@ BPM::Engine::Util::XPDL - XPDL parsing helper functions
 
 =head1 VERSION
 
-0.001
+0.01
 
 =head1 SYNOPSIS
 

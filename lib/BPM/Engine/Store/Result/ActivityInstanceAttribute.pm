@@ -1,6 +1,6 @@
 package BPM::Engine::Store::Result::ActivityInstanceAttribute;
 BEGIN {
-    $BPM::Engine::Store::Result::ActivityInstanceAttribute::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::ActivityInstanceAttribute::VERSION   = '0.01';
     $BPM::Engine::Store::Result::ActivityInstanceAttribute::AUTHORITY = 'cpan:SITETECH';
     }
 

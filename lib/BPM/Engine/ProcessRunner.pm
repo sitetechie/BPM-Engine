@@ -1,6 +1,6 @@
 package BPM::Engine::ProcessRunner;
 BEGIN {
-    $BPM::Engine::ProcessRunner::VERSION   = '0.001';
+    $BPM::Engine::ProcessRunner::VERSION   = '0.01';
     $BPM::Engine::ProcessRunner::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -597,7 +597,7 @@ BPM::Engine::ProcessRunner - Runs workflow processes
 
 =head1 VERSION
 
-0.001
+0.01
 
 =head1 SYNOPSIS
 

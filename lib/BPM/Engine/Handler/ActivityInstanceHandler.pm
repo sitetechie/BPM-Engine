@@ -1,6 +1,6 @@
 package BPM::Engine::Handler::ActivityInstanceHandler;
 BEGIN {
-    $BPM::Engine::Handler::ActivityInstanceHandler::VERSION   = '0.001';
+    $BPM::Engine::Handler::ActivityInstanceHandler::VERSION   = '0.01';
     $BPM::Engine::Handler::ActivityInstanceHandler::AUTHORITY = 'cpan:SITETECH';
     }
 ## no critic (RequireEndWithOne, RequireTidyCode)
@@ -72,7 +72,7 @@ BPM::Engine::Handler::ActivityInstanceHandler - Engine role
 
 =head1 VERSION
 
-version 0.001
+version 0.01
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 package BPM::Engine::Store::ResultSet::Package;
 BEGIN {
-    $BPM::Engine::Store::ResultSet::Package::VERSION   = '0.001';
+    $BPM::Engine::Store::ResultSet::Package::VERSION   = '0.01';
     $BPM::Engine::Store::ResultSet::Package::AUTHORITY = 'cpan:SITETECH';    
     }
 
@@ -810,7 +810,7 @@ BPM::Engine::Store::ResultSet::Package - Package DBIC resultset
 
 =head1 VERSION
 
-0.001
+0.01
 
 =head1 SYNOPSIS
 

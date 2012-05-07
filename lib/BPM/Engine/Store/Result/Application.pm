@@ -1,6 +1,6 @@
 package BPM::Engine::Store::Result::Application;
 BEGIN {
-    $BPM::Engine::Store::Result::Application::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::Application::VERSION   = '0.01';
     $BPM::Engine::Store::Result::Application::AUTHORITY = 'cpan:SITETECH';
     }
 

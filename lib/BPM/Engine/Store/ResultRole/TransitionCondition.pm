@@ -1,6 +1,6 @@
 package BPM::Engine::Store::ResultRole::TransitionCondition;
 BEGIN {
-    $BPM::Engine::Store::ResultRole::TransitionCondition::VERSION   = '0.001';
+    $BPM::Engine::Store::ResultRole::TransitionCondition::VERSION   = '0.01';
     $BPM::Engine::Store::ResultRole::TransitionCondition::AUTHORITY = 'cpan:SITETECH';
     }
 

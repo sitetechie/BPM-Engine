@@ -1,6 +1,6 @@
 package BPM::Engine::Util::ExpressionEvaluator;
 BEGIN {
-    $BPM::Engine::Util::ExpressionEvaluator::VERSION   = '0.001';
+    $BPM::Engine::Util::ExpressionEvaluator::VERSION   = '0.01';
     $BPM::Engine::Util::ExpressionEvaluator::AUTHORITY = 'cpan:SITETECH';
     }
 

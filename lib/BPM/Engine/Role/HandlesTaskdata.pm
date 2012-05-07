@@ -1,6 +1,6 @@
 package BPM::Engine::Role::HandlesTaskdata;
 BEGIN {
-    $BPM::Engine::Role::HandlesTaskdata::VERSION   = '0.001';
+    $BPM::Engine::Role::HandlesTaskdata::VERSION   = '0.01';
     $BPM::Engine::Role::HandlesTaskdata::AUTHORITY = 'cpan:SITETECH';
     }
 

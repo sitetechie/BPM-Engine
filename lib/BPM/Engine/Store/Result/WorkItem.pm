@@ -1,6 +1,6 @@
 package BPM::Engine::Store::Result::WorkItem;
 BEGIN {
-    $BPM::Engine::Store::Result::WorkItem::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::WorkItem::VERSION   = '0.01';
     $BPM::Engine::Store::Result::WorkItem::AUTHORITY = 'cpan:SITETECH';
     }
 

@@ -1,6 +1,6 @@
 package BPM::Engine::Store::ResultRole::WithWorkflow;
 BEGIN {
-    $BPM::Engine::Store::ResultRole::WithWorkflow::VERSION   = '0.001';
+    $BPM::Engine::Store::ResultRole::WithWorkflow::VERSION   = '0.01';
     $BPM::Engine::Store::ResultRole::WithWorkflow::AUTHORITY = 'cpan:SITETECH';
     }
 

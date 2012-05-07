@@ -1,6 +1,6 @@
 package BPM::Engine::Role::WithLogger;
 BEGIN {
-    $BPM::Engine::Role::WithLogger::VERSION   = '0.001';
+    $BPM::Engine::Role::WithLogger::VERSION   = '0.01';
     $BPM::Engine::Role::WithLogger::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -49,7 +49,7 @@ BPM::Engine::Role::WithLogger - Engine and ProcessRunner role providing a logger
 
 =head1 VERSION
 
-version 0.001
+version 0.01
 
 =head1 DESCRIPTION
 

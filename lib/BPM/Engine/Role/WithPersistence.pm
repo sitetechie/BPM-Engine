@@ -1,6 +1,6 @@
 package BPM::Engine::Role::WithPersistence;
 BEGIN {
-    $BPM::Engine::Role::WithPersistence::VERSION   = '0.001';
+    $BPM::Engine::Role::WithPersistence::VERSION   = '0.01';
     $BPM::Engine::Role::WithPersistence::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -66,7 +66,7 @@ BPM::Engine::Role::WithPersistence - Engine role that provides DBIC schema
 
 =head1 VERSION
 
-version 0.001
+version 0.01
 
 =head1 DESCRIPTION
 

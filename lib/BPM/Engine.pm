@@ -1,7 +1,7 @@
 package BPM::Engine;
 
 BEGIN {
-    $BPM::Engine::VERSION   = '0.001';
+    $BPM::Engine::VERSION   = '0.01';
     $BPM::Engine::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -69,7 +69,7 @@ BPM::Engine - Business Process Execution Engine
 
 =head1 VERSION
 
-0.001
+0.01
 
 =head1 SYNOPSIS
 

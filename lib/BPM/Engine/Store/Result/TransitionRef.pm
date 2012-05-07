@@ -1,6 +1,6 @@
 package BPM::Engine::Store::Result::TransitionRef;
 BEGIN {
-    $BPM::Engine::Store::Result::TransitionRef::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::TransitionRef::VERSION   = '0.01';
     $BPM::Engine::Store::Result::TransitionRef::AUTHORITY = 'cpan:SITETECH';
     }
 

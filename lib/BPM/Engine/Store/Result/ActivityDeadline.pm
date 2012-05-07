@@ -1,6 +1,6 @@
 package BPM::Engine::Store::Result::ActivityDeadline;
 BEGIN {
-    $BPM::Engine::Store::Result::ActivityDeadline::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::ActivityDeadline::VERSION   = '0.01';
     $BPM::Engine::Store::Result::ActivityDeadline::AUTHORITY = 'cpan:SITETECH';
     }
 

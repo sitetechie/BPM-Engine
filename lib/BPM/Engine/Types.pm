@@ -1,6 +1,6 @@
 package BPM::Engine::Types;
 BEGIN {
-    $BPM::Engine::Types::VERSION   = '0.001';
+    $BPM::Engine::Types::VERSION   = '0.01';
     $BPM::Engine::Types::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -28,7 +28,7 @@ BPM::Engine::Types - Exports BPM::Engine internal types as well as Moose types
 
 =head1 VERSION
 
-version 0.001
+version 0.01
 
 =head1 AUTHOR
 

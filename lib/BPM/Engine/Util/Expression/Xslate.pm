@@ -1,6 +1,6 @@
 package BPM::Engine::Util::Expression::Xslate;
 BEGIN {
-    $BPM::Engine::Util::Expression::Xslate::VERSION   = '0.001';
+    $BPM::Engine::Util::Expression::Xslate::VERSION   = '0.01';
     $BPM::Engine::Util::Expression::Xslate::AUTHORITY = 'cpan:SITETECH';
     }
 

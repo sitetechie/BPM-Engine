@@ -1,6 +1,6 @@
 package BPM::Engine::Store::ResultRole::WithAttributes;
 BEGIN {
-    $BPM::Engine::Store::ResultRole::WithAttributes::VERSION   = '0.001';
+    $BPM::Engine::Store::ResultRole::WithAttributes::VERSION   = '0.01';
     $BPM::Engine::Store::ResultRole::WithAttributes::AUTHORITY = 'cpan:SITETECH';
     }
 

@@ -1,6 +1,6 @@
 package BPM::Engine::Role::HandlesIO;
 BEGIN {
-    $BPM::Engine::Role::HandlesIO::VERSION   = '0.001';
+    $BPM::Engine::Role::HandlesIO::VERSION   = '0.01';
     $BPM::Engine::Role::HandlesIO::AUTHORITY = 'cpan:SITETECH';
     }
 

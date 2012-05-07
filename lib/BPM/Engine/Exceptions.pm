@@ -1,6 +1,6 @@
 package BPM::Engine::Exceptions;
 BEGIN {
-    $BPM::Engine::Exceptions::VERSION   = '0.001';
+    $BPM::Engine::Exceptions::VERSION   = '0.01';
     $BPM::Engine::Exceptions::AUTHORITY = 'cpan:SITETECH';
     }
 use strict;
@@ -90,7 +90,7 @@ BPM::Engine::Exceptions - Exception classes used in BPM::Engine
 
 =head1 VERSION
 
-0.001
+0.01
 
 =head1 SYNOPSIS
 

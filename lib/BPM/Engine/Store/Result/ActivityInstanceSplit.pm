@@ -1,6 +1,6 @@
 package BPM::Engine::Store::Result::ActivityInstanceSplit;
 BEGIN {
-    $BPM::Engine::Store::Result::ActivityInstanceSplit::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::ActivityInstanceSplit::VERSION   = '0.01';
     $BPM::Engine::Store::Result::ActivityInstanceSplit::AUTHORITY = 'cpan:SITETECH';
     }
 

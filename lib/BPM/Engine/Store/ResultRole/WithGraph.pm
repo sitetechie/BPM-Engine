@@ -1,6 +1,6 @@
 package BPM::Engine::Store::ResultRole::WithGraph;
 BEGIN {
-    $BPM::Engine::Store::ResultRole::WithGraph::VERSION   = '0.001';
+    $BPM::Engine::Store::ResultRole::WithGraph::VERSION   = '0.01';
     $BPM::Engine::Store::ResultRole::WithGraph::AUTHORITY = 'cpan:SITETECH';
     }
 

@@ -1,6 +1,6 @@
 package BPM::Engine::Store::Result::Performer;
 BEGIN {
-    $BPM::Engine::Store::Result::Performer::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::Performer::VERSION   = '0.01';
     $BPM::Engine::Store::Result::Performer::AUTHORITY = 'cpan:SITETECH';
     }
 

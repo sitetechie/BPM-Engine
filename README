@@ -2,7 +2,7 @@ NAME
     BPM::Engine - Business Process Execution Engine
 
 VERSION
-    0.001
+    0.01
 
 SYNOPSIS
     Create a new BPM engine

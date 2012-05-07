@@ -1,6 +1,6 @@
 package BPM::Engine::Store::Result::ProcessInstanceAttribute;
 BEGIN {
-    $BPM::Engine::Store::Result::ProcessInstanceAttribute::VERSION   = '0.001';
+    $BPM::Engine::Store::Result::ProcessInstanceAttribute::VERSION   = '0.01';
     $BPM::Engine::Store::Result::ProcessInstanceAttribute::AUTHORITY = 'cpan:SITETECH';
     }
 

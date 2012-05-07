@@ -1,6 +1,6 @@
 package BPM::Engine::Types::Internal;
 BEGIN {
-    $BPM::Engine::Types::Internal::VERSION   = '0.001';
+    $BPM::Engine::Types::Internal::VERSION   = '0.01';
     $BPM::Engine::Types::Internal::AUTHORITY = 'cpan:SITETECH';
     }
 ## no critic (RequireTidyCode)

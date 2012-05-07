@@ -1,6 +1,6 @@
 package BPM::Engine::Role::EngineAPI;
 BEGIN {
-    $BPM::Engine::Role::EngineAPI::VERSION   = '0.001';
+    $BPM::Engine::Role::EngineAPI::VERSION   = '0.01';
     $BPM::Engine::Role::EngineAPI::AUTHORITY = 'cpan:SITETECH';
     }
 
@@ -66,7 +66,7 @@ BPM::Engine::Role::EngineAPI - Engine API inventory
 
 =head1 VERSION
 
-version 0.001
+version 0.01
 
 =head1 DESCRIPTION
 
