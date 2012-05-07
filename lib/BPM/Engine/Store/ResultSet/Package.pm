@@ -723,7 +723,8 @@ sub _set_elements {
             elsif($container eq 'ActivityTask' && $multi eq 'ActualParameters') {
                 $json = _mapxml($json);
                 }
-            elsif($multi =~ /^(Artifacts|DataFields|DataMappings|Assignments|FormalParameters)$/) { ## no critic (ProhibitComplexRegexes)
+            ## no critic (ProhibitComplexRegexes)
+            elsif($multi =~ /^(Artifacts|DataFields|DataMappings|Assignments|FormalParameters)$/) {
                 foreach(@{$json}) {
                     delete $_->{'NodeGraphicsInfos'};
                     _hashxml($_);
