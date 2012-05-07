@@ -692,24 +692,24 @@ The callback handler receives the following options:
 
 This ProcessRunner instance.
 
-=item C<$entity>
+=item * C<$entity>
 
 Type of entity the node represents. This is either I<process>, I<activity>,
 I<transition> or I<task>.
 
-=item C<$action>
+=item * C<$action>
 
 The event action called on the entity. This is either I<start>, I<continue>,
 I<complete> or I<execute>.
 
-=item C<$node>
+=item * C<$node>
 
 The first argument passed to the C<cb_*> callback method, the respective entity
 node in the process that this callback is emitted for. On activity callbacks,
 this is the activity object, the task object on task callbacks, the process
 object for process entities, and transition for transition calls.
 
-=item C<$instance>
+=item * C<$instance>
 
 The second argument passed to the C<cb_*> callback method, being the instance
 for the node called on. In case of a transition callback, this is the activity

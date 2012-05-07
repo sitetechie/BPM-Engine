@@ -73,8 +73,8 @@ BPM::Engine - Business Process Execution Engine
 
 =head1 SYNOPSIS
 
-Create a new BPM engine  
-  
+Create a new BPM engine
+
   use BPM::Engine;
 
   my $callback = sub {

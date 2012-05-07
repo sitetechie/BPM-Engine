@@ -17,7 +17,7 @@ strict = 1
 minimum_regex_length_to_complain_about = 10
 
 [Subroutines::ProhibitUnusedPrivateSubroutines]
-allow = _build_schema _build_logger _build_process _build_graph
+allow = _build_schema _build_logger _build_process _build_graph _build_evaluator
 
 
 [CodeLayout::RequireTidyCode]
@@ -25,8 +25,8 @@ severity  = 2
 perltidyrc = xt/perltidyrc
 
 
-#[CodeLayout::ProhibitTrailingWhitespace]
-#severity  = 2
+[CodeLayout::ProhibitTrailingWhitespace]
+#severity  = 3
 
 #[TestingAndDebugging::ProhibitNoStrict]
 #allow=refs
