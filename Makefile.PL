@@ -43,6 +43,12 @@ build_requires  'Test::Fatal'                => '0.003';
 build_requires  'Test::Requires'             => '0.06';
 build_requires  'Test::NoWarnings'           => '1.02';
 
+# minimum versions required upstream (indirect deps)
+requires        'MooseX::Method::Signatures' => '0.42';
+requires        'YAML::LibYAML'              => '0.18';
+requires        'Config::Any'                => '0.23';
+
+# direct dependencies
 requires        'aliased'                    => '0';
 requires        'parent'                     => '0';
 requires        'namespace::clean'           => '0.18';
@@ -71,7 +77,7 @@ requires        'MooseX::NonMoose'           => '0.22';
 requires        'MooseX::Types'              => '0.23';
 requires        'MooseX::Types::UUID'        => '0.02';
 requires        'MooseX::Types::DBIx::Class' => '0.05';
-requires        'MooseX::Declare'            => '0.34';
+requires        'MooseX::Declare'            => '0.35';
 requires        'MooseX::LogDispatch'        => '1.20';
 requires        'MooseX::Traits'             => '0.11';
 requires        'MooseX::SimpleConfig'       => '0.09';

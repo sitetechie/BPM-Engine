@@ -37,7 +37,7 @@ isa_ok($pia->process_instance, 'BPM::Engine::Store::Result::ProcessInstance');
 $pi = $process->new_instance();
 
 isa_ok(exception { $pi->add_to_attributes() }, 'DBIx::Class::Exception');
-like(  exception { $pi->add_to_attributes() }, qr/create needs a hashref/);
+like(  exception { $pi->add_to_attributes() }, qr/needs a hash/);
 isa_ok(exception { $pi->add_to_attributes({}) }, 'DBIx::Class::Exception');
 # mysql: execute failed: Field 'name' doesn't have a default value
 #like(  exception { $pi->add_to_attributes({}) }, qr/wfe_process_instance_attr.name may not be NULL/);
