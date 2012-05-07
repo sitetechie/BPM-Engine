@@ -33,8 +33,10 @@ author_requires 'Module::Install::VersionCheck';
 author_requires 'Test::Pod'                  => '1.14';
 author_requires 'Test::Pod::Coverage';
 author_requires 'Pod::Coverage::Moose';
-author_requires 'Test::Perl::Critic'         => '1.02';
 author_requires 'Perl::Critic'               => '1.11';
+author_requires 'Perl::Critic::Swift'        => '1.03';
+author_requires 'Test::MinimumVersion'       => '0.101080';
+author_requires 'Test::Perl::Critic'         => '1.02';
 
 build_requires  'Test::More'                 => '0.92';
 build_requires  'Test::Exception'            => '0.29';
