@@ -28,6 +28,9 @@ perltidyrc = xt/perltidyrc
 [CodeLayout::ProhibitTrailingWhitespace]
 #severity  = 3
 
+[RegularExpressions::ProhibitComplexRegexes]
+max_characters = 66
+
 #[TestingAndDebugging::ProhibitNoStrict]
 #allow=refs
 
