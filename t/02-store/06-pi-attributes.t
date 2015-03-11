@@ -12,7 +12,8 @@ my $process = $schema->resultset('Process')->create({ package_id => $package->id
 
 my $rs = $schema->resultset('ProcessInstanceAttribute');
 isa_ok(exception { $rs->create() }, 'DBIx::Class::Exception');
-like(  exception { $rs->create() }, qr/create needs a hashref/);
+like(  exception { $rs->create() },
+       qr/(create needs|instantiation requires) a hashref/);
 # mysql: execute failed: Field 'process_instance' doesn't have a default value
 isa_ok(exception { $rs->create({}) }, 'DBIx::Class::Exception');
 #like(  exception { $rs->create({}) }, qr/process_instance_id may not be NULL/);
@@ -37,7 +38,7 @@ isa_ok($pia->process_instance, 'BPM::Engine::Store::Result::ProcessInstance');
 $pi = $process->new_instance();
 
 isa_ok(exception { $pi->add_to_attributes() }, 'DBIx::Class::Exception');
-like(  exception { $pi->add_to_attributes() }, qr/needs a hash/);
+like(  exception { $pi->add_to_attributes() }, qr/(needs|must be) a hash/);
 isa_ok(exception { $pi->add_to_attributes({}) }, 'DBIx::Class::Exception');
 # mysql: execute failed: Field 'name' doesn't have a default value
 #like(  exception { $pi->add_to_attributes({}) }, qr/wfe_process_instance_attr.name may not be NULL/);
