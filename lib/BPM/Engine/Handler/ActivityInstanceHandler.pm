@@ -4,9 +4,9 @@ BEGIN {
     $BPM::Engine::Handler::ActivityInstanceHandler::AUTHORITY = 'cpan:SITETECH';
     }
 ## no critic (RequireEndWithOne, RequireTidyCode)
-use MooseX::Declare;
+use Moops;
 
-role BPM::Engine::Handler::ActivityInstanceHandler {
+role BPM::Engine::Handler::ActivityInstanceHandler using Moose::Role {
 
   requires 'runner';
 

@@ -4,9 +4,9 @@ BEGIN {
     $BPM::Engine::Handler::ProcessDefinitionHandler::AUTHORITY = 'cpan:SITETECH';
     }
 ## no critic (RequireEndWithOne, RequireTidyCode)
-use MooseX::Declare;
+use Moops;
 
-role BPM::Engine::Handler::ProcessDefinitionHandler {
+role BPM::Engine::Handler::ProcessDefinitionHandler using Moose::Role {
 
   use BPM::Engine::Types qw/Exception LibXMLDoc UUID/;
   use BPM::Engine::Exceptions qw/throw_engine throw_model throw_store/;

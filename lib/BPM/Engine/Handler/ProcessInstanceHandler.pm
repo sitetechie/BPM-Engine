@@ -4,9 +4,9 @@ BEGIN {
     $BPM::Engine::Handler::ProcessInstanceHandler::AUTHORITY = 'cpan:SITETECH';
     }
 ## no critic (RequireEndWithOne, RequireTidyCode)
-use MooseX::Declare;
+use Moops;
 
-role BPM::Engine::Handler::ProcessInstanceHandler {
+role BPM::Engine::Handler::ProcessInstanceHandler using Moose::Role {
 
   use Scalar::Util qw/blessed/;
   use BPM::Engine::Types qw/UUID/;  
