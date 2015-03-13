@@ -83,7 +83,7 @@ sub _performer {
 sub _message {
     my ($self, $msg, $process, $pi) = @_;
 
-    return unless $msg;
+    return {} unless $msg;
 
     my $res = {};
 
@@ -146,7 +146,7 @@ sub _message_params {
     }
 
 sub _service {
-    my $svc = shift or return;
+    my $svc = shift or return {};
 
     my $end = $svc->{Service}->{EndPoint}->{ExternalReference};
 
