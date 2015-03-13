@@ -17,6 +17,8 @@ BEGIN {
     for sort map { s!/!::!g; s/\.pm$//; s/\.:://; s/^lib:://; $_ } @modules; ## no critic (MutatingListFunctions)
 }
 
+#diag("\$BPM::Engine::VERSION=".$BPM::Engine::VERSION);
+#diag("Module \$${_}::VERSION=".eval"\$${_}::VERSION"),
 is($_->VERSION, $BPM::Engine::VERSION, "Version $_ matches")
     for sort map { s!/!::!g; s/\.pm$//; s/\.:://; s/^lib:://; $_ } @modules; ## no critic (MutatingListFunctions)
 

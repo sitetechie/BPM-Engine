@@ -1,12 +1,12 @@
 package BPM::Engine::Handler::ProcessDefinitionHandler;
-BEGIN {
-    $BPM::Engine::Handler::ProcessDefinitionHandler::VERSION   = '0.01';
-    $BPM::Engine::Handler::ProcessDefinitionHandler::AUTHORITY = 'cpan:SITETECH';
-    }
 ## no critic (RequireEndWithOne, RequireTidyCode)
 use Moops;
 
-role BPM::Engine::Handler::ProcessDefinitionHandler using Moose::Role {
+role BPM::Engine::Handler::ProcessDefinitionHandler using Moose {
+  BEGIN {
+    $BPM::Engine::Handler::ProcessDefinitionHandler::VERSION   = '0.01';
+    $BPM::Engine::Handler::ProcessDefinitionHandler::AUTHORITY = 'cpan:SITETECH';
+  }
 
   use BPM::Engine::Types qw/Exception LibXMLDoc UUID/;
   use BPM::Engine::Exceptions qw/throw_engine throw_model throw_store/;

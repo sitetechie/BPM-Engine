@@ -1,12 +1,12 @@
 package BPM::Engine::Handler::ProcessInstanceHandler;
-BEGIN {
-    $BPM::Engine::Handler::ProcessInstanceHandler::VERSION   = '0.01';
-    $BPM::Engine::Handler::ProcessInstanceHandler::AUTHORITY = 'cpan:SITETECH';
-    }
 ## no critic (RequireEndWithOne, RequireTidyCode)
 use Moops;
 
-role BPM::Engine::Handler::ProcessInstanceHandler using Moose::Role {
+role BPM::Engine::Handler::ProcessInstanceHandler using Moose {
+  BEGIN {
+    $BPM::Engine::Handler::ProcessInstanceHandler::VERSION   = '0.01';
+    $BPM::Engine::Handler::ProcessInstanceHandler::AUTHORITY = 'cpan:SITETECH';
+    }
 
   use Scalar::Util qw/blessed/;
   use BPM::Engine::Types qw/UUID/;  
