@@ -27,8 +27,8 @@ has 'connect_info' => (
 
 sub _build_schema {
     my $self = shift;
-    return BPM::Engine::Store->connect($self->connect_info)
-        or die("Could not connect to Store");
+    return (BPM::Engine::Store->connect($self->connect_info)
+        or die("Could not connect to Store"));
     }
 
 sub BUILD {}
