@@ -7,7 +7,7 @@ BEGIN {
 use Moose;
 use MooseX::StrictConstructor;
 use DateTime;
-use BPM::Engine::Types qw/Bool ArrayRef HashRef CodeRef Exception Row/;
+use BPM::Engine::Types qw/Bool ArrayRef HashRef CodeRef +Exception Row/;
 use BPM::Engine::Exceptions qw/throw_model throw_abstract throw_runner/;
 use BPM::Engine::Util::ExpressionEvaluator;
 use namespace::autoclean;    # -also => [qr/^_/];

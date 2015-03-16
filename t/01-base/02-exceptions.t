@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 
-use BPM::Engine::Types 'Exception';
+use BPM::Engine::Types '+Exception';
 use BPM::Engine::Exceptions ':all'; # qw/throw_runner throw_model/;
 
 my $e;

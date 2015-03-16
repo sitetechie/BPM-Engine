@@ -249,7 +249,7 @@ is($engine->get_process_definitions->count, 0, 'No Processes');
 
 #-- create_package
 
-throws_ok( sub { $engine->create_package() }, qr/Validation failed/, 'Validation failed' );
+throws_ok( sub { $engine->create_package() }, qr/Validation failed|Expected 1 parameter/, 'Validation failed' );
 
 my $str = '';
 throws_ok( sub { $engine->create_package(\$str) }, qr/Empty String/, 'Validation failed' );
@@ -281,17 +281,17 @@ isa_ok($process, 'BPM::Engine::Store::Result::Process');
 
 #-- get_process_definition
 
-throws_ok( sub { $engine->get_process_definition() },         qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->get_process_definition('string') }, qr/Validation failed/, 'Validation failed' );
+throws_ok( sub { $engine->get_process_definition() },         qr/Validation failed|Expected .*1 parameter/, 'Validation failed' );
+throws_ok( sub { $engine->get_process_definition('string') }, qr/Validation failed|did not pass type constraint/, 'Validation failed' );
 
 $process = $engine->get_process_definition($process->id);
 isa_ok($process, 'BPM::Engine::Store::Result::Process');
 
 #-- delete_package
 
-throws_ok( sub { $engine->delete_package() },          qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->delete_package('string') },  qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->delete_package(1) },         qr/Validation failed/, 'Validation failed' );
+throws_ok( sub { $engine->delete_package() },          qr/Validation failed|Expected 1 parameter/, 'Validation failed' );
+throws_ok( sub { $engine->delete_package('string') },  qr/Validation failed|did not pass type constraint/, 'Validation failed' );
+throws_ok( sub { $engine->delete_package(1) },         qr/Validation failed|did not pass type constraint/, 'Validation failed' );
 
 $engine->delete_package($package->id);
 is($engine->get_packages->count, 0, 'Package deleted');
@@ -308,9 +308,9 @@ isa_ok($process, 'BPM::Engine::Store::Result::Process');
 
 #-- create_process_instance
 
-throws_ok( sub { $engine->create_process_instance() },          qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->create_process_instance('string') },  qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->create_process_instance(987654321) }, qr/Validation failed/, 'Validation failed' );
+throws_ok( sub { $engine->create_process_instance() },          qr/Validation failed|Expected at least 1 parameter/, 'Validation failed' );
+throws_ok( sub { $engine->create_process_instance('string') },  qr/Validation failed|did not pass type constraint/, 'Validation failed' );
+throws_ok( sub { $engine->create_process_instance(987654321) }, qr/Validation failed|did not pass type constraint/, 'Validation failed' );
 throws_ok( sub { $engine->create_process_instance('3C2B6B44-E2DB-1014-857D-7D16527AAD97') }, qr/Process 3C2B6B44-E2DB-1014-857D-7D16527AAD97 not found/, 'Process not found' );
 
 ok(my $pi0 = $engine->create_process_instance($process->id));
@@ -329,8 +329,8 @@ is($pi0->id, $first_pi->id, 'Created process instance found in list');
 
 #-- get_process_instance
 
-throws_ok( sub { $engine->get_process_instance() },          qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->get_process_instance('string') },  qr/Validation failed/, 'Validation failed' );
+throws_ok( sub { $engine->get_process_instance() },          qr/Validation failed|Expected .*1 parameter/, 'Validation failed' );
+throws_ok( sub { $engine->get_process_instance('string') },  qr/Validation failed|did not pass type constraint/, 'Validation failed' );
 throws_ok( sub { $engine->get_process_instance(987654321) }, qr/Process instance '987654321' not found/, 'Validation failed' );
 throws_ok( sub { $engine->get_process_instance(987654321) }, 'BPM::Engine::Exception::Database', 'Validation failed' );
 
@@ -341,8 +341,8 @@ is($first_pi->state, 'open.not_running.ready');
 
 #-- start_process_instance
 
-throws_ok( sub { $engine->start_process_instance() },          qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->start_process_instance('string') },  qr/Validation failed/, 'Validation failed' );
+throws_ok( sub { $engine->start_process_instance() },          qr/Validation failed|Expected .*1 parameter/, 'Validation failed' );
+throws_ok( sub { $engine->start_process_instance('string') },  qr/Validation failed|did not pass type constraint/, 'Validation failed' );
 throws_ok( sub { $engine->start_process_instance(987654321) }, qr/Process instance '987654321' not found/, 'Validation failed' );
 throws_ok( sub { $engine->start_process_instance(987654321) }, 'BPM::Engine::Exception::Database', 'Validation failed' );
 
@@ -411,8 +411,8 @@ isa_ok($ai, 'BPM::Engine::Store::Result::ActivityInstance');
 
 #-- get_activity_instance
 
-throws_ok( sub { $engine->get_activity_instance() },          qr/Validation failed/, 'Validation failed' );
-throws_ok( sub { $engine->get_activity_instance('string') },  qr/Validation failed/, 'Validation failed' );
+throws_ok( sub { $engine->get_activity_instance() },          qr/Validation failed|Expected .*1 parameter/, 'Validation failed' );
+throws_ok( sub { $engine->get_activity_instance('string') },  qr/Validation failed|did not pass type constraint/, 'Validation failed' );
 throws_ok( sub { $engine->get_activity_instance(987654321) }, 'BPM::Engine::Exception::Database', 'Record not found' );
 
 ok($ai = $engine->get_activity_instance($ai->id));

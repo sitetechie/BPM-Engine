@@ -2,7 +2,6 @@ package BPM::Engine::Types;
 use strict;
 use warnings;
 
-use namespace::autoclean;
 use Type::Library -base;
 use Type::Utils 'extends';
 
@@ -13,10 +12,10 @@ BEGIN {
   extends 'Types::Standard';
 #  extends 'MooseX::Types::Moose';
   extends 'MooseX::Types::UUID';
-  extends 'MooseX::Types::DBIx::Class';
+  extends 'Types::DBIxClass';
   extends 'BPM::Engine::Types::Internal';
 }
-
+__PACKAGE__->meta->make_immutable;
 1;
 __END__
 
