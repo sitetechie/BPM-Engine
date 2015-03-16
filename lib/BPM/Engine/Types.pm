@@ -10,8 +10,6 @@ BEGIN {
   $BPM::Engine::Types::AUTHORITY = 'cpan:SITETECH';
 
   extends 'Types::Standard';
-#  extends 'MooseX::Types::Moose';
-  extends 'MooseX::Types::UUID';
   extends 'Types::DBIxClass';
   extends 'BPM::Engine::Types::Internal';
 }

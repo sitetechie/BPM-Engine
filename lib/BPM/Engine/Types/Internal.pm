@@ -12,10 +12,11 @@ use Type::Library -base,
     LibXMLDoc
     Exception
     ConnectInfo
+    UUID
   /;
 use Type::Utils -all;
 use Types::Standard qw/
-    Str HashRef CodeRef Object
+    Str HashRef CodeRef Object StrMatch
     /;
 
 declare LibXMLDoc,
@@ -41,6 +42,9 @@ coerce ConnectInfo,
 sub _coerce_connect_info_from_str {
     +{ dsn => $_, user => '', password => '' }
     }
+
+declare UUID,
+  as StrMatch[ qr/^[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$/ ];
 
 __PACKAGE__->meta->make_immutable;
 
