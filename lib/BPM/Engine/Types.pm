@@ -10,7 +10,7 @@ BEGIN {
   $BPM::Engine::Types::AUTHORITY = 'cpan:SITETECH';
 
   extends 'Types::Standard';
-  extends 'Types::DBIxClass';
+  extends 'Types::DBIx::Class';
   extends 'BPM::Engine::Types::Internal';
 }
 __PACKAGE__->meta->make_immutable;
