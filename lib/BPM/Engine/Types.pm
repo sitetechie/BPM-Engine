@@ -1,22 +1,19 @@
 package BPM::Engine::Types;
-BEGIN {
-    $BPM::Engine::Types::VERSION   = '0.01';
-    $BPM::Engine::Types::AUTHORITY = 'cpan:SITETECH';
-    }
-
 use strict;
 use warnings;
 
-use base 'MooseX::Types::Combine';
+use Type::Library -base;
+use Type::Utils 'extends';
 
-__PACKAGE__->provide_types_from(
-    qw/ BPM::Engine::Types::Internal
-        MooseX::Types::Moose
-        MooseX::Types::UUID
-        MooseX::Types::DBIx::Class
-        /
-        );
+BEGIN {
+  $BPM::Engine::Types::VERSION   = '0.01';
+  $BPM::Engine::Types::AUTHORITY = 'cpan:SITETECH';
 
+  extends 'Types::Standard';
+  extends 'Types::DBIx::Class';
+  extends 'BPM::Engine::Types::Internal';
+}
+__PACKAGE__->meta->make_immutable;
 1;
 __END__
 

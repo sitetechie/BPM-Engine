@@ -6,7 +6,7 @@ BEGIN {
 
 use namespace::autoclean;
 use Moose::Role;
-use BPM::Engine::Types      qw/ArrayRef CodeRef Exception/;
+use BPM::Engine::Types      qw/ArrayRef CodeRef +Exception/;
 use BPM::Engine::Exceptions qw/throw_condition throw_expression/;
 use BPM::Engine::Util::ExpressionEvaluator;
 

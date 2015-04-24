@@ -13,7 +13,7 @@ use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::LibXML::Simple ();
 use BPM::XPDL;
-use BPM::Engine::Types qw/Exception/;
+use BPM::Engine::Types qw/+Exception/;
 use BPM::Engine::Exceptions qw/throw_model throw_install throw_param/;
 use Scalar::Util qw/blessed/;
 use parent qw/Exporter/;

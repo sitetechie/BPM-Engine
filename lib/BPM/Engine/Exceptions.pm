@@ -110,7 +110,7 @@ Throw an exception when something is wrong
 Now let's try something illegal and catch the exception    
     
     # use the is_Exception() function exported from the types library
-    use BPM::Engine::Types qw/Exception/;    
+    use BPM::Engine::Types qw/+Exception/;    
     
     eval {
         $obj->set_length( 'non-numerical value' ); # this throws the error
