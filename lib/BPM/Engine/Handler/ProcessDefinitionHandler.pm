@@ -1,14 +1,14 @@
 package BPM::Engine::Handler::ProcessDefinitionHandler;
-BEGIN {
+## no critic (RequireEndWithOne, RequireTidyCode)
+use Moops;
+
+role BPM::Engine::Handler::ProcessDefinitionHandler using Moose {
+  BEGIN {
     $BPM::Engine::Handler::ProcessDefinitionHandler::VERSION   = '0.01';
     $BPM::Engine::Handler::ProcessDefinitionHandler::AUTHORITY = 'cpan:SITETECH';
-    }
-## no critic (RequireEndWithOne, RequireTidyCode)
-use MooseX::Declare;
+  }
 
-role BPM::Engine::Handler::ProcessDefinitionHandler {
-
-  use BPM::Engine::Types qw/Exception LibXMLDoc UUID/;
+  use BPM::Engine::Types qw/+Exception LibXMLDoc UUID/;
   use BPM::Engine::Exceptions qw/throw_engine throw_model throw_store/;
 
   method get_packages (@args) {

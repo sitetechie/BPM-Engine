@@ -1,12 +1,12 @@
 package BPM::Engine::Handler::ActivityInstanceHandler;
-BEGIN {
+## no critic (RequireEndWithOne, RequireTidyCode)
+use Moops;
+
+role BPM::Engine::Handler::ActivityInstanceHandler using Moose {
+  BEGIN {
     $BPM::Engine::Handler::ActivityInstanceHandler::VERSION   = '0.01';
     $BPM::Engine::Handler::ActivityInstanceHandler::AUTHORITY = 'cpan:SITETECH';
-    }
-## no critic (RequireEndWithOne, RequireTidyCode)
-use MooseX::Declare;
-
-role BPM::Engine::Handler::ActivityInstanceHandler {
+  }
 
   requires 'runner';
 
