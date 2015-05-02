@@ -1,8 +1,7 @@
-package BPM::Engine::Store::Result::ActivityInstanceState; 
-BEGIN {
-    $BPM::Engine::Store::Result::ActivityInstanceState::VERSION   = '0.01';
-    $BPM::Engine::Store::Result::ActivityInstanceState::AUTHORITY = 'cpan:SITETECH';
-    }
+package BPM::Engine::Store::Result::ActivityInstanceState;
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose;
@@ -40,7 +39,7 @@ __PACKAGE__->add_columns(
     prev => {
         data_type         => 'INT',
         is_nullable       => 1,
-        size              => 11,        
+        size              => 11,
         },
     created => {
         data_type         => 'DATETIME',
@@ -53,30 +52,31 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key('event_id');
 
 __PACKAGE__->belongs_to(
-    activity_instance => 'BPM::Engine::Store::Result::ActivityInstance', 
+    activity_instance => 'BPM::Engine::Store::Result::ActivityInstance',
     'token_id', { cascade_delete => 0 }
-    );
+);
 
 __PACKAGE__->belongs_to( prev => __PACKAGE__ ); # history
 
 __PACKAGE__->might_have(
     next => __PACKAGE__,   { 'foreign.prev' => 'self.event_id' }
-    );
+);
 
 sub clone {
     my ($self, @fields) = @_;
     return $self->copy({@fields});
-    }
+}
 
 __PACKAGE__->inflate_column('state', {
-    inflate => sub { 
-        my ($value, $self) = @_; 
-        return $self->activity_instance->workflow->get_state($value); 
+    inflate => sub {
+        my ($value, $self) = @_;
+        return $self->activity_instance->workflow->get_state($value);
         },
-    deflate => sub { 
-        shift->stringify 
+    deflate => sub {
+        shift->stringify
         },
-    });
+    }
+);
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 

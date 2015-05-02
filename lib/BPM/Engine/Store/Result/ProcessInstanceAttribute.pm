@@ -1,8 +1,7 @@
 package BPM::Engine::Store::Result::ProcessInstanceAttribute;
-BEGIN {
-    $BPM::Engine::Store::Result::ProcessInstanceAttribute::VERSION   = '0.01';
-    $BPM::Engine::Store::Result::ProcessInstanceAttribute::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose;
@@ -38,7 +37,7 @@ __PACKAGE__->add_columns(
         default_value     => 'INOUT',
         extra             => { list => [qw/IN OUT INOUT/] },
         },
-    type => {        
+    type => {
         data_type         => 'ENUM',
         is_nullable       => 0,
         default           => 'BasicType',
@@ -88,39 +87,40 @@ __PACKAGE__->set_primary_key(qw/ process_instance_id name /);
 __PACKAGE__->belongs_to(
     process_instance => 'BPM::Engine::Store::Result::ProcessInstance',
     'process_instance_id'
-    );
+);
 
 sub new {
-    my ($class, $attrs) = @_;
+    my ( $class, $attrs ) = @_;
 
     #confess("Attribute 'name' missing") unless $attrs->{name};
     $attrs->{mode} ||= 'INOUT';
     $attrs->{type} ||= 'BasicType';
 
     return $class->next::method($attrs);
-    }
+}
 
 sub validate {
-    my ($self, $value) = @_;
-    
+    my ( $self, $value ) = @_;
+
     throw_abstract error => 'BlockActivity not implemented yet';
-    }
+}
 
 sub value {
-    my ($self, $newvalue) = @_;
+    my ( $self, $newvalue ) = @_;
 
-    if($newvalue) {
+    if ($newvalue) {
         my $name = $self->name;
-        die("Attribute '$name' is read-only") if($self->is_readonly);
-        die("Attribute value $newvalue should be a reference") 
-            unless(ref($newvalue));
+        die("Attribute '$name' is read-only") if ( $self->is_readonly );
+        die("Attribute value $newvalue should be a reference")
+            unless ( ref($newvalue) );
         return $self->_value($newvalue);
-        }
+    }
 
     my $value = $self->_value;
-    return ($self->type eq 'BasicType' && !$self->is_array) ? 
-        $value->[0] : $value;
-    }
+    return ( $self->type eq 'BasicType' && !$self->is_array )
+        ? $value->[0]
+        : $value;
+}
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 

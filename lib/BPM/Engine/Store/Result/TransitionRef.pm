@@ -1,8 +1,7 @@
 package BPM::Engine::Store::Result::TransitionRef;
-BEGIN {
-    $BPM::Engine::Store::Result::TransitionRef::VERSION   = '0.01';
-    $BPM::Engine::Store::Result::TransitionRef::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use strict;
 use warnings;
@@ -27,23 +26,27 @@ __PACKAGE__->add_columns(
         extra             => { list => [qw/
             SPLIT JOIN
             /] },
-        },   
+        },
     position => {
         data_type         => 'TINYINT',
         default_value     => 0,
         is_nullable       => 0,
         size              => 3,
         extras            => { unsigned => 1 }
-        },     
+        },
     );
 
 __PACKAGE__->set_primary_key(qw/ activity_id transition_id split_or_join /);
 
-__PACKAGE__->belongs_to( activity => 'BPM::Engine::Store::Result::Activity',
-    { 'foreign.activity_id' => 'self.activity_id' } );
+__PACKAGE__->belongs_to(
+    activity => 'BPM::Engine::Store::Result::Activity',
+    { 'foreign.activity_id' => 'self.activity_id' }
+);
 
-__PACKAGE__->belongs_to( transition => 'BPM::Engine::Store::Result::Transition',
-    'transition_id' );
+__PACKAGE__->belongs_to(
+    transition => 'BPM::Engine::Store::Result::Transition',
+    'transition_id'
+);
 
 1;
 __END__

@@ -1,8 +1,7 @@
 package BPM::Engine::Store::Result::ProcessInstance;
-BEGIN {
-    $BPM::Engine::Store::Result::ProcessInstance::VERSION   = '0.01';
-    $BPM::Engine::Store::Result::ProcessInstance::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose;
@@ -28,7 +27,7 @@ __PACKAGE__->add_columns(
         size              => 36,
         is_nullable       => 0,
         is_foreign_key    => 1,
-        },    
+        },
     parent_ai_id => {     # parent blockactivity
         data_type         => 'INT',
         is_nullable       => 1,
@@ -60,60 +59,62 @@ __PACKAGE__->set_primary_key(qw/ instance_id /);
 
 __PACKAGE__->belongs_to(
     process => 'BPM::Engine::Store::Result::Process','process_id'
-    );
+);
 
 __PACKAGE__->has_many(
     attributes => 'BPM::Engine::Store::Result::ProcessInstanceAttribute',
     { 'foreign.process_instance_id' => 'self.instance_id' }
-    );
+);
 
 __PACKAGE__->has_many(
     activity_instances => 'BPM::Engine::Store::Result::ActivityInstance',
     { 'foreign.process_instance_id' => 'self.instance_id' }, { order_by => 'prev' }
-    );
+);
 
 __PACKAGE__->belongs_to(
     parent_activity_instance => 'BPM::Engine::Store::Result::ActivityInstance',
     { 'foreign.token_id' => 'self.parent_ai_id' }
-    );
+);
 
 __PACKAGE__->has_many(
     state_events => 'BPM::Engine::Store::Result::ProcessInstanceState',
     { 'foreign.process_instance_id' => 'self.instance_id' }
-    );
+);
 
 __PACKAGE__->has_many(
     workitems => 'BPM::Engine::Store::Result::WorkItem',
     { 'foreign.process_instance_id' => 'self.instance_id' }
-    );
+);
 
 sub insert {
-    my ($self, @args) = @_;
+    my ( $self, @args ) = @_;
 
     my $guard = $self->result_source->schema->txn_scope_guard;
 
     $self->next::method(@args);
     $self->discard_changes;
 
-    my $rel = $self->create_related('state_events', {
-        state => $self->workflow->get_state($self->workflow->initial_state),
-        });
-    $self->update({ workflow_instance_id => $rel->id });
+    my $rel = $self->create_related(
+        'state_events',
+        {   state =>
+                $self->workflow->get_state( $self->workflow->initial_state ),
+        }
+    );
+    $self->update( { workflow_instance_id => $rel->id } );
 
     $guard->commit;
 
     return $self;
-    }
+}
 
 sub TO_JSON {
     my $self = shift;
-    my $fields = {
-        map { $_ => $self->$_() } 
-            qw/instance_id process_id instance_name created completed/
-        };
-    # $fields->{attributes} = [ map { $_->TO_JSON } $self->attributes_rs->all ];
+    my $fields = { map { $_ => $self->$_() }
+            qw/instance_id process_id instance_name created completed/ };
+
+  # $fields->{attributes} = [ map { $_->TO_JSON } $self->attributes_rs->all ];
     return $fields;
-    }
+}
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 

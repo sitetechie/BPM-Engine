@@ -1,8 +1,7 @@
 package BPM::Engine::Store::Result::Application;
-BEGIN {
-    $BPM::Engine::Store::Result::Application::VERSION   = '0.01';
-    $BPM::Engine::Store::Result::Application::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use strict;
 use warnings;
@@ -16,7 +15,7 @@ __PACKAGE__->add_columns(
         is_auto_increment => 1,
         is_nullable       => 0,
         extras            => { unsigned => 1 }
-        },    
+        },
     application_uid => {
         data_type         => 'VARCHAR',
         size              => 64,
@@ -44,7 +43,7 @@ __PACKAGE__->add_columns(
         size              => 36,
         is_nullable       => 0,
         is_foreign_key    => 1,
-        },    
+        },
     formal_params => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -54,7 +53,7 @@ __PACKAGE__->add_columns(
         data_type         => 'TEXT',
         is_nullable       => 1,
         serializer_class  => 'JSON',
-        },    
+        },
     );
 
 __PACKAGE__->set_primary_key(qw/ application_id /);
@@ -63,14 +62,13 @@ __PACKAGE__->might_have(
     'package' => 'BPM::Engine::Store::Result::Package',
     { 'foreign.package_id' => 'self.parent_node' },
     { application_scope => 'Package' }
-    );
+);
 
 __PACKAGE__->might_have(
     'process' => 'BPM::Engine::Store::Result::Process',
     { 'foreign.process_id' => 'self.parent_node' },
     { application_scope => 'Process' }
-    );
-
+);
 
 1;
 __END__

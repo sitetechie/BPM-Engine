@@ -1,8 +1,7 @@
 package BPM::Engine::Store::Result::Participant;
-BEGIN {
-    $BPM::Engine::Store::Result::Participant::VERSION   = '0.01';
-    $BPM::Engine::Store::Result::Participant::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use strict;
 use warnings;
@@ -47,13 +46,13 @@ __PACKAGE__->add_columns(
         default           => 'Package',
         default_value     => 'Package',
         extra             => { list => [qw/ Package Process /] },
-        },    
+        },
     parent_node => {
         data_type         => 'CHAR',
         size              => 36,
         is_nullable       => 0,
         is_foreign_key    => 1,
-        },    
+        },
     attributes => {
         data_type         => 'TEXT',
         is_nullable       => 1,
@@ -63,19 +62,17 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key(qw/participant_id/);
 
-
 __PACKAGE__->might_have(
     'package' => 'BPM::Engine::Store::Result::Package',
     { 'foreign.package_id' => 'self.parent_node' },
     { participant_scope => 'Package' }
-    );
+);
 
 __PACKAGE__->might_have(
     'process' => 'BPM::Engine::Store::Result::Process',
     { 'foreign.process_id' => 'self.parent_node' },
     { participant_scope => 'Process' }
-    );
-
+);
 
 1;
 __END__

@@ -1,6 +1,6 @@
 package Types::DBIx::Class;
 BEGIN {
-  $Types::DBIx::Class::VERSION = '0.01';
+  $Types::DBIx::Class::VERSION = '0.02';
 }
 #ABSTRACT-Type::Library for DBIx::Class objects, from MooseX::DBIx::Class::Types
 

@@ -1,8 +1,7 @@
 package BPM::Engine::Store::Result::ProcessInstanceState;
-BEGIN {
-    $BPM::Engine::Store::Result::ProcessInstanceState::VERSION   = '0.01';
-    $BPM::Engine::Store::Result::ProcessInstanceState::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose;
@@ -42,43 +41,45 @@ __PACKAGE__->add_columns(
     prev => {
         data_type         => 'INT',
         is_nullable       => 1,
-        size              => 11,        
+        size              => 11,
         },
     created => {
         data_type         => 'DATETIME',
         is_nullable       => 1,
         set_on_create     => 1,
         timezone          => 'UTC',
-        },    
+        },
     );
 
 __PACKAGE__->set_primary_key('event_id');
 
 __PACKAGE__->belongs_to(
-    process_instance => 'BPM::Engine::Store::Result::ProcessInstance', 
+    process_instance => 'BPM::Engine::Store::Result::ProcessInstance',
     'process_instance_id'
-    );
+);
 
 __PACKAGE__->belongs_to( prev => __PACKAGE__ ); # history
 
 __PACKAGE__->might_have(
     next => __PACKAGE__,   { 'foreign.prev' => 'self.event_id' }
-    );
+);
 
-__PACKAGE__->inflate_column('state', {
-    inflate => sub {
-        my ($value, $self) = @_;
-        return $self->process_instance->workflow->get_state($value);
+__PACKAGE__->inflate_column(
+    'state',
+    {   inflate => sub {
+            my ( $value, $self ) = @_;
+            return $self->process_instance->workflow->get_state($value);
         },
-    deflate => sub {
-        shift->stringify
+        deflate => sub {
+            shift->stringify;
         },
-    });
+    }
+);
 
 sub clone {
-    my ($self, %fields) = @_;
-    return $self->copy({%fields});
-    }
+    my ( $self, %fields ) = @_;
+    return $self->copy( {%fields} );
+}
 
 __PACKAGE__->meta->make_immutable( inline_constructor => 0 );
 

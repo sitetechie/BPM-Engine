@@ -1,8 +1,7 @@
 package BPM::Engine::Store::Result::Performer;
-BEGIN {
-    $BPM::Engine::Store::Result::Performer::VERSION   = '0.01';
-    $BPM::Engine::Store::Result::Performer::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use strict;
 use warnings;
@@ -35,7 +34,7 @@ __PACKAGE__->add_columns(
         default           => 'Activity',
         default_value     => 'Activity',
         extra             => { list => [qw/ Activity Task Lane /] },
-        },    
+        },
     );
 __PACKAGE__->set_primary_key('performer_id');
 
@@ -43,18 +42,18 @@ __PACKAGE__->might_have(
     'activity' => 'BPM::Engine::Store::Result::Activity',
     { 'foreign.activity_id' => 'self.container_id' },
     { where => { performer_scope => 'Activity' } }
-    );
+);
 
 # TaskUser, TaskManual
 __PACKAGE__->might_have(
     'task' => 'BPM::Engine::Store::Result::ActivityTask',
     { 'foreign.task_id' => 'self.container_id' },
     { where => { performer_scope => 'Task' } }
-    );
+);
 
 __PACKAGE__->belongs_to(
     participant => 'BPM::Engine::Store::Result::Participant', 'participant_id'
-    );
+);
 
 1;
 __END__
