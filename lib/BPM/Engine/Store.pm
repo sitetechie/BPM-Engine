@@ -1,8 +1,7 @@
 package BPM::Engine::Store;
-BEGIN {
-    $BPM::Engine::Store::VERSION   = '0.01';
-    $BPM::Engine::Store::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use strict;
 use warnings;

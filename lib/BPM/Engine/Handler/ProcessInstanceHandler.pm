@@ -1,87 +1,90 @@
 package BPM::Engine::Handler::ProcessInstanceHandler;
 ## no critic (RequireEndWithOne, RequireTidyCode)
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
+
 use Moops;
 
 role BPM::Engine::Handler::ProcessInstanceHandler using Moose {
-  BEGIN {
-    $BPM::Engine::Handler::ProcessInstanceHandler::VERSION   = '0.01';
-    $BPM::Engine::Handler::ProcessInstanceHandler::AUTHORITY = 'cpan:SITETECH';
+    use Scalar::Util qw/blessed/;
+    use BPM::Engine::Types qw/UUID/;
+    use BPM::Engine::Exceptions qw/throw_store throw_abstract/;
+    use aliased 'BPM::Engine::Store::Result::Process';
+    use aliased 'BPM::Engine::Store::Result::ProcessInstance';
+
+    requires 'runner';
+    requires 'get_process_definition';
+
+    method create_process_instance
+        (UUID|BPM::Engine::Store::Result::Process $process, HashRef $args = {}) {
+
+        $process =
+            $self->get_process_definition($process, { prefetch => 'package' })
+            unless blessed($process);
+
+        return $process->new_instance($args);
     }
 
-  use Scalar::Util qw/blessed/;
-  use BPM::Engine::Types qw/UUID/;  
-  use BPM::Engine::Exceptions qw/throw_store throw_abstract/;
-  use aliased 'BPM::Engine::Store::Result::Process';
-  use aliased 'BPM::Engine::Store::Result::ProcessInstance';
+    method get_process_instances (@args) {
+        return $self->schema->resultset('ProcessInstance')->search_rs(@args);
+    }
 
-  requires 'runner';
-  requires 'get_process_definition';
-
-  method create_process_instance (UUID|BPM::Engine::Store::Result::Process $process, HashRef $args = {}) {
-
-      $process =
-        $self->get_process_definition($process, { prefetch => 'package' })
-        unless blessed($process);
-
-      return $process->new_instance($args);
-      }
-
-  method get_process_instances (@args) {
-
-      return $self->schema->resultset('ProcessInstance')->search_rs(@args);
-      }
-
-  method get_process_instance (Int|HashRef $id, HashRef $args = {}) {
-
-      return $self->schema->resultset('ProcessInstance')->find($id, $args)
+    method get_process_instance (Int|HashRef $id, HashRef $args = {}) {
+        return $self->schema->resultset('ProcessInstance')->find($id, $args)
           || throw_store(error => "Process instance '$id' not found");
-      }
+    }
 
-  method start_process_instance (Int|BPM::Engine::Store::Result::ProcessInstance $pi, HashRef $args = {}) {
+    method start_process_instance
+        (Int|BPM::Engine::Store::Result::ProcessInstance $pi, HashRef $args = {}) {
 
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      foreach (keys %{$args}) {
-          $pi->attribute($_ => $args->{$_});
-          }
+        $pi = $self->get_process_instance($pi) unless(blessed $pi);
+        foreach (keys %{$args}) {
+            $pi->attribute($_ => $args->{$_});
+        }
 
-      my $runner = $self->runner($pi);
-      $runner->start_process();
-      
-      return;
-      }
+        my $runner = $self->runner($pi);
+        $runner->start_process();
 
-  method delete_process_instance (Int|HashRef|BPM::Engine::Store::Result::ProcessInstance $pi) {
+        return;
+    }
 
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      return $pi->delete;
-      }
+    method delete_process_instance
+        (Int|HashRef|BPM::Engine::Store::Result::ProcessInstance $pi) {
 
-  method process_instance_attribute 
-      (Int|HashRef|BPM::Engine::Store::Result::ProcessInstance $pi, Str $attr, Str $value?) {
+        $pi = $self->get_process_instance($pi) unless(blessed $pi);
+        return $pi->delete;
+    }
 
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      return defined($value) ?
-          $pi->attribute($attr => $value ) :
-          $pi->attribute($attr);
-      }
+    method process_instance_attribute
+        (Int|HashRef|BPM::Engine::Store::Result::ProcessInstance $pi, Str $attr, Str $value?) {
 
-  method change_process_instance_state (Int|BPM::Engine::Store::Result::ProcessInstance $pi, Str $state) {
+        $pi = $self->get_process_instance($pi) unless(blessed $pi);
+        return defined($value) ?
+            $pi->attribute($attr => $value ) :
+            $pi->attribute($attr);
+    }
 
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      $pi->apply_transition($state);
-      }
+    method change_process_instance_state
+        (Int|BPM::Engine::Store::Result::ProcessInstance $pi, Str $state) {
 
-  method terminate_process_instance (Int|BPM::Engine::Store::Result::ProcessInstance $pi) {
+        $pi = $self->get_process_instance($pi) unless(blessed $pi);
+        $pi->apply_transition($state);
+    }
 
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      throw_abstract(error => 'Method not implemented');
-      }
+    method terminate_process_instance
+        (Int|BPM::Engine::Store::Result::ProcessInstance $pi) {
 
-  method abort_process_instance (Int|BPM::Engine::Store::Result::ProcessInstance $pi) {
+        $pi = $self->get_process_instance($pi) unless(blessed $pi);
+        throw_abstract(error => 'Method not implemented');
+    }
 
-      $pi = $self->get_process_instance($pi) unless(blessed $pi);
-      throw_abstract(error => 'Method not implemented');
-      }
+    method abort_process_instance
+        (Int|BPM::Engine::Store::Result::ProcessInstance $pi) {
+
+        $pi = $self->get_process_instance($pi) unless(blessed $pi);
+        throw_abstract(error => 'Method not implemented');
+    }
 
 }
 
@@ -93,10 +96,6 @@ __END__
 =head1 NAME
 
 BPM::Engine::Handler::ProcessInstanceHandler - Engine role
-
-=head1 VERSION
-
-version 0.01
 
 =head1 DESCRIPTION
 

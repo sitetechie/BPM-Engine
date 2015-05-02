@@ -1,8 +1,7 @@
 package BPM::Engine::Role::EngineAPI;
-BEGIN {
-    $BPM::Engine::Role::EngineAPI::VERSION   = '0.01';
-    $BPM::Engine::Role::EngineAPI::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose::Role;
@@ -51,7 +50,7 @@ requires qw(
     activity_instance_attribute
 
     runner
-    );
+);
 
 no Moose::Role;
 
@@ -63,10 +62,6 @@ __END__
 =head1 NAME
 
 BPM::Engine::Role::EngineAPI - Engine API inventory
-
-=head1 VERSION
-
-version 0.01
 
 =head1 DESCRIPTION
 

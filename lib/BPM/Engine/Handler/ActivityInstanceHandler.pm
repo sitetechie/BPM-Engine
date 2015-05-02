@@ -1,63 +1,60 @@
 package BPM::Engine::Handler::ActivityInstanceHandler;
 ## no critic (RequireEndWithOne, RequireTidyCode)
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
+
 use Moops;
 
 role BPM::Engine::Handler::ActivityInstanceHandler using Moose {
-  BEGIN {
-    $BPM::Engine::Handler::ActivityInstanceHandler::VERSION   = '0.01';
-    $BPM::Engine::Handler::ActivityInstanceHandler::AUTHORITY = 'cpan:SITETECH';
-  }
 
-  requires 'runner';
+    requires 'runner';
 
-  use Scalar::Util qw/blessed/;
-  use BPM::Engine::Exceptions qw/throw_store/;
-  use aliased 'BPM::Engine::Store::Result::ActivityInstance';
+    use Scalar::Util qw/blessed/;
+    use BPM::Engine::Exceptions qw/throw_store/;
+    use aliased 'BPM::Engine::Store::Result::ActivityInstance';
 
-  method get_activity_instances (@args) {
+    method get_activity_instances (@args) {
+        return $self->schema->resultset('ActivityInstance')->search_rs(@args);
+    }
 
-      return $self->schema->resultset('ActivityInstance')->search_rs(@args);
-      }
+    method get_activity_instance (Int|HashRef $id, HashRef $args = {}) {
+        return $self->schema->resultset('ActivityInstance')->find($id, $args)
+            || throw_store(error => "ActivityInstance '$id' not found");
+    }
 
-  method get_activity_instance (Int|HashRef $id, HashRef $args = {}) {
+    method change_activity_instance_state
+        (Int|HashRef|ActivityInstance $ai, Str $state) {
 
-      return $self->schema->resultset('ActivityInstance')->find($id, $args)
-          || throw_store(error => "ActivityInstance '$id' not found");
-      }
+        $ai = $self->get_activity_instance(
+            $ai, { prefetch => ['process_instance', 'activity'] }
+            ) unless(blessed $ai);
 
-  method change_activity_instance_state 
-      (Int|HashRef|ActivityInstance $ai, Str $state) {
+        if ($state eq 'assign' || $state eq 'finish') {
+            my $activity         = $ai->activity;
+            my $process_instance = $ai->process_instance;
+            my $runner           = $self->runner($process_instance);
+            if($state eq 'assign') {
+                # Execute the activity if it is now open.running.
+                $runner->start_activity($activity, $ai, 1);
+            }
+            elsif($state eq 'finish') {
+                # Fire the activity's efferent transitions if it is
+                # now closed.completed.
+                $runner->complete_activity($activity, $ai, 1);
+            }
+        }
+        else {
+            $ai->apply_transition($state);
+        }
 
-      $ai = $self->get_activity_instance(
-          $ai, { prefetch => ['process_instance', 'activity'] }
-          ) unless(blessed $ai);
+        return $ai;
+    }
 
-      if ($state eq 'assign' || $state eq 'finish') {
-          my $activity         = $ai->activity;
-          my $process_instance = $ai->process_instance;
-          my $runner           = $self->runner($process_instance);
-          if($state eq 'assign') {
-              # Execute the activity if it is now open.running.
-              $runner->start_activity($activity, $ai, 1);
-              }
-          elsif($state eq 'finish') {
-              # Fire the activity's efferent transitions if it is
-              # now closed.completed.
-              $runner->complete_activity($activity, $ai, 1);
-              }
-          }
-      else {
-          $ai->apply_transition($state);
-          }
-
-      return $ai;
-      }
-
-  method activity_instance_attribute (Int|ActivityInstance $ai, @args) {
-
-      $ai = $self->get_activity_instance($ai) unless(blessed $ai);
-      return $ai->attribute(@args);
-      }
+    method activity_instance_attribute (Int|ActivityInstance $ai, @args) {
+        $ai = $self->get_activity_instance($ai) unless(blessed $ai);
+        return $ai->attribute(@args);
+    }
 
 }
 
@@ -69,10 +66,6 @@ __END__
 =head1 NAME
 
 BPM::Engine::Handler::ActivityInstanceHandler - Engine role
-
-=head1 VERSION
-
-version 0.01
 
 =head1 DESCRIPTION
 

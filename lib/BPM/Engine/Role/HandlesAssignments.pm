@@ -1,8 +1,7 @@
 package BPM::Engine::Role::HandlesAssignments;
-BEGIN {
-    $BPM::Engine::Role::HandlesAssignments::VERSION   = '0.01';
-    $BPM::Engine::Role::HandlesAssignments::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose::Role;
@@ -19,12 +18,12 @@ before 'start_process' => sub {
     my $evaluator = BPM::Engine::Util::ExpressionEvaluator->load(
         process          => $self->process,
         process_instance => $self->process_instance,
-        );
+    );
 
     foreach my $ass (@assignments) {
-        $evaluator->assign($ass->{Target}, $ass->{Expression});
-        }
-    };
+        $evaluator->assign( $ass->{Target}, $ass->{Expression} );
+    }
+};
 
 before 'complete_process' => sub {
     my $self = shift;
@@ -35,15 +34,15 @@ before 'complete_process' => sub {
     my $evaluator = BPM::Engine::Util::ExpressionEvaluator->load(
         process          => $self->process,
         process_instance => $self->process_instance,
-        );
+    );
 
     foreach my $ass (@assignments) {
-        $evaluator->assign($ass->{Target}, $ass->{Expression});
-        }
-    };
+        $evaluator->assign( $ass->{Target}, $ass->{Expression} );
+    }
+};
 
 before 'start_activity' => sub {
-    my ($self, $activity, $instance) = @_;
+    my ( $self, $activity, $instance ) = @_;
 
     my @assignments = $activity->start_assignments;
     return unless scalar @assignments;
@@ -53,15 +52,15 @@ before 'start_activity' => sub {
         activity_instance => $instance,
         process           => $self->process,
         process_instance  => $self->process_instance,
-        );
+    );
 
     foreach my $ass (@assignments) {
-        $evaluator->assign($ass->{Target}, $ass->{Expression});
-        }
-    };
+        $evaluator->assign( $ass->{Target}, $ass->{Expression} );
+    }
+};
 
 before 'complete_activity' => sub {
-    my ($self, $activity, $instance) = @_;
+    my ( $self, $activity, $instance ) = @_;
 
     my @assignments = $activity->end_assignments;
     return unless scalar @assignments;
@@ -71,36 +70,37 @@ before 'complete_activity' => sub {
         activity_instance => $instance,
         process           => $self->process,
         process_instance  => $self->process_instance,
-        );
+    );
 
     foreach my $ass (@assignments) {
-        $evaluator->assign($ass->{Target}, $ass->{Expression});
-        }
-    };
+        $evaluator->assign( $ass->{Target}, $ass->{Expression} );
+    }
+};
 
 around '_execute_transition' => sub {
-    my ($orig, $self, $transition, $instance) = @_;
+    my ( $orig, $self, $transition, $instance ) = @_;
 
     my $evaluator = BPM::Engine::Util::ExpressionEvaluator->load(
         activity_instance => $instance,
         transition        => $transition,
         process           => $self->process,
         process_instance  => $self->process_instance,
+
         #args              => [@args],
-        );
+    );
 
-    foreach my $ass ($transition->start_assignments) {
-        $evaluator->assign($ass->{Target}, $ass->{Expression});
-        }
+    foreach my $ass ( $transition->start_assignments ) {
+        $evaluator->assign( $ass->{Target}, $ass->{Expression} );
+    }
 
-    my $res = $self->$orig($transition, $instance);
+    my $res = $self->$orig( $transition, $instance );
 
-    foreach my $ass ($transition->end_assignments) {
-        $evaluator->assign($ass->{Target}, $ass->{Expression});
-        }
+    foreach my $ass ( $transition->end_assignments ) {
+        $evaluator->assign( $ass->{Target}, $ass->{Expression} );
+    }
 
     return $res;
-    };
+};
 
 no Moose::Role;
 

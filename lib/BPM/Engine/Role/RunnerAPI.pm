@@ -1,8 +1,7 @@
 package BPM::Engine::Role::RunnerAPI;
-BEGIN {
-    $BPM::Engine::Role::RunnerAPI::VERSION   = '0.01';
-    $BPM::Engine::Role::RunnerAPI::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose::Role;
@@ -45,7 +44,7 @@ requires qw(
     start_activity
     continue_activity
     complete_activity
-    );
+);
 
 no Moose::Role;
 
@@ -58,10 +57,6 @@ __END__
 =head1 NAME
 
 BPM::Engine::Role::RunnerAPI - ProcessRunner API inventory
-
-=head1 VERSION
-
-version 0.01
 
 =head1 DESCRIPTION
 

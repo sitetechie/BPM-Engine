@@ -1,127 +1,127 @@
 package BPM::Engine::Role::HandlesIO;
-BEGIN {
-    $BPM::Engine::Role::HandlesIO::VERSION   = '0.01';
-    $BPM::Engine::Role::HandlesIO::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use Moose::Role;
 use namespace::autoclean;
 
 before '_execute_implementation' => sub {
-    my ($self, $activity, $instance) = @_;
+    my ( $self, $activity, $instance ) = @_;
 
-    if ($activity->input_sets) {
+    if ( $activity->input_sets ) {
         my $pi         = $instance->process_instance;
         my $artifacts  = $pi->process->package->artifacts;
         my $attributes = $pi->attributes_rs;
 
         my @inputs = ();
-        foreach my $set (@{ $activity->input_sets }) {
-            @inputs = _validate_inputset($pi, $set, $attributes, $artifacts);
+        foreach my $set ( @{ $activity->input_sets } ) {
+            @inputs
+                = _validate_inputset( $pi, $set, $attributes, $artifacts );
             last if scalar @inputs;
-            }
+        }
         die("Incomplete InputSets") unless scalar @inputs;
 
-        $instance->update({ inputset => [@inputs] });
-        }
+        $instance->update( { inputset => [@inputs] } );
+    }
     else {
         #warn "No InputSets";
-        }
+    }
     return;
-    };
+};
 
 after '_execute_implementation' => sub {
-    my ($self, $task, $instance) = @_;
+    my ( $self, $task, $instance ) = @_;
+
     #XXX task?
     my $activity = $instance->activity;
-    if ($activity->output_sets) {
+    if ( $activity->output_sets ) {
         my $pi         = $instance->process_instance;
         my $artifacts  = $pi->process->package->artifacts;
         my $attributes = $pi->attributes_rs;
         my $result     = $instance->taskresult;
 
-        foreach my $set (@{ $activity->output_sets }) {
-            _set_output($pi, $set, $attributes, $artifacts, $result);
-            }
+        foreach my $set ( @{ $activity->output_sets } ) {
+            _set_output( $pi, $set, $attributes, $artifacts, $result );
         }
+    }
     else {
         #warn "No InputSets";
-        }
+    }
     return;
-    };
+};
 
 sub _validate_inputset {
-    my ($pi, $ioset, $attributes, $artifacts) = @_;
+    my ( $pi, $ioset, $attributes, $artifacts ) = @_;
 
     my @inputs = ();
 
-    foreach my $input (@{ $ioset->{Input} }, @{ $ioset->{ArtifactInput} }) {
+    foreach my $input ( @{ $ioset->{Input} }, @{ $ioset->{ArtifactInput} } ) {
         my ($art) = grep { $input->{ArtifactId} eq $_->{Id} } @{$artifacts};
-        die("ArtifactId '" . $input->{ArtifactId} . " not specified")
+        die( "ArtifactId '" . $input->{ArtifactId} . " not specified" )
             unless $art;
 
-        if ($art->{ArtifactType} eq 'DataObject') {
+        if ( $art->{ArtifactType} eq 'DataObject' ) {
             die "Useless use of empty Artifact" unless $art->{DataObject};
             die "Useless use of empty DataObject"
                 unless $art->{DataObject}->{DataField};
 
-            my @fields =
-                map { $attributes->find({ name => $_->{Id} })->value }
+            my @fields
+                = map { $attributes->find( { name => $_->{Id} } )->value }
                 @{ $art->{DataObject}->{DataField} };
 
-            if ($art->{'RequiredForStart'}) {
+            if ( $art->{'RequiredForStart'} ) {
                 my @vals = grep {$_} @fields;
-                return if (scalar(@vals) != scalar(@fields));
-                }
-
-            if (scalar @fields == 1) {
-                push(@inputs, $fields[0]);
-                }
-            elsif (scalar @fields) {
-                push(@inputs, [@fields]);
-                }
+                return if ( scalar(@vals) != scalar(@fields) );
             }
+
+            if ( scalar @fields == 1 ) {
+                push( @inputs, $fields[0] );
+            }
+            elsif ( scalar @fields ) {
+                push( @inputs, [@fields] );
+            }
+        }
         else {
             die "Invalid ArtifactType " . $art->{ArtifactType};
-            }
         }
-
-    foreach my $input (@{ $ioset->{PropertyInput} }) {
-        my $attr = $input->{PropertyId};
-        push(@inputs, $attributes->find({ name => $attr })->value);
-        }
-
-    return (@inputs);
     }
 
-sub _set_output {
-    my ($pi, $ioset, $attributes, $artifacts, $result) = @_;
+    foreach my $input ( @{ $ioset->{PropertyInput} } ) {
+        my $attr = $input->{PropertyId};
+        push( @inputs, $attributes->find( { name => $attr } )->value );
+    }
 
-    foreach my $output (@{ $ioset->{Output} }) {
+    return (@inputs);
+}
+
+sub _set_output {
+    my ( $pi, $ioset, $attributes, $artifacts, $result ) = @_;
+
+    foreach my $output ( @{ $ioset->{Output} } ) {
         my ($art) = grep { $output->{ArtifactId} eq $_->{Id} } @{$artifacts};
-        die("ArtifactId '" . $output->{ArtifactId} . "' not specified")
+        die( "ArtifactId '" . $output->{ArtifactId} . "' not specified" )
             unless $art;
 
-        if ($art->{ArtifactType} eq 'DataObject') {
+        if ( $art->{ArtifactType} eq 'DataObject' ) {
             die "Useless use of empty Artifact" unless $art->{DataObject};
             die "Useless use of empty DataObject"
                 unless $art->{DataObject}->{DataField};
 
-            my @attr =
-                map { $attributes->find({ name => $_->{Id} }) }
+            my @attr = map { $attributes->find( { name => $_->{Id} } ) }
                 @{ $art->{DataObject}->{DataField} };
 
             foreach my $attr (@attr) {
                 my $val = shift @$result or last;
-                $attr->update({ value => [$val] });
-                }
-            }
-        else {
-            die "Invalid ArtifactType " . $art->{ArtifactType};
+                $attr->update( { value => [$val] } );
             }
         }
-
+        else {
+            die "Invalid ArtifactType " . $art->{ArtifactType};
+        }
     }
+
+}
 
 no Moose::Role;
 

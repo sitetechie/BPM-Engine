@@ -1,8 +1,8 @@
 package BPM::Engine::Exceptions;
-BEGIN {
-    $BPM::Engine::Exceptions::VERSION   = '0.01';
-    $BPM::Engine::Exceptions::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
+
 use strict;
 use warnings;
 
@@ -11,64 +11,64 @@ BEGIN {
         'BPM::Engine::Exception' => {
             description => 'Generic BPM::Engine exception',
             alias       => 'throw'
-            },
+        },
         'BPM::Engine::Exception::Engine' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Engine exception',
             alias       => 'throw_engine'
-            },
+        },
         'BPM::Engine::Exception::Runner' => {
             isa         => 'BPM::Engine::Exception',
             description => 'ProcessRunner exception',
             alias       => 'throw_runner'
-            },
+        },
         'BPM::Engine::Exception::Database' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Datastore exception',
             alias       => 'throw_store'
-            },
+        },
         'BPM::Engine::Exception::IO' => {
             isa         => 'BPM::Engine::Exception',
             description => 'IO exception',
             alias       => 'throw_io'
-            },
+        },
         'BPM::Engine::Exception::Parameter' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Invalid parameters was given to method/function',
             alias       => 'throw_param'
-            },
+        },
         'BPM::Engine::Exception::Condition' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Condition false error',
             alias       => 'throw_condition'
-            },
+        },
         'BPM::Engine::Exception::Expression' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Exception evaluator error',
             alias       => 'throw_expression'
-            },
+        },
         'BPM::Engine::Exception::Plugin' => {
             isa         => 'BPM::Engine::Exception',
             fields      => 'plugin',
             description => 'Plugin exception',
             alias       => 'throw_plugin'
-            },
+        },
         'BPM::Engine::Exception::Model' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Model exception',
             alias       => 'throw_model'
-            },
+        },
         'BPM::Engine::Exception::Install' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Installation/configuration exception',
             alias       => 'throw_install'
-            },
+        },
         'BPM::Engine::Exception::NotImplemented' => {
             isa         => 'BPM::Engine::Exception',
             description => 'Abstract method',
             alias       => 'throw_abstract'
-            },
-            );
+        },
+    );
 
     my @exports = map { $classes{$_}->{alias} } keys %classes;
 
@@ -76,8 +76,8 @@ BEGIN {
     require Sub::Exporter;
 
     Exception::Class->import(%classes);
-    Sub::Exporter->import(-setup => { exports => \@exports });
-    }
+    Sub::Exporter->import( -setup => { exports => \@exports } );
+}
 
 1;
 __END__
@@ -87,10 +87,6 @@ __END__
 =head1 NAME
 
 BPM::Engine::Exceptions - Exception classes used in BPM::Engine
-
-=head1 VERSION
-
-0.01
 
 =head1 SYNOPSIS
 
@@ -105,22 +101,22 @@ Throw an exception when something is wrong
         throw_plugin("Whoops!") unless $length =~ /\d+/;
 
         # ...
-        }    
+        }
 
-Now let's try something illegal and catch the exception    
-    
+Now let's try something illegal and catch the exception
+
     # use the is_Exception() function exported from the types library
-    use BPM::Engine::Types qw/+Exception/;    
-    
+    use BPM::Engine::Types qw/+Exception/;
+
     eval {
         $obj->set_length( 'non-numerical value' ); # this throws the error
         #...
     };
-    
+
     # handle any exception, cathing them in various ways
     if(my $err = $@) {
         # encountered an error
-        
+
         if( Exception::Class->caught('BPM::Engine::Exception::Engine') ) {
             #... use the thrown error obj
             warn $err->error;
@@ -154,14 +150,14 @@ modules and provides shortcuts to make raising an exception easier and more
 readable.
 
 The exceptions are subclasses of Exception::Class::Base, created by the
-interface defined by C<Exception::Class>. See 
+interface defined by C<Exception::Class>. See
 L<Exception::Class|Exception::Class> for more information on how this is done.
 
 =head1 EXCEPTIONS
 
-Each of the exception classes created by BPM::Engine::Exceptions has a 
-functional alias for its throw class method. In the L<SYNOPSIS|/SYNOPSIS> 
-example, we use the C<throw_plugin> function to throw a 
+Each of the exception classes created by BPM::Engine::Exceptions has a
+functional alias for its throw class method. In the L<SYNOPSIS|/SYNOPSIS>
+example, we use the C<throw_plugin> function to throw a
 C<BPM::Engine::Exception::Plugin> exception.
 
 These may be imported by passing a list of the function names to import:

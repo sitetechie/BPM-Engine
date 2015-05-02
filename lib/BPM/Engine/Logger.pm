@@ -1,8 +1,7 @@
 package BPM::Engine::Logger;
-BEGIN {
-    $BPM::Engine::Logger::VERSION   = '0.01';
-    $BPM::Engine::Logger::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose;
@@ -16,7 +15,7 @@ has log_dispatch_conf => (
     is      => 'ro',
     lazy    => 1,
     default => '/etc/bpmengine/logger.conf'
-    );
+);
 
 __PACKAGE__->meta->make_immutable;
 
@@ -28,10 +27,6 @@ __END__
 =head1 NAME
 
 BPM::Engine::Logger - Engine and ProcessRunner logger object
-
-=head1 VERSION
-
-version 0.01
 
 =head1 DESCRIPTION
 

@@ -1,4 +1,8 @@
 package BPM::Engine::Types;
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
+
 use strict;
 use warnings;
 
@@ -6,14 +10,13 @@ use Type::Library -base;
 use Type::Utils 'extends';
 
 BEGIN {
-  $BPM::Engine::Types::VERSION   = '0.01';
-  $BPM::Engine::Types::AUTHORITY = 'cpan:SITETECH';
-
-  extends 'Types::Standard';
-  extends 'Types::DBIx::Class';
-  extends 'BPM::Engine::Types::Internal';
+    extends 'Types::Standard';
+    extends 'Types::DBIx::Class';
+    extends 'BPM::Engine::Types::Internal';
 }
+
 __PACKAGE__->meta->make_immutable;
+
 1;
 __END__
 
@@ -22,10 +25,6 @@ __END__
 =head1 NAME
 
 BPM::Engine::Types - Exports BPM::Engine internal types as well as Moose types
-
-=head1 VERSION
-
-version 0.01
 
 =head1 AUTHOR
 

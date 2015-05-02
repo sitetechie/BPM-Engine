@@ -1,8 +1,7 @@
 package BPM::Engine::Role::WithLogger;
-BEGIN {
-    $BPM::Engine::Role::WithLogger::VERSION   = '0.01';
-    $BPM::Engine::Role::WithLogger::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose::Role;
@@ -13,10 +12,10 @@ has 'logger' => (
     is         => 'ro',
     lazy_build => 1,
     handles    => 'MooseX::LogDispatch::Interface',
-    );
+);
 
 has 'log_dispatch_conf' => (
-    is       => 'ro',
+    is => 'ro',
     #isa      => 'Log::Dispatch::Configurator|Str|HashRef',
     lazy     => 1,
     required => 1,
@@ -26,15 +25,16 @@ has 'log_dispatch_conf' => (
             min_level => 'info',
             stderr    => 1,
             format    => '[%p] %m at %F line %L%n',
-            };
-        },
-    );
+        };
+    }
+);
 
 sub _build_logger {
     my $self = shift;
     return BPM::Engine::Logger->new(
-        { log_dispatch_conf => $self->log_dispatch_conf });
-    }
+        { log_dispatch_conf => $self->log_dispatch_conf } );
+}
+
 
 no Moose::Role;
 
@@ -47,13 +47,9 @@ __END__
 
 BPM::Engine::Role::WithLogger - Engine and ProcessRunner role providing a logger
 
-=head1 VERSION
-
-version 0.01
-
 =head1 DESCRIPTION
 
-This role provides a logger object to L<BPM::Engine> and 
+This role provides a logger object to L<BPM::Engine> and
 L<BPM::Engine::ProcessRunner|BPM::Engine::ProcessRunner>.
 
 =head1 ATTRIBUTES

@@ -1,8 +1,7 @@
 package BPM::Engine::Role::WithCallback;
-BEGIN {
-    $BPM::Engine::Role::WithCallback::VERSION   = '0.01';
-    $BPM::Engine::Role::WithCallback::AUTHORITY = 'cpan:SITETECH';
-    }
+
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:SITETECH';
 
 use namespace::autoclean;
 use Moose::Role;
@@ -15,9 +14,10 @@ has 'callback' => (
     required  => 0,
     predicate => 'has_callback',
     handles   => { call_callback => 'execute', },
-    );
+);
 
 no Moose::Role;
+
 
 1;
 __END__
@@ -28,13 +28,9 @@ __END__
 
 BPM::Engine::Role::WithCallback - Engine and ProcessRunner role providing a callback
 
-=head1 VERSION
-
-version 0.01
-
 =head1 DESCRIPTION
 
-This role provides a callback code reference to L<BPM::Engine> and 
+This role provides a callback code reference to L<BPM::Engine> and
 L<BPM::Engine::ProcessRunner|BPM::Engine::ProcessRunner>.
 
 =head1 ATTRIBUTES
